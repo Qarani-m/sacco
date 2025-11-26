@@ -1,0 +1,37 @@
+<% title = "Email Verified" %>
+
+<div class="container-sm">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="accent-line"></div>
+        <h1 class="page-title">Email Verified!</h1>
+        <p class="page-subtitle">Your account is now active</p>
+    </div>
+
+    <div class="card" style="text-align: center; padding: 2rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="#000000" style="margin: 0 auto 1.5rem;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+
+        <h2 class="section-title" style="margin-bottom: 1rem;">Success!</h2>
+        
+        <p class="text-secondary" style="margin-bottom: 1.5rem;">
+            Thank you, <strong><%= userName %></strong>! Your email has been successfully verified.
+        </p>
+
+        <p class="text-secondary" style="margin-bottom: 2rem;">
+            You can now access all features of your SACCO account.
+        </p>
+
+        <a href="/members/dashboard" class="btn-primary">
+            Continue to Dashboard
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+        <p>SACCO Member Portal • 2024</p>
+    </div>
+
+</div>

@@ -1,0 +1,104 @@
+
+<% title = "Register" %>
+
+<div class="container-sm">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="accent-line"></div>
+        <h1 class="page-title">Create Account</h1>
+        <p class="page-subtitle">Join the SACCO Community</p>
+    </div>
+
+    <!-- Registration Form -->
+    <form id="registerForm" action="/auth/register" method="POST" class="space-y-6">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <!-- Full Name -->
+        <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input 
+                type="text"
+                id="full_name"
+                name="full_name"
+                value="Martin"
+                required
+            >
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input 
+                type="email"
+                id="email"
+                name="email"
+                value="em@g.c"
+                required
+            >
+        </div>
+
+        <!-- Phone Number -->
+        <div class="form-group">
+            <label for="phone_number">Phone Number</label>
+            <input 
+                type="tel"
+                id="phone_number"
+                name="phone_number"
+                value="254704847676"
+                placeholder="254XXXXXXXXX"
+                required
+            >
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input 
+                type="password"
+                id="password"
+                name="password"
+                value="password1234!!"
+                required
+            >
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input 
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                value="password1234!!"
+                required
+            >
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary">
+            Create Account
+        </button>
+
+    </form>
+
+    <!-- Links -->
+    <div class="text-center mt-6">
+        <p class="text-secondary">
+            Already have an account?
+            <a href="/auth/login" class="link-primary">Login</a>
+        </p>
+    </div>
+
+    <!-- Alerts -->
+    <div id="errorMessage" class="hidden alert alert-error"></div>
+    <div id="successMessage" class="hidden alert alert-success"></div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+        <p>SACCO Member Portal • 2024</p>
+    </div>
+
+</div>
+
+<script src="/js/auth-register.js"></script>

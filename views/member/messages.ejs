@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - SACCO</title>
+    <link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>Messages</h1>
+            <a href="/messages/compose" class="btn btn-primary">Compose Message</a>
+        </div>
+
+        <div class="messages-tabs">
+            <a href="/messages" class="tab-btn active">Inbox (<%= unreadCount %>)</a>
+            <a href="/messages/sent" class="tab-btn">Sent</a>
+        </div>
+
+        <div class="messages-list">
+            <% if (messages.length === 0) { %>
+                <div class="alert alert-info">No messages</div>
+            <% } else { %>
+                <% messages.forEach(message => { %>
+                <div class="message-item <%= !message.is_read ? 'unread' : '' %>">
+                    <div class="message-info">
+                        <h4><%= message.sender_name %></h4>
+                        <p class="subject"><%= message.subject %></p>
+                        <p class="preview"><%= message.body.substring(0, 100) %>...</p>
+                    </div>
+                    <div class="message-meta">
+                        <span class="date"><%= new Date(message.created_at).toLocaleDateString() %></span>
+                        <a href="/messages/<%= message.id %>" class="btn btn-sm">Read</a>
+                    </div>
+                </div>
+                 <% }) %>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>
+<script src="/js/member-messages.js"></script>

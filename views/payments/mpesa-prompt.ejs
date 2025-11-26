@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Pesa Payment - SACCO</title>
+    <link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+    <div class="payment-container">
+        <div class="payment-card">
+            <div class="payment-icon">
+                <img src="/images/mpesa-logo.png" alt="M-Pesa">
+            </div>
+            <h2>M-Pesa Payment</h2>
+            <p class="payment-amount">KSh <%= amount.toLocaleString() %></p>
+            <p class="payment-type"><%= type.replace('_', ' ').toUpperCase() %></p>
+
+            <div class="payment-status" id="paymentStatus">
+                <div class="spinner"></div>
+                <p>Please check your phone for the M-Pesa prompt</p>
+                <p class="text-muted">Enter your M-Pesa PIN to complete payment</p>
+            </div>
+
+            <div class="payment-info">
+                <p><strong>Transaction Reference:</strong> <%= transaction_ref %></p>
+                <p><strong>Phone Number:</strong> <%= phone_number %></p>
+            </div>
+
+            <div class="payment-actions">
+                <button onclick="checkPaymentStatus()" class="btn btn-primary">Check Status</button>
+                <a href="<%= cancelUrl || '/members/dashboard' %>" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const transactionRef = '<%= transaction_ref %>';
+        
+        // Auto-check payment status every 5 seconds
+        let checkInterval = setInterval(checkPaymentStatus, 5000);
+
+        async function checkPaymentStatus() {
+            try {
+                const response = await fetch(`/payments/status/${transactionRef}`);
+                const data = await response.json();
+
+                if (data.status === 'completed') {
+                    clearInterval(checkInterval);
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <div class="success-icon">✓</div>
+                        <p class="success-message">Payment Successful!</p>
+                        <p>Redirecting...</p>
+                    `;
+                    setTimeout(() => {
+                        window.location.href = '<%= successUrl || "/members/dashboard" %>';
+                    }, 2000);
+                } else if (data.status === 'failed') {
+                    clearInterval(checkInterval);
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <div class="error-icon">✗</div>
+                        <p class="error-message">Payment Failed</p>
+                        <p>Please try again</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error checking payment status:', error);
+            }
+        }
+
+        // Stop checking after 5 minutes
+        setTimeout(() => {
+            clearInterval(checkInterval);
+        }, 300000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Shares - SACCO</title>
+    <link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>My Shares</h1>
+            <a href="/shares/buy" class="btn btn-primary">Buy More Shares</a>
+        </div>
+
+        <div class="shares-summary">
+            <div class="summary-card">
+                <h3>Total Shares</h3>
+                <p class="stat-number"><%= total_shares %></p>
+                <p class="stat-label">Worth KSh <%= (total_shares * 1000).toLocaleString() %></p>
+            </div>
+
+            <div class="summary-card">
+                <h3>Available Shares</h3>
+                <p class="stat-number"><%= available_shares %></p>
+                <p class="stat-label">Can be used for loans</p>
+            </div>
+
+            <div class="summary-card">
+                <h3>Pledged Shares</h3>
+                <p class="stat-number"><%= pledged_shares %></p>
+                <p class="stat-label">Supporting guarantees</p>
+            </div>
+
+            <div class="summary-card">
+                <h3>Total Value</h3>
+                <p class="stat-number">KSh <%= total_value.toLocaleString() %></p>
+            </div>
+        </div>
+
+        <% if (pledged_details.length > 0) { %>
+        <div class="pledged-section">
+            <h2>Pledged as Guarantees</h2>
+            <table class="shares-table">
+                <thead>
+                    <tr>
+                        <th>Borrower</th>
+                        <th>Loan ID</th>
+                        <th>Shares Pledged</th>
+                        <th>Value</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% pledged_details.forEach(pledge => { %>
+                    <tr>
+                        <td><%= pledge.borrower_name %></td>
+                        <td>#<%= pledge.loan_id.substring(0, 8) %></td>
+                        <td><%= pledge.quantity %></td>
+                        <td>KSh <%= (pledge.quantity * 1000).toLocaleString() %></td>
+                        <td><span class="badge badge-warning">Pledged</span></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <% } %>
+
+        <div class="history-section">
+            <h2>Purchase History</h2>
+            <table class="shares-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Quantity</th>
+                        <th>Amount Paid</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% history.forEach(share => { %>
+                    <tr>
+                        <td><%= new Date(share.purchase_date).toLocaleDateString() %></td>
+                        <td><%= share.quantity %></td>
+                        <td>KSh <%= share.amount_paid.toLocaleString() %></td>
+                        <td><span class="badge badge-<%= share.status %>"><%= share.status %></span></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script src="/js/member-shares.js"></script>
+</body>
+</html>

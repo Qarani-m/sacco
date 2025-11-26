@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SACCO</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <%- include('../layouts/admin-header') %>
+    
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Members</h3>
+                <p class="stat-number"><%= stats.total_members %></p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending Loans</h3>
+                <p class="stat-number"><%= stats.pending_loans %></p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending Actions</h3>
+                <p class="stat-number"><%= stats.pending_actions %></p>
+            </div>
+            <div class="stat-card">
+                <h3>Active Loans</h3>
+                <p class="stat-number"><%= stats.active_loans %></p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Shares Value</h3>
+                <p class="stat-number">KSh <%= stats.total_shares_value.toLocaleString() %></p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Loan Balance</h3>
+                <p class="stat-number">KSh <%= stats.total_loan_balance.toLocaleString() %></p>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="action-buttons">
+                <a href="/admin/pending-actions" class="btn btn-primary">View Pending Actions</a>
+                <a href="/admin/loans" class="btn btn-secondary">Manage Loans</a>
+                <a href="/admin/members" class="btn btn-secondary">View Members</a>
+                <a href="/admin/reports" class="btn btn-secondary">Generate Reports</a>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script src="/js/admin-dashboard.js"></script>
+</body>
+</html>

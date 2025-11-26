@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Loans - SACCO</title>
+    <link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>My Loans</h1>
+            <a href="/loans/request" class="btn btn-primary">Request New Loan</a>
+        </div>
+
+        <div class="loans-tabs">
+            <button class="tab-btn active" onclick="filterLoans('all')">All</button>
+            <button class="tab-btn" onclick="filterLoans('pending')">Pending</button>
+            <button class="tab-btn" onclick="filterLoans('active')">Active</button>
+            <button class="tab-btn" onclick="filterLoans('paid')">Paid</button>
+        </div>
+
+        <div class="loans-list">
+            <% if (loans.length === 0) { %>
+                <div class="alert alert-info">No loans found</div>
+            <% } else { %>
+                <% loans.forEach(loan => { %>
+                <div class="loan-card" data-status="<%= loan.status %>">
+                    <div class="loan-header">
+                        <h3>Loan #<%= loan.id.substring(0, 8) %></h3>
+                        <span class="badge badge-<%= loan.status %>"><%= loan.status.toUpperCase() %></span>
+                    </div>
+                    <div class="loan-body">
+                        <div class="loan-details">
+                            <div class="detail-item">
+                                <label>Requested Amount:</label>
+                                <span>KSh <%= loan.requested_amount.toLocaleString() %></span>
+                            </div>
+                            <% if (loan.approved_amount) { %>
+                            <div class="detail-item">
+                                <label>Approved Amount:</label>
+                                <span>KSh <%= loan.approved_amount.toLocaleString() %></span>
+                            </div>
+                            <% } %>
+                            <% if (loan.balance_remaining) { %>
+                            <div class="detail-item">
+                                <label>Balance:</label>
+                                <span>KSh <%= loan.balance_remaining.toLocaleString() %></span>
+                            </div>
+                            <% } %>
+                            <div class="detail-item">
+                                <label>Interest Rate:</label>
+                                <span><%= loan.interest_rate %>% per month</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Repayment Period:</label>
+                                <span><%= loan.repayment_months %> months</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Date Applied:</label>
+                                <span><%= new Date(loan.created_at).toLocaleDateString() %></span>
+                            </div>
+                            <% if (loan.due_date) { %>
+                            <div class="detail-item">
+                                <label>Due Date:</label>
+                                <span><%= new Date(loan.due_date).toLocaleDateString() %></span>
+                            </div>
+                            <% } %>
+                        </div>
+                        <div class="loan-actions">
+                            <a href="/loans/<%= loan.id %>" class="btn btn-sm">View Details</a>
+                            <% if (loan.status === 'active') { %>
+                                <a href="/loans/<%= loan.id %>/repay" class="btn btn-sm btn-primary">Make Payment</a>
+                            <% } %>
+                            <% if (loan.status === 'pending') { %>
+                                <button onclick="cancelLoan('<%= loan.id %>')" class="btn btn-sm btn-danger">Cancel</button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script src="/js/member-loans.js"></script>
+</body>
+</html>

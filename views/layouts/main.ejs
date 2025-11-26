@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | SACCO System</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body style="background: #FFFFFF; margin: 0; padding: 0;">
+ 
+
+    <main>
+        <%- body %>
+    </main>
+
+    <footer style="margin-top: 3rem; padding: 2rem 0; border-top: 1px solid #E5E5E5;">
+        <p style="font-size: 0.75rem; color: #9CA3AF; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+            &copy; <%= new Date().getFullYear() %> SACCO System. All rights reserved.
+        </p>
+    </footer>
+
+<!-- Notifications Modal -->
+<div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="notificationsModalLabel">Notifications</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="notificationsContainer">
+        <p>Loading notifications...</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const modal = document.getElementById('notificationsModal');
+    const container = document.getElementById('notificationsContainer');
+    const badge = document.getElementById('notificationsBadge');
+
+    // Load notifications when modal opens
+    modal.addEventListener('show.bs.modal', async () => {
+        container.innerHTML = '<p>Loading notifications...</p>';
+        try {
+            const res = await fetch('/members/notifications/json');
+            const data = await res.json();
+
+            if (!data.notifications || data.notifications.length === 0) {
+                container.innerHTML = '<p>No new notifications.</p>';
+            } else {
+                container.innerHTML = '<ul class="list-group">' + 
+                    data.notifications.map(n => 
+                        `<li class="list-group-item ${n.read ? '' : 'fw-bold'}">
+                            ${n.message} <br>
+                            <small class="text-muted">${new Date(n.date).toLocaleString()}</small>
+                        </li>`).join('') +
+                    '</ul>';
+            }
+
+            // Update unread badge
+            const unreadCount = data.notifications.filter(n => !n.read).length;
+            badge.textContent = unreadCount;
+
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = '<p>Error loading notifications.</p>';
+        }
+    });
+
+    // Optional: poll for new notifications every 30s
+    setInterval(async () => {
+        try {
+            const res = await fetch('/members/notifications/json');
+            const data = await res.json();
+            const unreadCount = data.notifications.filter(n => !n.read).length;
+            badge.textContent = unreadCount;
+        } catch (err) { console.error(err); }
+    }, 30000);
+
+});
+</script>
+
+</body>
+</html>

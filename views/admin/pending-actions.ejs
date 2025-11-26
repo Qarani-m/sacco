@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Actions - SACCO Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <%- include('../layouts/admin-header') %>
+    
+    <div class="container">
+        <h1>Pending Admin Actions (Requires 2/3 Approval)</h1>
+
+        <% if (pending_actions.length === 0) { %>
+            <div class="alert alert-info">No pending actions</div>
+        <% } else { %>
+            <div class="actions-list">
+                <% pending_actions.forEach(action => { %>
+                <div class="action-card">
+                    <div class="action-header">
+                        <h3><%= action.action_type.toUpperCase() %> - <%= action.entity_type %></h3>
+                        <span class="badge badge-warning">Pending</span>
+                    </div>
+                    <div class="action-body">
+                        <p><strong>Initiated by:</strong> <%= action.initiator_name %></p>
+                        <p><strong>Reason:</strong> <%= action.reason %></p>
+                        <p><strong>Date:</strong> <%= new Date(action.created_at).toLocaleString() %></p>
+                        
+                        <div class="verifications">
+                            <h4>Verifications:</h4>
+                            <% action.verifications.forEach(v => { %>
+                                <div class="verification">
+                                    <span><%= v.verifier_name %></span>
+                                    <span class="badge <%= v.decision === 'approved' ? 'badge-success' : 'badge-danger' %>">
+                                        <%= v.decision %>
+                                    </span>
+                                    <% if (v.comment) { %>
+                                        <p class="comment"><%= v.comment %></p>
+                                    <% } %>
+                                </div>
+                            <% }) %>
+                        </div>
+
+                        <% if (action.initiated_by !== user.id) { %>
+                            <% const hasVerified = action.verifications.some(v => v.verifier_id === user.id); %>
+                            <% if (!hasVerified) { %>
+                                <div class="action-buttons">
+                                    <button onclick="verifyAction('<%= action.id %>', 'approved')" class="btn btn-success">Approve</button>
+                                    <button onclick="verifyAction('<%= action.id %>', 'rejected')" class="btn btn-danger">Reject</button>
+                                </div>
+                            <% } else { %>
+                                <p class="text-muted">You have already verified this action</p>
+                            <% } %>
+                        <% } else { %>
+                            <p class="text-muted">You initiated this action</p>
+                        <% } %>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script src="/js/admin-actions.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guarantor Requests - SACCO</title>
+    <link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container">
+        <h1>Guarantor Requests</h1>
+
+        <% if (requests.length === 0) { %>
+            <div class="alert alert-info">No pending guarantor requests</div>
+        <% } else { %>
+            <div class="requests-list">
+                <% requests.forEach(request => { %>
+                <div class="request-card">
+                    <div class="request-header">
+                        <h3>Loan Guarantee Request from <%= request.borrower_name %></h3>
+                        <span class="badge badge-warning">Pending</span>
+                    </div>
+                    <div class="request-body">
+                        <p><strong>Loan Amount:</strong> KSh <%= request.requested_amount.toLocaleString() %></p>
+                        <p><strong>Shares Requested:</strong> <%= request.shares_pledged %> shares (KSh <%= (request.shares_pledged * 1000).toLocaleString() %>)</p>
+                        <p><strong>Repayment Period:</strong> <%= request.repayment_months %> months</p>
+                        <p><strong>Date Requested:</strong> <%= new Date(request.created_at).toLocaleDateString() %></p>
+
+                        <div class="request-actions">
+                            <button onclick="showRespondForm('<%= request.id %>')" class="btn btn-primary">Respond</button>
+                        </div>
+
+                        <div id="respondForm<%= request.id %>" class="respond-form" style="display: none;">
+                            <h4>Respond to Request</h4>
+                            <form onsubmit="respondToRequest(event, '<%= request.id %>')">
+                                <div class="form-group">
+                                    <label>Decision</label>
+                                    <select name="decision" class="form-control" required onchange="toggleSharesInput(this, '<%= request.id %>')">
+                                        <option value="">Select...</option>
+                                        <option value="accepted">Accept</option>
+                                        <option value="declined">Decline</option>
+                                    </select>
+                                </div>
+
+                                <div id="sharesInput<%= request.id %>" class="form-group" style="display: none;">
+                                    <label>Shares to Pledge</label>
+                                    <input type="number" name="shares_to_pledge" class="form-control" min="1" max="<%= request.shares_pledged %>">
+                                    <small>You can pledge up to <%= request.shares_pledged %> shares</small>
+                                </div>
+
+                                <button type="submit" class="btn btn-success">Submit</button>
+                                <button type="button" onclick="hideRespondForm('<%= request.id %>')" class="btn btn-secondary">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script src="/js/guarantor-requests.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Details - SACCO</title>
+    <link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>Loan #<%= loan.id.substring(0, 8) %></h1>
+            <span class="badge badge-<%= loan.status %>"><%= loan.status.toUpperCase() %></span>
+        </div>
+
+        <div class="loan-details-grid">
+            <div class="detail-section">
+                <h3>Loan Information</h3>
+                <div class="detail-item">
+                    <label>Requested Amount:</label>
+                    <span>KSh <%= loan.requested_amount.toLocaleString() %></span>
+                </div>
+                <% if (loan.approved_amount) { %>
+                <div class="detail-item">
+                    <label>Approved Amount:</label>
+                    <span>KSh <%= loan.approved_amount.toLocaleString() %></span>
+                </div>
+                <% } %>
+                <% if (loan.balance_remaining) { %>
+                <div class="detail-item">
+                    <label>Balance Remaining:</label>
+                    <span>KSh <%= loan.balance_remaining.toLocaleString() %></span>
+                </div>
+                <% } %>
+                <div class="detail-item">
+                    <label>Interest Rate:</label>
+                    <span><%= loan.interest_rate %>% per month</span>
+                </div>
+                <div class="detail-item">
+                    <label>Repayment Period:</label>
+                    <span><%= loan.repayment_months %> months</span>
+                </div>
+                <div class="detail-item">
+                    <label>Application Date:</label>
+                    <span><%= new Date(loan.created_at).toLocaleDateString() %></span>
+                </div>
+                <% if (loan.approved_at) { %>
+                <div class="detail-item">
+                    <label>Approval Date:</label>
+                    <span><%= new Date(loan.approved_at).toLocaleDateString() %></span>
+                </div>
+                <% } %>
+                <% if (loan.due_date) { %>
+                <div class="detail-item">
+                    <label>Due Date:</label>
+                    <span><%= new Date(loan.due_date).toLocaleDateString() %></span>
+                </div>
+                <% } %>
+            </div>
+
+            <% if (guarantors.length > 0) { %>
+            <div class="detail-section">
+                <h3>Guarantors</h3>
+                <table class="guarantors-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Shares Pledged</th>
+                            <th>Amount Covered</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% guarantors.forEach(g => { %>
+                        <tr>
+                            <td><%= g.guarantor_name %></td>
+                            <td><%= g.shares_pledged %></td>
+                            <td>KSh <%= g.amount_covered.toLocaleString() %></td>
+                            <td><span class="badge badge-<%= g.status %>"><%= g.status %></span></td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <% } %>
+        </div>
+
+        <% if (schedule) { %>
+        <div class="repayment-schedule">
+            <h3>Repayment Schedule</h3>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Payment</th>
+                        <th>Principal</th>
+                        <th>Interest</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% schedule.schedule.forEach(s => { %>
+                    <tr>
+                        <td>Month <%= s.month %></td>
+                        <td>KSh <%= parseFloat(s.payment).toLocaleString() %></td>
+                        <td>KSh <%= parseFloat(s.principal).toLocaleString() %></td>
+                        <td>KSh <%= parseFloat(s.interest).toLocaleString() %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Total</th>
+                        <th>KSh <%= parseFloat(schedule.totalAmount).toLocaleString() %></th>
+                        <th></th>
+                        <th>KSh <%= parseFloat(schedule.totalInterest).toLocaleString() %></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <% } %>
+
+        <% if (repayments.length > 0) { %>
+        <div class="repayment-history">
+            <h3>Repayment History</h3>
+            <table class="repayments-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount Paid</th>
+                        <th>Principal</th>
+                        <th>Interest</th>
+                        <th>Transaction Ref</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% repayments.forEach(r => { %>
+                    <tr>
+                        <td><%= new Date(r.payment_date).toLocaleDateString() %></td>
+                        <td>KSh <%= r.amount_paid.toLocaleString() %></td>
+                        <td>KSh <%= r.principal_amount.toLocaleString() %></td>
+                        <td>KSh <%= r.interest_amount.toLocaleString() %></td>
+                        <td><%= r.transaction_ref %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <% } %>
+
+        <div class="loan-actions">
+            <% if (loan.status === 'active') { %>
+                <a href="/loans/<%= loan.id %>/repay" class="btn btn-primary">Make Payment</a>
+            <% } %>
+            <% if (loan.status === 'pending') { %>
+                <a href="/guarantors/search?loan_id=<%= loan.id %>" class="btn btn-secondary">Find Guarantors</a>
+                <button onclick="cancelLoan('<%= loan.id %>')" class="btn btn-danger">Cancel Request</button>
+            <% } %>
+            <a href="/loans" class="btn btn-secondary">Back to Loans</a>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script src="/js/loan-detail.js"></script>
+</body>
+</html>

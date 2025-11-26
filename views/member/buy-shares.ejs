@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Shares - SACCO</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container-lg">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">Buy Shares</h1>
+            <p class="page-subtitle">Invest in your future</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 gap-6 mb-12">
+            <div class="stat-card">
+                <p class="stat-label">Current Shares</p>
+                <p class="stat-value"><%= current_shares %></p>
+                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                    Worth KSh <%= (current_shares * 1000).toLocaleString() %>
+                </p>
+            </div>
+
+            <div class="stat-card">
+                <p class="stat-label">Share Price</p>
+                <p class="stat-value">KSh 1,000</p>
+                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                    per share
+                </p>
+            </div>
+        </div>
+
+        <!-- Purchase Form -->
+        <div class="card">
+            <form id="buySharesForm" class="space-y-6">
+                <div class="form-group">
+                    <label for="quantity">Number of Shares</label>
+                    <input type="number" id="quantity" name="quantity" required min="1" value="1">
+                </div>
+
+                <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
+                    <h4 class="small-title" style="margin-bottom: 0.5rem;">
+                        Total Amount: <span id="totalAmount">KSh 1,000</span>
+                    </h4>
+                </div>
+
+                <div class="alert alert-info">
+                    <p style="margin-bottom: 0.5rem;"><strong>Payment Method:</strong> M-Pesa</p>
+                    <p style="margin: 0;">You will receive an M-Pesa prompt on your phone to complete the payment.</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn-primary">Buy Shares</button>
+                    <a href="/shares" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="page-footer">
+            <p>SACCO Member Portal • 2024</p>
+        </div>
+
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script>
+        document.getElementById('quantity').addEventListener('input', function() {
+            const quantity = parseInt(this.value) || 0;
+            const total = quantity * 1000;
+            document.getElementById('totalAmount').textContent = `KSh ${total.toLocaleString()}`;
+        });
+
+        document.getElementById('buySharesForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const quantity = document.getElementById('quantity').value;
+
+            try {
+                const response = await fetch('/shares/buy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quantity })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    // Redirect to payment status page
+                    window.location.href = `/payments/status/${data.transaction_ref}`;
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Failed to initiate payment');
+            }
+        });
+    </script>
+</body>
+</html>

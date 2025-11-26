@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welfare - SACCO</title>
+    <link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>Welfare Contributions</h1>
+            <a href="/welfare/pay" class="btn btn-primary">Pay Welfare (KSh 300)</a>
+        </div>
+
+        <div class="welfare-summary">
+            <div class="summary-card">
+                <h3>Total Paid</h3>
+                <p class="stat-number">KSh <%= total_paid.toLocaleString() %></p>
+            </div>
+
+            <div class="summary-card">
+                <h3>This Year</h3>
+                <p class="stat-number">KSh <%= total_this_year.toLocaleString() %></p>
+            </div>
+
+            <div class="summary-card">
+                <h3>Payment Count</h3>
+                <p class="stat-number"><%= payment_count %></p>
+            </div>
+
+            <div class="summary-card">
+                <h3>Last Payment</h3>
+                <p class="stat-number">
+                    <%= last_payment_date ? new Date(last_payment_date).toLocaleDateString() : 'Never' %>
+                </p>
+            </div>
+        </div>
+
+        <div class="payment-history">
+            <h2>Payment History</h2>
+            <table class="welfare-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Payment Method</th>
+                        <th>Transaction Ref</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% history.forEach(payment => { %>
+                    <tr>
+                        <td><%= new Date(payment.payment_date).toLocaleDateString() %></td>
+                        <td>KSh <%= payment.amount.toLocaleString() %></td>
+                        <td><%= payment.payment_method.toUpperCase() %></td>
+                        <td><%= payment.transaction_ref %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script src="/js/member-welfare.js"></script>
+</body>
+</html>

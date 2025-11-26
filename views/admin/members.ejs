@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Members - SACCO Admin</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body>
+    <%- include('../layouts/admin-header') %>
+    
+    <div class="container-2xl">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">Members Management</h1>
+            <p class="page-subtitle">View and manage all SACCO members</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-8">
+            <div class="grid grid-cols-3 gap-4">
+                <div class="form-group">
+                    <label for="searchMembers">Search Members</label>
+                    <input type="text" id="searchMembers" placeholder="Search by name or email...">
+                </div>
+                <div class="form-group">
+                    <label for="filterActive">Status Filter</label>
+                    <select id="filterActive">
+                        <option value="">All Status</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filterRegistration">Registration Filter</label>
+                    <select id="filterRegistration">
+                        <option value="">All</option>
+                        <option value="true">Registered</option>
+                        <option value="false">Not Registered</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Table -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Registration</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="membersTableBody">
+                <% members.forEach(member => { %>
+                <tr>
+                    <td><%= member.full_name %></td>
+                    <td><%= member.email %></td>
+                    <td><%= member.phone_number %></td>
+                    <td>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                            <%= member.is_active ? 'Active' : 'Inactive' %>
+                        </span>
+                    </td>
+                    <td>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                            <%= member.registration_paid ? 'Paid' : 'Pending' %>
+                        </span>
+                    </td>
+                    <td><%= new Date(member.created_at).toLocaleDateString() %></td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="/admin/members/<%= member.id %>" class="btn-small">View</a>
+                            <% if (member.is_active) { %>
+                                <button onclick="deactivateMember('<%= member.id %>')" class="btn-small-outline">Deactivate</button>
+                            <% } else { %>
+                                <button onclick="activateMember('<%= member.id %>')" class="btn-small">Activate</button>
+                            <% } %>
+                        </div>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+        <!-- Footer -->
+        <div class="page-footer">
+            <p>SACCO Admin Portal • 2024</p>
+        </div>
+
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script src="/js/admin-members.js"></script>
+</body>
+</html>

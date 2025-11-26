@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - SACCO Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <%- include('../layouts/admin-header') %>
+    
+    <div class="container">
+        <h1>Generate Reports</h1>
+
+        <div class="reports-grid">
+            <div class="report-card">
+                <h3>Loan Report</h3>
+                <form id="loanReportForm">
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" name="start_date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" name="end_date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="status" class="form-control">
+                            <option value="">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="active">Active</option>
+                            <option value="paid">Paid</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate</button>
+                </form>
+            </div>
+
+            <div class="report-card">
+                <h3>Share Report</h3>
+                <button onclick="generateShareReport()" class="btn btn-primary">Generate Share Report</button>
+            </div>
+
+            <div class="report-card">
+                <h3>Welfare Report</h3>
+                <form id="welfareReportForm">
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="number" name="year" class="form-control" value="<%= new Date().getFullYear() %>">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate</button>
+                </form>
+            </div>
+
+            <div class="report-card">
+                <h3>Savings Report</h3>
+                <form id="savingsReportForm">
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="number" name="year" class="form-control" value="<%= new Date().getFullYear() %>">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate</button>
+                </form>
+            </div>
+
+            <div class="report-card">
+                <h3>SACCO Savings (Interest)</h3>
+                <button onclick="generateSaccoSavingsReport()" class="btn btn-primary">Generate Report</button>
+            </div>
+
+            <div class="report-card">
+                <h3>Member Statistics</h3>
+                <button onclick="generateMemberStats()" class="btn btn-primary">Generate Report</button>
+            </div>
+
+            <div class="report-card">
+                <h3>Defaulters Report</h3>
+                <button onclick="generateDefaultersReport()" class="btn btn-primary">Generate Report</button>
+            </div>
+        </div>
+
+        <div id="reportResults" class="report-results" style="display: none;">
+            <h2>Report Results</h2>
+            <div id="reportContent"></div>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script src="/js/admin-reports.js"></script>
+</body>
+</html>

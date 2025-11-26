@@ -4,42 +4,251 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages - SACCO</title>
-    <link rel="stylesheet" href="/css/member.css">
+    <link rel="stylesheet" href="/css/design-system.css">
 </head>
 <body>
     <%- include('../layouts/member-header') %>
     
-    <div class="container">
+    <div class="container-xl">
+        
+        <!-- Page Header -->
         <div class="page-header">
-            <h1>Messages</h1>
-            <a href="/messages/compose" class="btn btn-primary">Compose Message</a>
+            <div class="accent-line"></div>
+            <h1 class="page-title">Messages</h1>
+            <p class="page-subtitle">Communicate with admins and other members</p>
         </div>
 
-        <div class="messages-tabs">
-            <a href="/messages" class="tab-btn active">Inbox (<%= unreadCount %>)</a>
-            <a href="/messages/sent" class="tab-btn">Sent</a>
+        <!-- Message Stats -->
+        <div class="grid grid-cols-3 gap-6 mb-8">
+            <div class="stat-card">
+                <p class="stat-label">Inbox</p>
+                <p class="stat-value"><%= inbox.length %></p>
+                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                    <%= unreadCount %> unread
+                </p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Sent</p>
+                <p class="stat-value"><%= sent.length %></p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Total Messages</p>
+                <p class="stat-value"><%= inbox.length + sent.length %></p>
+            </div>
         </div>
 
-        <div class="messages-list">
-            <% if (messages.length === 0) { %>
-                <div class="alert alert-info">No messages</div>
-            <% } else { %>
-                <% messages.forEach(message => { %>
-                <div class="message-item <%= !message.is_read ? 'unread' : '' %>">
-                    <div class="message-info">
-                        <h4><%= message.sender_name %></h4>
-                        <p class="subject"><%= message.subject %></p>
-                        <p class="preview"><%= message.body.substring(0, 100) %>...</p>
-                    </div>
-                    <div class="message-meta">
-                        <span class="date"><%= new Date(message.created_at).toLocaleDateString() %></span>
-                        <a href="/messages/<%= message.id %>" class="btn btn-sm">Read</a>
-                    </div>
+        <!-- Compose Message Button -->
+        <div style="margin-bottom: 2rem;">
+            <button onclick="showComposeModal()" class="btn-primary">
+                ✉️ Compose Message
+            </button>
+        </div>
+
+        <!-- Message Tabs -->
+        <div style="border-bottom: 2px solid #E5E5E5; margin-bottom: 2rem;">
+            <div style="display: flex; gap: 2rem;">
+                <button onclick="showTab('inbox')" id="inboxTab" class="tab-button active" style="padding: 1rem 0; border: none; background: none; font-weight: 600; border-bottom: 2px solid #000000; cursor: pointer;">
+                    Inbox (<%= inbox.length %>)
+                </button>
+                <button onclick="showTab('sent')" id="sentTab" class="tab-button" style="padding: 1rem 0; border: none; background: none; font-weight: 600; border-bottom: 2px solid transparent; cursor: pointer; color: #6B7280;">
+                    Sent (<%= sent.length %>)
+                </button>
+            </div>
+        </div>
+
+        <!-- Inbox Tab -->
+        <div id="inboxContent" class="tab-content">
+            <% if (inbox.length === 0) { %>
+                <div class="card" style="text-align: center; padding: 4rem 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                    <h3 class="small-title" style="margin-bottom: 0.5rem;">No Messages</h3>
+                    <p class="text-secondary">Your inbox is empty.</p>
                 </div>
-                 <% }) %>
-        <% } %>
-    </div>
-</div>
+            <% } else { %>
+                <div class="space-y-4">
+                    <% inbox.forEach(message => { %>
+                    <div class="card-hover" onclick="viewMessage('<%= message.id %>')" style="cursor: pointer; padding: 1.5rem; <%= !message.is_read ? 'border-left: 3px solid #000000;' : '' %>">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <h3 class="small-title" style="margin: 0;">
+                                        <%= message.sender_name %>
+                                    </h3>
+                                    <% if (!message.is_read) { %>
+                                    <span style="width: 8px; height: 8px; background: #000000; border-radius: 50%;"></span>
+                                    <% } %>
+                                </div>
+                                <p style="font-weight: 600; color: #000000; margin-bottom: 0.5rem;">
+                                    <%= message.subject || '(No Subject)' %>
+                                </p>
+                                <p class="text-secondary" style="font-size: 0.875rem; margin: 0;">
+                                    <%= message.body.substring(0, 100) %><%= message.body.length > 100 ? '...' : '' %>
+                                </p>
+                            </div>
+                            <p class="text-meta" style="white-space: nowrap; margin-left: 1rem;">
+                                <%= new Date(message.created_at).toLocaleDateString() %>
+                            </p>
+                        </div>
+                    </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
 
-<%- include('../layouts/footer') %>
-<script src="/js/member-messages.js"></script>
+        <!-- Sent Tab -->
+        <div id="sentContent" class="tab-content" style="display: none;">
+            <% if (sent.length === 0) { %>
+                <div class="card" style="text-align: center; padding: 4rem 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📤</div>
+                    <h3 class="small-title" style="margin-bottom: 0.5rem;">No Sent Messages</h3>
+                    <p class="text-secondary">You haven't sent any messages yet.</p>
+                </div>
+            <% } else { %>
+                <div class="space-y-4">
+                    <% sent.forEach(message => { %>
+                    <div class="card-hover" onclick="viewMessage('<%= message.id %>')" style="cursor: pointer; padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <div style="flex: 1;">
+                                <h3 class="small-title" style="margin-bottom: 0.5rem;">
+                                    To: <%= message.recipient_name %>
+                                </h3>
+                                <p style="font-weight: 600; color: #000000; margin-bottom: 0.5rem;">
+                                    <%= message.subject || '(No Subject)' %>
+                                </p>
+                                <p class="text-secondary" style="font-size: 0.875rem; margin: 0;">
+                                    <%= message.body.substring(0, 100) %><%= message.body.length > 100 ? '...' : '' %>
+                                </p>
+                            </div>
+                            <p class="text-meta" style="white-space: nowrap; margin-left: 1rem;">
+                                <%= new Date(message.created_at).toLocaleDateString() %>
+                            </p>
+                        </div>
+                    </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+
+    </div>
+
+    <!-- Compose Message Modal -->
+    <div id="composeModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 class="section-title" style="margin: 0;">Compose Message</h2>
+                <button onclick="hideComposeModal()" style="border: none; background: none; font-size: 1.5rem; cursor: pointer; color: #6B7280;">×</button>
+            </div>
+
+            <form id="composeForm" class="space-y-6">
+                <div class="form-group">
+                    <label for="recipient">Recipient</label>
+                    <select id="recipient" name="recipient_id" required>
+                        <option value="">Select recipient...</option>
+                        <optgroup label="Admins">
+                            <% admins.forEach(admin => { %>
+                            <option value="<%= admin.id %>"><%= admin.full_name %> (Admin)</option>
+                            <% }) %>
+                        </optgroup>
+                        <optgroup label="Members">
+                            <% members.forEach(member => { %>
+                            <option value="<%= member.id %>"><%= member.full_name %></option>
+                            <% }) %>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="body">Message</label>
+                    <textarea id="body" name="body" required rows="6"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn-primary">Send Message</button>
+                    <button type="button" onclick="hideComposeModal()" class="btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+
+    <script>
+        function showTab(tab) {
+            document.getElementById('inboxContent').style.display = 'none';
+            document.getElementById('sentContent').style.display = 'none';
+            document.getElementById('inboxTab').classList.remove('active');
+            document.getElementById('sentTab').classList.remove('active');
+            document.getElementById('inboxTab').style.borderBottomColor = 'transparent';
+            document.getElementById('sentTab').style.borderBottomColor = 'transparent';
+            document.getElementById('inboxTab').style.color = '#6B7280';
+            document.getElementById('sentTab').style.color = '#6B7280';
+            
+            if (tab === 'inbox') {
+                document.getElementById('inboxContent').style.display = 'block';
+                document.getElementById('inboxTab').classList.add('active');
+                document.getElementById('inboxTab').style.borderBottomColor = '#000000';
+                document.getElementById('inboxTab').style.color = '#000000';
+            } else {
+                document.getElementById('sentContent').style.display = 'block';
+                document.getElementById('sentTab').classList.add('active');
+                document.getElementById('sentTab').style.borderBottomColor = '#000000';
+                document.getElementById('sentTab').style.color = '#000000';
+            }
+        }
+
+        function showComposeModal() {
+            document.getElementById('composeModal').style.display = 'flex';
+        }
+
+        function hideComposeModal() {
+            document.getElementById('composeModal').style.display = 'none';
+            document.getElementById('composeForm').reset();
+        }
+
+        function viewMessage(messageId) {
+            window.location.href = `/messages/${messageId}`;
+        }
+
+        document.getElementById('composeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                recipient_id: document.getElementById('recipient').value,
+                subject: document.getElementById('subject').value,
+                body: document.getElementById('body').value
+            };
+
+            try {
+                const response = await fetch('/messages/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Message sent successfully!');
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to send message'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to send message. Please try again.');
+            }
+        });
+
+        document.getElementById('composeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideComposeModal();
+            }
+        });
+    </script>
+</body>
+</html>

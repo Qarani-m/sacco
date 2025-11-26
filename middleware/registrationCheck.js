@@ -12,14 +12,13 @@ const registrationCheck = (req, res, next) => {
         return res.redirect('/auth/login');
     }
 
-    // Check if registration is paid
-    if (!res.locals.user.registration_paid) {
-        // Allow access to payment page and logout
-        const allowedPaths = ['/members/pay-registration', '/members/process-registration', '/auth/logout'];
-        if (!allowedPaths.includes(req.path)) {
-            return res.redirect('/members/pay-registration');
-        }
+    // If registration is not paid, restrict access
+if (!res.locals.user.registration_paid) {
+    const allowedPaths = ['/members/registration-fee', '/members/registration/pay', '/auth/logout'];
+    if (!allowedPaths.includes(req.path)) {
+        return res.redirect('/members/registration-fee');
     }
+}
 
     next();
 };

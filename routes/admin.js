@@ -1,12 +1,22 @@
 const express = require('express');
 const router = express.Router();
 // admin.js
-const authMiddleware = require('../middleware/adminAuth'); // no destructuring
+const authMiddleware = require('../middleware/auth'); // Cookie-based auth
 
 const adminController = require('../controllers/adminController');
 
-// All routes require admin authentication
+// All routes require authentication
 router.use(authMiddleware);
+
+// Check if user is admin
+router.use((req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        req.flash('error_msg', 'Admin access required');
+        res.redirect('/members/dashboard');
+    }
+});
 
 // GET /admin/dashboard
 // Display admin dashboard with overview stats
@@ -34,6 +44,14 @@ router.get('/actions/history', adminController.showActionsHistory);
 // GET /admin/members
 // List all SACCO members with search and filter
 router.get('/members', adminController.listMembers);
+
+// GET /admin/members/:userId/edit
+// Show form to edit member details
+router.get('/members/:userId/edit', adminController.editMemberForm);
+
+// POST /admin/members/:userId
+// Update member details
+router.post('/members/:userId', adminController.updateMember);
 
 // GET /admin/members/:userId
 // View detailed information about specific member

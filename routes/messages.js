@@ -2,9 +2,12 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 const messageController = require('../controllers/messageController');
+const  registrationCheck  = require('../middleware/registrationCheck');
 
 // All routes require authentication
 router.use(authMiddleware);
+
+// router.use(registrationCheck);
 
 /* ============================
    DISPLAY ROUTES (Render Pages / Views)

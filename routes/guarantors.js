@@ -8,6 +8,7 @@ const guarantorController = require('../controllers/guarantorController');
 router.use(authMiddleware);
 // router.use(registrationCheck);
 
+
 /* ============================
    DISPLAY ROUTES (Render Pages)
    ============================ */

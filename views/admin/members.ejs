@@ -1,102 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Members - SACCO Admin</title>
-    <link rel="stylesheet" href="/css/design-system.css">
-</head>
-<body>
-    <%- include('../layouts/admin-header') %>
-    
-    <div class="container-2xl">
-        
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="accent-line"></div>
-            <h1 class="page-title">Members Management</h1>
-            <p class="page-subtitle">View and manage all SACCO members</p>
-        </div>
+<div class="page-header">
+    <h1 class="page-title">Member Management</h1>
+</div>
 
-        <!-- Filters -->
-        <div class="card mb-8">
-            <div class="grid grid-cols-3 gap-4">
-                <div class="form-group">
-                    <label for="searchMembers">Search Members</label>
-                    <input type="text" id="searchMembers" placeholder="Search by name or email...">
-                </div>
-                <div class="form-group">
-                    <label for="filterActive">Status Filter</label>
-                    <select id="filterActive">
-                        <option value="">All Status</option>
-                        <option value="true">Active</option>
-                        <option value="false">Inactive</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="filterRegistration">Registration Filter</label>
-                    <select id="filterRegistration">
-                        <option value="">All</option>
-                        <option value="true">Registered</option>
-                        <option value="false">Not Registered</option>
-                    </select>
-                </div>
-            </div>
+<div class="card" style="margin-bottom: 2rem;">
+    <form action="/admin/members" method="GET" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.875rem; color: #6B7280; margin-bottom: 0.5rem;">Role</label>
+            <select name="role" style="width: 100%; padding: 0.5rem; border: 1px solid #D1D5DB; border-radius: 4px;">
+                <option value="">All Roles</option>
+                <option value="member" <%= filters.role === 'member' ? 'selected' : '' %>>Member</option>
+                <option value="admin" <%= filters.role === 'admin' ? 'selected' : '' %>>Admin</option>
+            </select>
         </div>
+        <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.875rem; color: #6B7280; margin-bottom: 0.5rem;">Status</label>
+            <select name="is_active" style="width: 100%; padding: 0.5rem; border: 1px solid #D1D5DB; border-radius: 4px;">
+                <option value="">All Statuses</option>
+                <option value="true" <%= filters.is_active === 'true' ? 'selected' : '' %>>Active</option>
+                <option value="false" <%= filters.is_active === 'false' ? 'selected' : '' %>>Inactive</option>
+            </select>
+        </div>
+        <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.875rem; color: #6B7280; margin-bottom: 0.5rem;">Registration Paid</label>
+            <select name="registration_paid" style="width: 100%; padding: 0.5rem; border: 1px solid #D1D5DB; border-radius: 4px;">
+                <option value="">Any</option>
+                <option value="true" <%= filters.registration_paid === 'true' ? 'selected' : '' %>>Yes</option>
+                <option value="false" <%= filters.registration_paid === 'false' ? 'selected' : '' %>>No</option>
+            </select>
+        </div>
+        <button type="submit" style="background: #000; color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: 500; height: 38px;">Filter</button>
+    </form>
+</div>
 
-        <!-- Members Table -->
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th>Registration</th>
-                    <th>Joined</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="membersTableBody">
-                <% members.forEach(member => { %>
-                <tr>
-                    <td><%= member.full_name %></td>
-                    <td><%= member.email %></td>
-                    <td><%= member.phone_number %></td>
-                    <td>
-                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-                            <%= member.is_active ? 'Active' : 'Inactive' %>
+<div class="card">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="text-align: left; border-bottom: 1px solid #E5E7EB;">
+                <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Name / Email</th>
+                <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Phone</th>
+                <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Role</th>
+                <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Status</th>
+                <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Joined</th>
+                <th style="padding: 0.75rem 1rem; text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% members.forEach(member => { %>
+                <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="padding: 1rem;">
+                        <div style="font-weight: 500; color: #111827;"><%= member.full_name %></div>
+                        <div style="font-size: 0.875rem; color: #6B7280;"><%= member.email %></div>
+                    </td>
+                    <td style="padding: 1rem; color: #374151;"><%= member.phone_number %></td>
+                    <td style="padding: 1rem;">
+                        <span style="background: #E5E7EB; color: #374151; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize;">
+                            <%= member.role %>
                         </span>
                     </td>
-                    <td>
-                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-                            <%= member.registration_paid ? 'Paid' : 'Pending' %>
-                        </span>
+                    <td style="padding: 1rem;">
+                        <% if (member.is_active) { %>
+                            <span style="background: #D1FAE5; color: #059669; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">Active</span>
+                        <% } else { %>
+                            <span style="background: #FEE2E2; color: #DC2626; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">Inactive</span>
+                        <% } %>
                     </td>
-                    <td><%= new Date(member.created_at).toLocaleDateString() %></td>
-                    <td>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <a href="/admin/members/<%= member.id %>" class="btn-small">View</a>
-                            <% if (member.is_active) { %>
-                                <button onclick="deactivateMember('<%= member.id %>')" class="btn-small-outline">Deactivate</button>
-                            <% } else { %>
-                                <button onclick="activateMember('<%= member.id %>')" class="btn-small">Activate</button>
-                            <% } %>
-                        </div>
+                    <td style="padding: 1rem; color: #6B7280; font-size: 0.875rem;">
+                        <%= new Date(member.created_at).toLocaleDateString() %>
+                    </td>
+                    <td style="padding: 1rem; text-align: right;">
+                        <a href="/admin/members/<%= member.id %>/edit" style="color: #2563EB; text-decoration: none; font-size: 0.875rem; font-weight: 500;">Edit</a>
                     </td>
                 </tr>
-                <% }) %>
-            </tbody>
-        </table>
-
-        <!-- Footer -->
-        <div class="page-footer">
-            <p>SACCO Admin Portal • 2024</p>
-        </div>
-
-    </div>
-
-    <%- include('../layouts/footer') %>
-    <script src="/js/admin-members.js"></script>
-</body>
-</html>
+            <% }); %>
+        </tbody>
+    </table>
+</div>

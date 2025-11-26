@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | SACCO Admin</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        body {
+            background: #F9FAFB;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        main {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <%- include('admin-header') %>
+
+    <main>
+        <%- body %>
+    </main>
+
+    <footer style="margin-top: 3rem; padding: 2rem 0; border-top: 1px solid #E5E5E5;">
+        <p style="font-size: 0.75rem; color: #9CA3AF; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+            &copy; <%= new Date().getFullYear() %> SACCO System. Admin Panel.
+        </p>
+    </footer>
+</body>
+</html>

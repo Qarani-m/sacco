@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - SACCO</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container-xl">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">My Profile</h1>
+            <p class="page-subtitle">Manage your personal information and documents</p>
+        </div>
+
+        <!-- Profile Information -->
+        <div class="grid grid-cols-2 gap-6 mb-12">
+            <div class="card">
+                <h2 class="section-title mb-6">Personal Information</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-meta">Full Name</p>
+                        <p style="font-weight: 600; color: #000000;"><%= user.full_name %></p>
+                    </div>
+                    <div>
+                        <p class="text-meta">Email Address</p>
+                        <p style="font-weight: 600; color: #000000;"><%= user.email %></p>
+                    </div>
+                    <div>
+                        <p class="text-meta">Phone Number</p>
+                        <p style="font-weight: 600; color: #000000;"><%= user.phone_number %></p>
+                    </div>
+                    <div>
+                        <p class="text-meta">Member Since</p>
+                        <p style="font-weight: 600; color: #000000;">
+                            <%= new Date(user.created_at).toLocaleDateString() %>
+                        </p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button id="editProfileBtn" class="btn-secondary">Edit Profile</button>
+                </div>
+            </div>
+
+            <!-- Document Upload -->
+            <div class="card">
+                <h2 class="section-title mb-6">Identity Documents</h2>
+                
+                <% if (documents.length === 0) { %>
+                    <div class="alert alert-warning mb-6">
+                        <p style="margin: 0;">Please upload your ID documents for verification.</p>
+                    </div>
+
+                    <form id="documentUploadForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="idFront">ID Front</label>
+                            <input type="file" id="idFront" name="id_front" accept="image/*" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="idBack">ID Back</label>
+                            <input type="file" id="idBack" name="id_back" accept="image/*" required>
+                        </div>
+
+                        <button type="submit" class="btn-primary">Upload Documents</button>
+                    </form>
+                <% } else { %>
+                    <div class="space-y-4">
+                        <% documents.forEach(doc => { %>
+                        <div style="padding: 1rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <p style="font-weight: 600; color: #000000; text-transform: capitalize;">
+                                    <%= doc.document_type.replace('_', ' ') %>
+                                </p>
+                                <% if (doc.verification_status === 'verified') { %>
+                                    <span style="padding: 0.25rem 0.75rem; background: #000000; color: #FFFFFF; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                        Verified
+                                    </span>
+                                <% } else if (doc.verification_status === 'pending') { %>
+                                    <span style="padding: 0.25rem 0.75rem; background: #F5F5F5; color: #000000; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                        Verification in Progress
+                                    </span>
+                                <% } else { %>
+                                    <span style="padding: 0.25rem 0.75rem; background: #EF4444; color: #FFFFFF; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                        Rejected
+                                    </span>
+                                <% } %>
+                            </div>
+                            <p class="text-meta">Uploaded <%= new Date(doc.uploaded_at).toLocaleDateString() %></p>
+                            <% if (doc.rejection_reason) { %>
+                                <p style="color: #EF4444; font-size: 0.875rem; margin-top: 0.5rem;">
+                                    Reason: <%= doc.rejection_reason %>
+                                </p>
+                            <% } %>
+                        </div>
+                        <% }) %>
+                    </div>
+
+                    <% const hasRejected = documents.some(d => d.verification_status === 'rejected'); %>
+                    <% if (hasRejected) { %>
+                        <p class="text-secondary" style="margin-top: 1rem; font-size: 0.875rem;">
+                            Contact admin to delete rejected documents before uploading new ones.
+                        </p>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Member Profile Form -->
+        <div class="card mb-12">
+            <h2 class="section-title mb-6">Member Profile Form</h2>
+            
+            <% if (profileForm) { %>
+                <div class="alert alert-info mb-6">
+                    <p style="margin: 0;">
+                        <strong>Form Submitted:</strong> This form has been locked. Only admins can make changes.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-meta">National ID Number</p>
+                        <p style="font-weight: 600; color: #000000;"><%= profileForm.national_id %></p>
+                    </div>
+                    <div>
+                        <p class="text-meta">Date of Birth</p>
+                        <p style="font-weight: 600; color: #000000;">
+                            <%= new Date(profileForm.date_of_birth).toLocaleDateString() %>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-meta">Address</p>
+                        <p style="font-weight: 600; color: #000000;"><%= profileForm.address %></p>
+                    </div>
+                    <div>
+                        <p class="text-meta">Occupation</p>
+                        <p style="font-weight: 600; color: #000000;"><%= profileForm.occupation %></p>
+                    </div>
+                    <div>
+                        <p class="text-meta">Next of Kin</p>
+                        <p style="font-weight: 600; color: #000000;"><%= profileForm.next_of_kin_name %></p>
+                    </div>
+                    <div>
+                        <p class="text-meta">Next of Kin Phone</p>
+                        <p style="font-weight: 600; color: #000000;"><%= profileForm.next_of_kin_phone %></p>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="alert alert-warning mb-6">
+                    <p style="margin: 0;">
+                        <strong>Important:</strong> This form can only be filled once. Please ensure all information is correct before submitting.
+                    </p>
+                </div>
+
+                <form id="profileFormSubmit" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label for="nationalId">National ID Number</label>
+                            <input type="text" id="nationalId" name="national_id" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dateOfBirth">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" name="date_of_birth" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Residential Address</label>
+                            <input type="text" id="address" name="address" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="occupation">Occupation</label>
+                            <input type="text" id="occupation" name="occupation" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nextOfKinName">Next of Kin Name</label>
+                            <input type="text" id="nextOfKinName" name="next_of_kin_name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nextOfKinPhone">Next of Kin Phone</label>
+                            <input type="tel" id="nextOfKinPhone" name="next_of_kin_phone" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Submit Profile Form</button>
+                </form>
+            <% } %>
+        </div>
+
+    </div>
+
+    <%- include('../layouts/footer') %>
+
+    <script src="/js/profile.js"></script>
+</body>
+</html>

@@ -80,7 +80,7 @@ document.getElementById('resendBtn').addEventListener('click', async function() 
             btn.textContent = 'Resend Verification Email';
         }
     } catch (error) {
-        alert('Failed to resend email. Please try again.');
+        alert(`Failed to resend email. Please try again.${error}` );
         btn.disabled = false;
         btn.textContent = 'Resend Verification Email';
     }

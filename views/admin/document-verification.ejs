@@ -1,0 +1,79 @@
+<div class="page-header">
+    <h1 class="page-title">Document Verification</h1>
+</div>
+
+<div class="card">
+    <% if (documents && documents.length > 0) { %>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            <% documents.forEach(doc => { %>
+                <div style="border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden;">
+                    <div style="height: 200px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <img src="<%= doc.file_path %>" alt="<%= doc.document_type %>" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="padding: 1rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem 0;"><%= doc.document_type %></h3>
+                        <p style="font-size: 0.875rem; color: #6B7280; margin: 0 0 1rem 0;">
+                            Uploaded by: <span style="color: #111827; font-weight: 500;"><%= doc.user_name %></span><br>
+                            Date: <%= new Date(doc.uploaded_at).toLocaleDateString() %>
+                        </p>
+                        
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="verifyDocument('<%= doc.id %>')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-weight: 500;">Approve</button>
+                            <button onclick="rejectDocument('<%= doc.id %>')" style="flex: 1; background: #EF4444; color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-weight: 500;">Reject</button>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div style="text-align: center; padding: 3rem 0;">
+            <p style="color: #6B7280; font-size: 1rem;">No documents pending verification.</p>
+        </div>
+    <% } %>
+</div>
+
+<script>
+async function verifyDocument(docId) {
+    if (!confirm('Are you sure you want to approve this document?')) return;
+    
+    try {
+        const res = await fetch(`/admin/documents/${docId}/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Failed to verify document');
+    }
+}
+
+async function rejectDocument(docId) {
+    const reason = prompt('Please enter a reason for rejection:');
+    if (reason === null) return; // Cancelled
+    
+    try {
+        const res = await fetch(`/admin/documents/${docId}/reject`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Failed to reject document');
+    }
+}
+</script>

@@ -1,23 +1,20 @@
-// middleware/auth.js
-// Verifies JWT, attaches user to req.user
-// Replace `getUserById` and JWT secret with your project's implementations.
-
+// middleware/adminAuth.js
 const jwt = require('jsonwebtoken');
+const { getUserById } = require('../models/User');
 
 // TODO: replace with environment variable / config
 const JWT_SECRET = process.env.JWT_SECRET || 'replace-this-with-real-secret';
 
-// Mock DB helper - replace with real DB call
-const { getUserById } = require('../models/User'); // create this in your models
-
-// If you don't have userModel yet, here's a tiny placeholder:
-// const getUserById = async (id) => ({ id, email: 'a@b.com', role: 'member', hasPaidRegistration: true });
-
 const adminAuthMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization || req.headers.Authorization;
+    
+    // Check if token exists
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Missing or invalid Authorization header' });
+        // If it's a browser request (no bearer token), check session or redirect to login
+        // For now, we'll return 401 JSON, but for a web app we might want to redirect
+        // if (req.accepts('html')) return res.redirect('/auth/login');
+        return res.status(401).json({ message: 'Missing or invalid Authorization header' });
     }
 
     const token = authHeader.split(' ')[1];
@@ -28,7 +25,7 @@ const adminAuthMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid or expired token' });
     }
 
-    // payload should contain userId (adjust to your token shape)
+    // payload should contain userId
     const userId = payload.userId || payload.id;
     if (!userId) return res.status(401).json({ message: 'Invalid token payload' });
 
@@ -36,11 +33,18 @@ const adminAuthMiddleware = async (req, res, next) => {
     const user = await getUserById(userId);
     if (!user) return res.status(401).json({ message: 'User not found' });
 
-    // Attach user to request
+    // Ensure admin role
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+
+    // Attach user to request and set admin locals
     req.user = user;
+    res.locals.isAdmin = true;
+    res.locals.user = user;
     next();
   } catch (err) {
-    console.error('authMiddleware error:', err);
+    console.error('adminAuthMiddleware error:', err);
     res.status(500).json({ message: 'Authentication error' });
   }
 };

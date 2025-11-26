@@ -1,10 +1,99 @@
-<footer class="footer">
-    <div class="container">
-        <p>&copy; <%= new Date().getFullYear() %> SACCO Management System. All rights reserved.</p>
-        <div class="footer-links">
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-            <a href="/help">Help</a>
+<footer style="margin-top: 4rem; border-top: 1px solid #E5E5E5; background: #FAFAFA;">
+    <div class="container-2xl" style="padding: 3rem 0 2rem;">
+        <div class="grid grid-cols-4 gap-8" style="margin-bottom: 3rem;">
+            <!-- About Section -->
+            <div>
+                <h3 style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; color: #000000;">
+                    SACCO Portal
+                </h3>
+                <p class="text-secondary" style="font-size: 0.875rem; line-height: 1.6;">
+                    Empowering members through savings, shares, and mutual support. Building financial futures together.
+                </p>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h3 style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; color: #000000;">
+                    Quick Links
+                </h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="/members/dashboard" class="link-secondary" style="font-size: 0.875rem;">Dashboard</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="/shares" class="link-secondary" style="font-size: 0.875rem;">My Shares</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="/loans/page" class="link-secondary" style="font-size: 0.875rem;">My Loans</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="/welfare/page" class="link-secondary" style="font-size: 0.875rem;">Welfare</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="/guarantors/requests" class="link-secondary" style="font-size: 0.875rem;">Guarantor Requests</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Support -->
+            <div>
+                <h3 style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; color: #000000;">
+                    Support
+                </h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="/messages" class="link-secondary" style="font-size: 0.875rem;">Contact Admin</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="/members/profile" class="link-secondary" style="font-size: 0.875rem;">My Profile</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="/members/notifications" class="link-secondary" style="font-size: 0.875rem;">Notifications</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="/members/savings" class="link-secondary" style="font-size: 0.875rem;">Savings Report</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div>
+                <h3 style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; color: #000000;">
+                    Contact
+                </h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 0.5rem;">
+                        <p class="text-secondary" style="font-size: 0.875rem; margin: 0;">
+                            <strong>Email:</strong><br>
+                            support@sacco.com
+                        </p>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <p class="text-secondary" style="font-size: 0.875rem; margin: 0;">
+                            <strong>Phone:</strong><br>
+                            +254 700 000 000
+                        </p>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <p class="text-secondary" style="font-size: 0.875rem; margin: 0;">
+                            <strong>Hours:</strong><br>
+                            Mon-Fri: 8AM - 5PM
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div style="padding-top: 2rem; border-top: 1px solid #E5E5E5; display: flex; justify-content: space-between; align-items: center;">
+            <p class="text-meta" style="margin: 0;">
+                © <%= new Date().getFullYear() %> SACCO System. All rights reserved.
+            </p>
+            <div style="display: flex; gap: 1.5rem;">
+                <a href="#" class="link-secondary" style="font-size: 0.75rem;">Privacy Policy</a>
+                <a href="#" class="link-secondary" style="font-size: 0.75rem;">Terms of Service</a>
+                <a href="#" class="link-secondary" style="font-size: 0.75rem;">Help Center</a>
+            </div>
         </div>
     </div>
 </footer>

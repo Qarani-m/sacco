@@ -33,7 +33,7 @@ class Message {
     // Get inbox messages
     static async getInbox(userId) {
         const query = `
-            SELECT m.*, u.full_name as sender_name
+            SELECT m.*, u.full_name as sender_name, u.email as sender_email
             FROM messages m
             INNER JOIN users u ON m.sender_id = u.id
             WHERE m.recipient_id = $1 AND m.parent_message_id IS NULL

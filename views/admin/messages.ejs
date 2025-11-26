@@ -1,0 +1,55 @@
+<div class="page-header">
+    <h1 class="page-title">Messages</h1>
+    <div>
+        <a href="/admin/messages/new" style="padding: 0.5rem 1rem; background: #2563EB; color: white; text-decoration: none; border-radius: 4px; font-size: 0.875rem;">New Message</a>
+    </div>
+</div>
+
+<div class="card">
+    <% if (messages && messages.length > 0) { %>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 2px solid #E5E7EB;">
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase;">From</th>
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase;">Subject</th>
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase;">Date</th>
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase; text-align: center;">Status</th>
+                    <th style="padding: 0.75rem; text-align: right;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% messages.forEach(message => { %>
+                    <tr style="border-bottom: 1px solid #F3F4F6; <%= !message.is_read ? 'background: #F9FAFB;' : '' %>">
+                        <td style="padding: 1rem 0.75rem;">
+                            <div style="font-weight: <%= !message.is_read ? '600' : '500' %>;"><%= message.sender_name %></div>
+                            <div style="font-size: 0.75rem; color: #6B7280;"><%= message.sender_email %></div>
+                        </td>
+                        <td style="padding: 1rem 0.75rem;">
+                            <div style="font-weight: <%= !message.is_read ? '600' : '400' %>;"><%= message.subject %></div>
+                            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">
+                                <%= message.body.substring(0, 60) %><%= message.body.length > 60 ? '...' : '' %>
+                            </div>
+                        </td>
+                        <td style="padding: 1rem 0.75rem;"><%= new Date(message.created_at).toLocaleDateString() %></td>
+                        <td style="padding: 1rem 0.75rem; text-align: center;">
+                            <% if (!message.is_read) { %>
+                                <span style="display: inline-block; width: 8px; height: 8px; background: #2563EB; border-radius: 50%;"></span>
+                            <% } %>
+                        </td>
+                        <td style="padding: 1rem 0.75rem; text-align: right;">
+                            <a href="/admin/messages/<%= message.id %>" style="color: #2563EB; text-decoration: none; font-size: 0.875rem;">Read</a>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+        <% if (unread_count > 0) { %>
+            <div style="margin-top: 1rem; padding: 1rem; background: #EFF6FF; border-radius: 4px; color: #1E40AF;">
+                You have <%= unread_count %> unread message<%= unread_count !== 1 ? 's' : '' %>
+            </div>
+        <% } %>
+    <% } else { %>
+        <p style="color: #6B7280; text-align: center; padding: 2rem;">No messages found.</p>
+    <% } %>
+</div>

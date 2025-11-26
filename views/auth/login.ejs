@@ -1,75 +1,71 @@
 <% title = "Login" %>
 
-<div class="bg-white shadow-lg rounded-xl p-8">
+<div class="container-sm">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="accent-line"></div>
+        <h1 class="page-title">SACCO Login</h1>
+        <p class="page-subtitle">Access Your Account</p>
+    </div>
 
-    <h1 class="text-2xl font-bold text-center text-gray-700 mb-6">
-        SACCO Login
-    </h1>
-
-    <form id="loginForm" action="/auth/login" method="POST" class="space-y-4">
+    <!-- Login Form -->
+    <form id="loginForm" action="/auth/login" method="POST" class="space-y-6">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-
         <!-- Email -->
-        <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1" for="email">
-                Email
-            </label>
+        <div class="form-group">
+            <label for="email">Email</label>
             <input 
                 type="email"
                 id="email"
                 name="email"
                 value="em@g.cx"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
             >
         </div>
 
         <!-- Password -->
-        <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1" for="password">
-                Password
-            </label>
+        <div class="form-group">
+            <label for="password">Password</label>
             <input 
                 type="password"
                 id="password"
                 name="password"
                 value="password1234!!"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
             >
         </div>
 
         <!-- Login button -->
-        <button 
-            type="submit"
-            class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg 
-                   hover:bg-blue-700 transition"
-        >
+        <button type="submit" class="btn-primary">
             Login
         </button>
+
     </form>
 
     <!-- Links -->
-    <div class="text-center text-sm text-gray-600 mt-4 space-y-1">
-        <p>
+    <div class="text-center mt-6">
+        <p class="text-secondary">
             Don't have an account?
-            <a href="/auth/register" class="text-blue-600 hover:underline font-medium">
-                Register
-            </a>
+            <a href="/auth/register" class="link-primary">Register</a>
         </p>
-        <p>
-            <a href="/auth/forgot-password" class="text-blue-600 hover:underline font-medium">
-                Forgot Password?
-            </a>
+        <p class="text-secondary mt-2">
+            <a href="/auth/forgot-password" class="link-primary">Forgot Password?</a>
         </p>
     </div>
 
     <!-- Alerts -->
-    <div id="errorMessage" class="hidden mt-4 bg-red-100 text-red-700 p-3 rounded-lg"></div>
+    <div id="errorMessage" class="hidden alert alert-error"></div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+        <p>SACCO Member Portal • 2024</p>
+    </div>
 
 </div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container"></div>
 
 <script src="/js/auth-login.js"></script>

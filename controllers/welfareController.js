@@ -5,17 +5,21 @@ exports.viewWelfare = async (req, res) => {
     try {
         const userId = req.user.id;
         const stats = await WelfarePayment.getStatsByUser(userId);
+        const paymentHistory = await WelfarePayment.getByUser(userId);
+        
+        // Format last payment date
+        const lastPaymentDate = stats.last_payment_date ? 
+            new Date(stats.last_payment_date).toLocaleDateString() : 'Never';
 
         res.render("member/welfare", {
-            user: req.user,                 // Pass logged-in user
-            total_paid: stats.total_paid,
-            payment_count: stats.payment_count,
-            last_payment_date: stats.last_payment_date,
-            title:'',
-            unreadMessages:0,
-            unreadNotifications:0,
-            total_this_year:0,
-            history:[]
+            title: 'Welfare Payments',
+            user: req.user,
+            unreadMessages: 0,
+            unreadNotifications: 0,
+            totalPayments: parseInt(stats.payment_count) || 0,
+            totalContributed: parseFloat(stats.total_paid) || 0,
+            lastPaymentDate: lastPaymentDate,
+            paymentHistory: paymentHistory || []
         });
     } catch (error) {
         console.error("View welfare error:", error);

@@ -195,6 +195,32 @@ class Loan {
             totalInterest: totalInterest.toFixed(2)
         };
     }
+    // Record repayment (updates balance)
+    static async recordRepayment(loanId, amount) {
+        const query = `
+            UPDATE loans
+            SET balance_remaining = balance_remaining - $1,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $2
+            RETURNING *
+        `;
+        const result = await db.query(query, [amount, loanId]);
+        return result.rows[0];
+    }
+
+    // Mark loan as paid
+    static async markAsPaid(loanId) {
+        const query = `
+            UPDATE loans
+            SET status = 'paid',
+                balance_remaining = 0,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $1
+            RETURNING *
+        `;
+        const result = await db.query(query, [loanId]);
+        return result.rows[0];
+    }
 }
 
 module.exports = Loan;

@@ -23,14 +23,47 @@ exports.viewLoans = async (req, res) => {
 exports.renderLoansPage = async (req, res) => {
     try {
         const userId = req.user.id;
-        const loans = await Loan.getByUser(userId);
+        const allLoans = await Loan.getByUser(userId);
+        
+        // Separate active and historical loans
+        const activeLoans = allLoans.filter(l => l.status === 'active' || l.status === 'approved');
+        const loanHistory = allLoans;
+        
+        // Calculate totals
+        let totalBorrowed = 0;
+        let totalRepaid = 0;
+        let balanceRemaining = 0;
+        
+        allLoans.forEach(loan => {
+            if (loan.approved_amount) {
+                totalBorrowed += parseFloat(loan.approved_amount);
+                totalRepaid += parseFloat(loan.approved_amount) - parseFloat(loan.balance_remaining || 0);
+                if (loan.status === 'active') {
+                    balanceRemaining += parseFloat(loan.balance_remaining || 0);
+                }
+            }
+        });
+        
+        // Get guarantors for active loans
+        for (let loan of activeLoans) {
+            loan.guarantors = await LoanGuarantor.getByLoan(loan.id);
+        }
+        
+        // Calculate max loan amount based on shares
+        const totalShares = await Share.getTotalByUser(userId);
+        const maxLoanAmount = totalShares * 1000;
 
         res.render("member/loans", {
-            loans,
+            title: 'My Loans',
             user: req.user,
-                unreadMessages: 0,
-    unreadNotifications: 0,
-title:"",
+            unreadMessages: 0,
+            unreadNotifications: 0,
+            activeLoans: activeLoans || [],
+            loanHistory: loanHistory || [],
+            totalBorrowed: totalBorrowed,
+            totalRepaid: totalRepaid,
+            balanceRemaining: balanceRemaining,
+            maxLoanAmount: maxLoanAmount
         });
     } catch (error) {
         console.error("Render loans page error:", error);
@@ -63,7 +96,7 @@ exports.showRequestForm = async (req, res) => {
 
 exports.requestLoan = async (req, res) => {
     try {
-        const { requested_amount, repayment_months } = req.body;
+        const { requested_amount, repayment_months, guarantors } = req.body;
         const userId = req.user.id;
 
         // Validation
@@ -81,14 +114,20 @@ exports.requestLoan = async (req, res) => {
         const totalShares = await Share.getTotalByUser(userId);
         const shareValue = totalShares * 1000;
 
-        if (requested_amount > shareValue) {
+        // Calculate total coverage
+        let totalCoverage = shareValue;
+        if (guarantors && guarantors.length > 0) {
+            const guarantorCoverage = guarantors.reduce((sum, g) => sum + (g.shares_requested * 1000), 0);
+            totalCoverage += guarantorCoverage;
+        }
+
+        if (requested_amount > totalCoverage) {
             return res.status(400).json({
-                error: 'Loan amount exceeds share value',
-                message: 'You need guarantors to cover the difference',
+                error: 'Insufficient coverage',
+                message: 'You need more guarantor shares',
                 share_value: shareValue,
                 requested_amount: requested_amount,
-                shortfall: requested_amount - shareValue,
-                shares_needed: Math.ceil((requested_amount - shareValue) / 1000)
+                shortfall: requested_amount - totalCoverage
             });
         }
 
@@ -99,9 +138,39 @@ exports.requestLoan = async (req, res) => {
             repayment_months
         });
 
+        // Create guarantor requests if provided
+        if (guarantors && guarantors.length > 0) {
+            const notifications = [];
+            
+            for (const guarantor of guarantors) {
+                // Create guarantor request
+                const request = await LoanGuarantor.create({
+                    loan_id: loan.id,
+                    guarantor_id: guarantor.guarantor_id,
+                    shares_pledged: guarantor.shares_requested,
+                    amount_covered: guarantor.shares_requested * 1000
+                });
+
+                // Prepare notification
+                notifications.push({
+                    user_id: guarantor.guarantor_id,
+                    type: 'guarantor_request',
+                    title: 'New Guarantor Request',
+                    message: `${req.user.full_name} is requesting you to guarantee a loan with ${guarantor.shares_requested} shares`,
+                    related_entity_type: 'loan_guarantor',
+                    related_entity_id: request.id
+                });
+            }
+
+            // Send all notifications
+            if (notifications.length > 0) {
+                await Notification.createBulk(notifications);
+            }
+        }
+
         // Notify admins
         const admins = await User.getAllAdmins();
-        const notifications = admins.map(admin => ({
+        const adminNotifications = admins.map(admin => ({
             user_id: admin.id,
             type: 'loan_request',
             title: 'New Loan Request',
@@ -109,7 +178,7 @@ exports.requestLoan = async (req, res) => {
             related_entity_type: 'loan',
             related_entity_id: loan.id
         }));
-        await Notification.createBulk(notifications);
+        await Notification.createBulk(adminNotifications);
 
         res.json({
             success: true,

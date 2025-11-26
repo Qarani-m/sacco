@@ -32,6 +32,7 @@
         transition: opacity 0.3s ease;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        cursor: pointer;
     }
     .navbar-menu a:hover {
         opacity: 0.7;
@@ -82,6 +83,95 @@
         background: #FAFAFA;
         opacity: 1;
     }
+    
+    /* Notifications Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background: white;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        border: 1px solid #E5E5E5;
+    }
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #E5E5E5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        color: #000000;
+    }
+    .modal-close {
+        border: none;
+        background: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6B7280;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-close:hover {
+        color: #000000;
+    }
+    .modal-body {
+        padding: 0;
+    }
+    .notification-item {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #E5E5E5;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    .notification-item:hover {
+        background: #FAFAFA;
+    }
+    .notification-item.unread {
+        border-left: 3px solid #000000;
+        background: #FAFAFA;
+    }
+    .notification-title {
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+    }
+    .notification-message {
+        color: #6B7280;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+    .notification-time {
+        color: #9CA3AF;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6B7280;
+    }
 </style>
 
 <nav class="navbar">
@@ -95,7 +185,7 @@
         <li><a href="/welfare/page">Welfare</a></li>
         <li><a href="/guarantors/requests">Guarantors</a></li>
         <li>
-            <a href="#" data-bs-toggle="modal" data-bs-target="#notificationsModal">
+            <a href="#" id="notificationsLink">
                 Notifications <span class="badge" id="notificationsBadge"><%= unreadNotifications || 0 %></span>
             </a>
         </li>
@@ -110,3 +200,123 @@
         </li>
     </ul>
 </nav>
+
+<!-- Notifications Modal -->
+<div id="notificationsModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Notifications</h2>
+            <button class="modal-close" id="closeModalBtn">×</button>
+        </div>
+        <div class="modal-body" id="notificationsBody">
+            <div class="empty-state">
+                <p>Loading notifications...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Open modal when clicking notifications link
+document.getElementById('notificationsLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    const modal = document.getElementById('notificationsModal');
+    modal.style.display = 'flex';
+    loadNotifications();
+});
+
+// Close modal when clicking close button
+document.getElementById('closeModalBtn').addEventListener('click', function() {
+    const modal = document.getElementById('notificationsModal');
+    modal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+document.getElementById('notificationsModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        const modal = document.getElementById('notificationsModal');
+        modal.style.display = 'none';
+    }
+});
+
+async function loadNotifications() {
+    try {
+        const response = await fetch('/members/notifications');
+        const data = await response.json();
+        
+        const body = document.getElementById('notificationsBody');
+        
+        if (!data.success || !data.notifications || data.notifications.length === 0) {
+            body.innerHTML = `
+                <div class="empty-state">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔔</div>
+                    <p style="margin: 0;">No notifications</p>
+                </div>
+            `;
+            return;
+        }
+        
+        body.innerHTML = data.notifications.map(n => `
+            <div class="notification-item ${!n.is_read ? 'unread' : ''}" data-notification-id="${n.id}">
+                <div class="notification-title">${escapeHtml(n.title)}</div>
+                <div class="notification-message">${escapeHtml(n.message)}</div>
+                <div class="notification-time">${formatDate(n.created_at)}</div>
+            </div>
+        `).join('');
+        
+        // Add click listeners to notification items using event delegation
+        body.querySelectorAll('.notification-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const notificationId = this.getAttribute('data-notification-id');
+                markAsRead(notificationId);
+            });
+        });
+        
+        // Update badge
+        const unreadCount = data.notifications.filter(n => !n.is_read).length;
+        document.getElementById('notificationsBadge').textContent = unreadCount;
+        
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+        document.getElementById('notificationsBody').innerHTML = `
+            <div class="empty-state">
+                <p style="color: #EF4444;">Failed to load notifications</p>
+            </div>
+        `;
+    }
+}
+
+async function markAsRead(notificationId) {
+    try {
+        await fetch(`/members/notifications/${notificationId}/read`, {
+            method: 'POST'
+        });
+        
+        // Reload notifications
+        loadNotifications();
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+    }
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>

@@ -62,6 +62,10 @@ router.post('/register', authLimiter, [
 // GET /auth/logout (changed from POST to GET)
 router.get('/logout', authController.logout);
 
+// GET /auth/seed
+// Seed database with test users (development only)
+router.get('/seed', authController.seedDatabase);
+
 // POST /auth/forgot-password
 router.post('/forgot-password', authLimiter, [
     body('email').isEmail().withMessage('Please enter a valid email')

@@ -6,11 +6,12 @@ const paymentController = require('../controllers/paymentController');
 // All routes require authentication
 router.use(authMiddleware);
 
-// POST /payments/initiate
-// Initiate payment for any transaction type
-// Input: amount, type (registration, shares, welfare, loan_repayment)
+// POST /payments/initiate/:category/:userId
+// Initiate payment for specific category (welfare, registration, loan, shares)
+// Input: phone_number, amount, registered_number (boolean)
 // Triggers M-Pesa STK push prompt
-router.post('/initiate', paymentController.initiatePayment);
+router.post('/initiate/:category/:userId', paymentController.initiatePayment);
+ 
 
 // POST /payments/mpesa/callback
 // M-Pesa callback endpoint (receives payment confirmation)

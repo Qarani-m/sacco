@@ -8,25 +8,25 @@ const viewShares = async (req, res) => {
         const totalShares = await Share.getTotalByUser(userId);
         const availableShares = await Share.getAvailableByUser(userId);
         const pledgedShares = await Share.getPledgedByUser(userId);
-        const totalValue = await Share.getValueByUser(userId);
+        const shareHistory = await Share.getHistory(userId);
+        
+        // Calculate max purchasable (50 shares total limit)
+        const maxPurchasable = Math.max(0, 50 - totalShares);
 
- res.render('member/shares', {
-    user: req.user,
-    unreadMessages: 0,
-    unreadNotifications: 0,
-title:"",
-    total_shares: totalShares,
-    available_shares: availableShares,
-    pledged_shares: pledgedShares?.length || 0,
-    total_value: totalValue,
-    pledged_details: pledgedShares || [],
-    history: await Share.getHistory(userId),
-});
-
-
+        res.render('member/shares', {
+            title: 'My Shares',
+            user: req.user,
+            unreadMessages: 0,
+            unreadNotifications: 0,
+            totalShares: totalShares || 0,
+            activeShares: availableShares || 0,
+            pledgedShares: pledgedShares || 0,
+            maxPurchasable: maxPurchasable,
+            shareHistory: shareHistory || []
+        });
     } catch (err) {
         console.error('viewShares error:', err);
-        res.status(500).json({ message: 'Failed to fetch shares' });
+        res.status(500).send('Failed to load shares page');
     }
 };
 

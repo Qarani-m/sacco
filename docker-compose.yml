@@ -1,0 +1,118 @@
+version: "3.9"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17-alpine
+    container_name: sacco_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sacco
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./models/db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - sacco_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sacco"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Node.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sacco_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Server
+      NODE_ENV: production
+      PORT: 3000
+      BASE_URL: http://localhost:3000
+
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: sacco
+
+      # Auth (CHANGE THESE IN PRODUCTION!)
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+      SESSION_SECRET: your-super-secret-session-key-change-this-in-production
+
+      # MPESA (Optional - add your credentials)
+      MPESA_CONSUMER_KEY: ${MPESA_CONSUMER_KEY:-}
+      MPESA_CONSUMER_SECRET: ${MPESA_CONSUMER_SECRET:-}
+      MPESA_SHORTCODE: ${MPESA_SHORTCODE:-}
+      MPESA_PASSKEY: ${MPESA_PASSKEY:-}
+      MPESA_CALLBACK_URL: ${MPESA_CALLBACK_URL:-}
+
+      # Email (Optional - add your credentials)
+      EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASS: ${EMAIL_PASS:-}
+
+      # SMS (Optional - add your credentials)
+      SMS_API_KEY: ${SMS_API_KEY:-}
+      SMS_API_SECRET: ${SMS_API_SECRET:-}
+      SMS_SENDER_ID: ${SMS_SENDER_ID:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code for development (comment out for production)
+      - .:/app
+      - /app/node_modules
+      # Persist uploads
+      - uploads_data:/app/uploads
+    networks:
+      - sacco_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # pgAdmin (Optional - for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sacco_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@sacco.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - sacco_network
+    depends_on:
+      - postgres
+    profiles:
+      - tools  # Only start with: docker-compose --profile tools up
+
+networks:
+  sacco_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  uploads_data:
+    driver: local

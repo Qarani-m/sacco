@@ -10,16 +10,35 @@ exports.viewRequestsPage = async (req, res) => {
     try {
         const userId = req.user.id;
 
+        // Check if user has active loan
+        const hasActiveLoan = await User.hasUnpaidLoan(userId);
+        
         // Fetch pending guarantor requests for this member
-        const requests = await LoanGuarantor.getPendingByGuarantor(userId);
+        const pendingRequests = await LoanGuarantor.getPendingByGuarantor(userId);
+        
+        // Fetch active guarantees
+        const activeGuarantees = await LoanGuarantor.getByGuarantor(userId, 'accepted');
+        
+        // Get available shares
+        const availableShares = await Share.getAvailableByUser(userId);
+        
+        // Calculate total pledged shares
+        let totalPledgedShares = 0;
+        activeGuarantees.forEach(g => {
+            totalPledgedShares += parseInt(g.shares_pledged) || 0;
+        });
 
         // Render the EJS page
         res.render('member/guarantor-requests', {
-            user: req.user,     // logged-in user for header
-            requests         ,   // array of request objects
-            unreadMessages:0,
-            unreadNotifications:0,
-            title:"m"
+            title: 'Guarantor Requests',
+            user: req.user,
+            unreadMessages: 0,
+            unreadNotifications: 0,
+            hasActiveLoan: hasActiveLoan,
+            pendingRequests: pendingRequests || [],
+            activeGuarantees: activeGuarantees || [],
+            availableShares: availableShares || 0,
+            totalPledgedShares: totalPledgedShares
         });
 
     } catch (error) {

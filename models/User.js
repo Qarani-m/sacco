@@ -92,6 +92,30 @@ class User {
         return result.rows;
     }
 
+    // Seed exactly three admin users if they don't exist
+    static async seedAdmins() {
+        const existingAdmins = await this.getAllAdmins();
+        const needed = 3 - existingAdmins.length;
+        if (needed <= 0) return existingAdmins;
+        const admins = [];
+        for (let i = 0; i < needed; i++) {
+            const email = `admin${i + 1}@example.com`;
+            const password = 'AdminPass123'; // In real life, use env vars
+            const password_hash = await bcrypt.hash(password, 10);
+            const full_name = `Admin ${i + 1}`;
+            const phone_number = `070000000${i}`;
+            const role = 'admin';
+            const query = `
+                INSERT INTO users (email, password_hash, full_name, phone_number, role, is_active, registration_paid)
+                VALUES ($1, $2, $3, $4, $5, true, true)
+                RETURNING id, email, full_name, phone_number, role, is_active, registration_paid
+            `;
+            const result = await db.query(query, [email, password_hash, full_name, phone_number, role]);
+            admins.push(result.rows[0]);
+        }
+        return admins;
+    }
+
     // Update user details
     static async update(userId, updateData) {
         const { full_name, phone_number } = updateData;

@@ -1,56 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - SACCO</title>
-    <link rel="stylesheet" href="/css/admin.css">
-</head>
-<body>
-    <%- include('../layouts/admin-header') %>
-    
-    <div class="container">
-        <h1>Admin Dashboard</h1>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Members</h3>
-                <p class="stat-number"><%= stats.total_members %></p>
-            </div>
-            <div class="stat-card">
-                <h3>Pending Loans</h3>
-                <p class="stat-number"><%= stats.pending_loans %></p>
-            </div>
-            <div class="stat-card">
-                <h3>Pending Actions</h3>
-                <p class="stat-number"><%= stats.pending_actions %></p>
-            </div>
-            <div class="stat-card">
-                <h3>Active Loans</h3>
-                <p class="stat-number"><%= stats.active_loans %></p>
-            </div>
-            <div class="stat-card">
-                <h3>Total Shares Value</h3>
-                <p class="stat-number">KSh <%= stats.total_shares_value.toLocaleString() %></p>
-            </div>
-            <div class="stat-card">
-                <h3>Total Loan Balance</h3>
-                <p class="stat-number">KSh <%= stats.total_loan_balance.toLocaleString() %></p>
-            </div>
-        </div>
+<div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <div>
+        <span style="color: #6B7280; font-size: 0.875rem;">Welcome back, <%= user.full_name %></span>
+    </div>
+</div>
 
-        <div class="quick-actions">
-            <h2>Quick Actions</h2>
-            <div class="action-buttons">
-                <a href="/admin/pending-actions" class="btn btn-primary">View Pending Actions</a>
-                <a href="/admin/loans" class="btn btn-secondary">Manage Loans</a>
-                <a href="/admin/members" class="btn btn-secondary">View Members</a>
-                <a href="/admin/reports" class="btn btn-secondary">Generate Reports</a>
-            </div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card">
+        <h3 style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; margin: 0 0 0.5rem 0;">Total Members</h3>
+        <p style="font-size: 2rem; font-weight: 700; color: #111827; margin: 0;"><%= stats.total_members %></p>
+    </div>
+    <div class="card">
+        <h3 style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; margin: 0 0 0.5rem 0;">Pending Loans</h3>
+        <p style="font-size: 2rem; font-weight: 700; color: #F59E0B; margin: 0;"><%= stats.pending_loans %></p>
+    </div>
+    <div class="card">
+        <h3 style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; margin: 0 0 0.5rem 0;">Pending Actions</h3>
+        <p style="font-size: 2rem; font-weight: 700; color: #EF4444; margin: 0;"><%= stats.pending_actions %></p>
+    </div>
+    <div class="card">
+        <h3 style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; margin: 0 0 0.5rem 0;">Total Shares Value</h3>
+        <p style="font-size: 2rem; font-weight: 700; color: #10B981; margin: 0;">KSh <%= parseInt(stats.total_shares_value).toLocaleString() %></p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Recent Pending Actions</h2>
+            <a href="/admin/pending-actions" style="color: #2563EB; text-decoration: none; font-size: 0.875rem;">View All</a>
         </div>
+        
+        <% if (recentActions && recentActions.length > 0) { %>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 1px solid #E5E7EB;">
+                        <th style="padding: 0.75rem 0; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Type</th>
+                        <th style="padding: 0.75rem 0; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Initiated By</th>
+                        <th style="padding: 0.75rem 0; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Date</th>
+                        <th style="padding: 0.75rem 0; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Status</th>
+                        <th style="padding: 0.75rem 0; text-align: right;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% recentActions.forEach(action => { %>
+                        <tr style="border-bottom: 1px solid #F3F4F6;">
+                            <td style="padding: 1rem 0;">
+                                <span style="font-weight: 500;"><%= action.action_type %> <%= action.entity_type %></span>
+                                <div style="font-size: 0.75rem; color: #6B7280;"><%= action.reason %></div>
+                            </td>
+                            <td style="padding: 1rem 0;"><%= action.initiator_name %></td>
+                            <td style="padding: 1rem 0;"><%= new Date(action.created_at).toLocaleDateString() %></td>
+                            <td style="padding: 1rem 0;">
+                                <span style="background: #FEF3C7; color: #D97706; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">
+                                    <%= action.status %>
+                                </span>
+                            </td>
+                            <td style="padding: 1rem 0; text-align: right;">
+                                <a href="/admin/pending-actions" style="color: #2563EB; text-decoration: none; font-size: 0.875rem;">Review</a>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p style="color: #6B7280; text-align: center; padding: 2rem;">No pending actions requiring verification.</p>
+        <% } %>
     </div>
 
-    <%- include('../layouts/footer') %>
-    <script src="/js/admin-dashboard.js"></script>
-</body>
-</html>
+    <div class="card">
+        <h2 style="font-size: 1.125rem; font-weight: 600; margin: 0 0 1.5rem 0;">Quick Links</h2>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <a href="/admin/members" style="display: block; padding: 1rem; background: #F3F4F6; border-radius: 6px; text-decoration: none; color: #111827; font-weight: 500; transition: background 0.2s;">
+                Manage Members
+            </a>
+            <a href="/admin/loans" style="display: block; padding: 1rem; background: #F3F4F6; border-radius: 6px; text-decoration: none; color: #111827; font-weight: 500; transition: background 0.2s;">
+                Review Loan Requests
+            </a>
+            <a href="/admin/reports" style="display: block; padding: 1rem; background: #F3F4F6; border-radius: 6px; text-decoration: none; color: #111827; font-weight: 500; transition: background 0.2s;">
+                Generate Reports
+            </a>
+            <a href="/admin/messages/send" style="display: block; padding: 1rem; background: #F3F4F6; border-radius: 6px; text-decoration: none; color: #111827; font-weight: 500; transition: background 0.2s;">
+                Send Announcement
+            </a>
+        </div>
+    </div>
+</div>

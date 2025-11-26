@@ -5,6 +5,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Dashboard - SACCO</title>
     <link rel="stylesheet" href="/css/design-system.css">
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 480px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: slideIn 0.3s ease;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #F3F4F6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            cursor: pointer;
+            color: #9CA3AF;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            background: #F3F4F6;
+            color: #000;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #F3F4F6;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            background: #FAFAFA;
+        }
+
+        .phone-option {
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background: white;
+        }
+
+        .phone-option:hover {
+            border-color: #D1D5DB;
+            background: #FAFAFA;
+        }
+
+        .phone-option.selected {
+            border-color: #000;
+            background: #FAFAFA;
+        }
+
+        .phone-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .phone-option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .radio-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #D1D5DB;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .phone-option.selected .radio-custom {
+            border-color: #000;
+        }
+
+        .phone-option.selected .radio-custom::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+        }
+
+        .custom-phone-input {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #F3F4F6;
+        }
+
+        .custom-phone-input.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateY(-20px) scale(0.95);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .alert-inline {
+            padding: 0.875rem 1rem;
+            border-left: 3px solid #000;
+            background: #F9FAFB;
+            font-size: 0.875rem;
+            border-radius: 4px;
+        }
+
+        .alert-inline.success {
+            border-left-color: #000;
+            background: #F0FDF4;
+        }
+
+        .alert-inline.error {
+            border-left-color: #000;
+            background: #FEF2F2;
+        }
+    </style>
 </head>
 <body>
     <%- include('../layouts/member-header') %>
@@ -14,7 +196,7 @@
         <!-- Page Header -->
         <div class="page-header">
             <div class="accent-line"></div>
-            <h1 class="page-title">Welcome, <%= user.full_name %></h1>
+            <h1 class="page-title">Welcome, <%=  Object.keys(user)%></h1>
             <p class="page-subtitle">Member Dashboard</p>
         </div>
 
@@ -23,7 +205,7 @@
             <div class="alert alert-warning" style="border-left-width: 4px; border-left-color: #000000; margin-bottom: 2rem;">
                 <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; color: #000000;">⚠️ Registration Fee Required</h3>
                 <p style="margin-bottom: 1rem; color: #000000;">To access loans and shares features, please pay the KSh 1,000 registration fee.</p>
-                <a href="/payments/registration" class="btn-small">Pay Registration Fee Now</a>
+                <button id="openRegistrationBtn" class="btn-small">Pay Registration Fee Now</button>
             </div>
         <% } %>
 
@@ -32,7 +214,7 @@
             <div class="alert alert-info" style="margin-bottom: 2rem;">
                 <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">📧 Email Not Verified</h3>
                 <p style="margin-bottom: 0.5rem;">Please verify your email to ensure you receive important notifications.</p>
-                <a href="/auth/verify-email" class="link-primary">Verify Email</a>
+                <a href="/auth/verify-email" class="link-primary">Verify Email <%!user.email%></a>
             </div>
         <% } %>
 
@@ -348,7 +530,243 @@
 
     </div>
 
+    <!-- Registration Payment Modal -->
+    <div id="registrationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Pay Registration Fee</h3>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-inline" style="margin-bottom: 1.5rem;">
+                    <p style="margin: 0; font-weight: 600;">Amount: KSh 1,000</p>
+                </div>
+
+                <p style="margin-bottom: 1.5rem; color: #4B5563; font-size: 0.875rem;">
+                    Choose a phone number to receive the M-PESA STK push prompt:
+                </p>
+
+                <!-- Registered Phone Option -->
+                <div class="phone-option selected" data-option="registered" id="registeredOption">
+                    <input type="radio" name="phone_option" value="registered" checked>
+                    <label class="phone-option-label">
+                        <div class="radio-custom"></div>
+                        <div style="flex: 1;">
+                            <p style="font-weight: 600; color: #000; margin-bottom: 0.25rem;">Use Registered Number</p>
+                            <p style="font-size: 0.875rem; color: #6B7280;"><%= user.phone_number %></p>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Different Phone Option -->
+                <div class="phone-option" data-option="different" id="differentOption">
+                    <input type="radio" name="phone_option" value="different">
+                    <label class="phone-option-label">
+                        <div class="radio-custom"></div>
+                        <div style="flex: 1;">
+                            <p style="font-weight: 600; color: #000; margin-bottom: 0.25rem;">Use Different Number</p>
+                            <p style="font-size: 0.875rem; color: #6B7280;">Enter a different M-PESA number</p>
+                        </div>
+                    </label>
+                    
+                    <!-- Custom Phone Input (hidden by default) -->
+                    <div class="custom-phone-input" id="customPhoneInput">
+                        <div class="form-group">
+                            <label for="custom_phone">Phone Number</label>
+                            <input 
+                                type="tel" 
+                                id="custom_phone" 
+                                name="custom_phone"
+                                placeholder="254XXXXXXXXX"
+                                class="w-full px-4 py-4 bg-white text-black"
+                                pattern="254[0-9]{9}"
+                                maxlength="12"
+                            >
+                        </div>
+                        <p style="font-size: 0.75rem; color: #9CA3AF; margin-top: 0.5rem;">
+                            Format: 254XXXXXXXXX (12 digits starting with 254)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Status Messages -->
+                <div id="modalStatus" style="margin-top: 1.5rem;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelBtn">Cancel</button>
+                <button class="btn-primary" id="payButton">
+                    Send STK Push
+                </button>
+            </div>
+        </div>
+    </div>
+
     <%- include('../layouts/footer') %>
     <script src="/js/member-dashboard.js"></script>
+    <script>
+        // Modal Functions
+        function openRegistrationModal() {
+            document.getElementById('registrationModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeRegistrationModal() {
+            document.getElementById('registrationModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            // Reset form
+            selectPhoneOption('registered');
+            document.getElementById('custom_phone').value = '';
+            document.getElementById('modalStatus').innerHTML = '';
+        }
+
+        function selectPhoneOption(option) {
+            const registeredOption = document.getElementById('registeredOption');
+            const differentOption = document.getElementById('differentOption');
+            const customPhoneInput = document.getElementById('customPhoneInput');
+
+            if (option === 'registered') {
+                registeredOption.classList.add('selected');
+                differentOption.classList.remove('selected');
+                customPhoneInput.classList.remove('active');
+                document.querySelector('input[value="registered"]').checked = true;
+            } else {
+                registeredOption.classList.remove('selected');
+                differentOption.classList.add('selected');
+                customPhoneInput.classList.add('active');
+                document.querySelector('input[value="different"]').checked = true;
+                // Focus on the custom phone input
+                setTimeout(() => document.getElementById('custom_phone').focus(), 100);
+            }
+        }
+
+        async function initiatePayment() {
+            const payButton = document.getElementById('payButton');
+            const modalStatus = document.getElementById('modalStatus');
+            const selectedOption = document.querySelector('input[name="phone_option"]:checked').value;
+            
+            let phoneNumber;
+            
+            if (selectedOption === 'registered') {
+                phoneNumber = '<%= user.phone_number %>';
+            } else {
+                phoneNumber = document.getElementById('custom_phone').value;
+                
+                // Validate custom phone number
+                if (!phoneNumber) {
+                    modalStatus.innerHTML = '<div class="alert-inline error">Please enter a phone number</div>';
+                    return;
+                }
+                
+                if (!/^254[0-9]{9}$/.test(phoneNumber)) {
+                    modalStatus.innerHTML = '<div class="alert-inline error">Invalid phone number format. Use 254XXXXXXXXX</div>';
+                    return;
+                }
+            }
+
+            // Disable button and show loading
+            payButton.disabled = true;
+            payButton.textContent = 'Processing...';
+            modalStatus.innerHTML = '<div class="alert-inline">Initiating M-PESA payment...</div>';
+
+            try {
+                const response = await fetch(`/payments/initiate/registration/<%= user.id %>`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': '<%= csrfToken %>'
+                    },
+                    body: JSON.stringify({ 
+                        phone_number: phoneNumber,
+                        amount: 1000,
+                        registered_number: selectedOption === 'registered'
+                    })
+                });
+
+                const data = await response.json();
+                console.log(data)
+
+                if (response.ok && data.success) {
+                    modalStatus.innerHTML = `
+                        <div class="alert-inline success">
+                            <p style="margin: 0; font-weight: 600;">✓ STK Push Sent!</p>
+                            <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">
+                                Please check your phone (${phoneNumber}) and enter your M-PESA PIN to complete the payment.
+                            </p>
+                        </div>
+                    `;
+                    
+                    // Optionally close modal after a few seconds
+                    setTimeout(() => {
+                        closeRegistrationModal();
+                        // Reload page to update registration status
+                        location.reload();
+                    }, 5000);
+                } else {
+                    modalStatus.innerHTML = `<div class="alert-inline error">Error: ${data.message || 'Payment initiation failed'}</div>`;
+                    payButton.disabled = false;
+                    payButton.textContent = 'Send STK Push';
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                modalStatus.innerHTML = '<div class="alert-inline error">An error occurred. Please try again.</div>';
+                payButton.disabled = false;
+                payButton.textContent = 'Send STK Push';
+            }
+        }
+
+        // Event Listeners - Initialize after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Open modal button
+            const openBtn = document.getElementById('openRegistrationBtn');
+            if (openBtn) {
+                openBtn.addEventListener('click', openRegistrationModal);
+            }
+
+            // Close modal button
+            const closeBtn = document.getElementById('modalCloseBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeRegistrationModal);
+            }
+
+            // Cancel button
+            const cancelBtn = document.getElementById('cancelBtn');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', closeRegistrationModal);
+            }
+
+            // Pay button
+            const payButton = document.getElementById('payButton');
+            if (payButton) {
+                payButton.addEventListener('click', initiatePayment);
+            }
+
+            // Phone option selections
+            const phoneOptions = document.querySelectorAll('.phone-option');
+            phoneOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const optionValue = this.getAttribute('data-option');
+                    selectPhoneOption(optionValue);
+                });
+            });
+
+            // Close modal when clicking outside
+            const modal = document.getElementById('registrationModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeRegistrationModal();
+                    }
+                });
+            }
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', function(e) {
+                const modal = document.getElementById('registrationModal');
+                if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+                    closeRegistrationModal();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

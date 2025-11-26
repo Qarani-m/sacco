@@ -3,15 +3,15 @@ const db = require('./db');
 class Transaction {
     // Create payment transaction
     static async create(transactionData) {
-        const { user_id, amount, type, payment_method, transaction_ref, status = 'pending' } = transactionData;
+        const { user_id, amount, type, payment_method, transaction_ref, status = 'pending', used_registered_number = false } = transactionData;
         
         const query = `
-            INSERT INTO payment_transactions (user_id, amount, type, payment_method, transaction_ref, status)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO payment_transactions (user_id, amount, type, payment_method, transaction_ref, status, used_registered_number)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *
         `;
         
-        const result = await db.query(query, [user_id, amount, type, payment_method, transaction_ref, status]);
+        const result = await db.query(query, [user_id, amount, type, payment_method, transaction_ref, status, used_registered_number]);
         return result.rows[0];
     }
 
@@ -114,6 +114,28 @@ class Transaction {
         `;
         const result = await db.query(query);
         return result.rows;
+    }
+    // Update transaction allocation
+    static async updateAllocation(transactionRef, allocation) {
+        const query = `
+            UPDATE payment_transactions
+            SET allocation_loan_repayment = $1,
+                allocation_loan_interest = $2,
+                allocation_welfare = $3,
+                allocation_shares = $4,
+                allocation_personal_savings = $5
+            WHERE transaction_ref = $6
+            RETURNING *
+        `;
+        const result = await db.query(query, [
+            allocation.loan_repayment,
+            allocation.loan_interest,
+            allocation.welfare,
+            allocation.shares,
+            allocation.personal_savings,
+            transactionRef
+        ]);
+        return result.rows[0];
     }
 }
 

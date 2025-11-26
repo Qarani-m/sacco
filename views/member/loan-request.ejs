@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Loan - SACCO</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container-xl">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">Request Loan</h1>
+            <p class="page-subtitle">Apply for a loan based on your shares</p>
+        </div>
+
+        <!-- Loan Eligibility Overview -->
+        <div class="grid grid-cols-3 gap-6 mb-12">
+            <div class="stat-card">
+                <p class="stat-label">Your Shares</p>
+                <p class="stat-value"><%= totalShares %></p>
+                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                    Worth KSh <%= (totalShares * 1000).toLocaleString() %>
+                </p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Available Shares</p>
+                <p class="stat-value"><%= availableShares %></p>
+                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                    Not pledged
+                </p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Max Loan (Your Shares)</p>
+                <p class="stat-value">KSh <%= (totalShares * 1000).toLocaleString() %></p>
+                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                    Without guarantors
+                </p>
+            </div>
+        </div>
+
+        <!-- Loan Request Form -->
+        <div class="card mb-12">
+            <h2 class="section-title mb-6">Loan Details</h2>
+            
+            <form id="loanRequestForm" class="space-y-6">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label for="loanAmount">Loan Amount (KSh)</label>
+                        <input type="number" id="loanAmount" name="requested_amount" required min="1000" step="1000">
+                        <p class="text-meta" style="margin-top: 0.5rem;" id="amountHelp">
+                            Your shares cover up to KSh <%= (totalShares * 1000).toLocaleString() %>
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="repaymentMonths">Repayment Period</label>
+                        <select id="repaymentMonths" name="repayment_months" required>
+                            <option value="">Select period...</option>
+                            <option value="1">1 Month</option>
+                            <option value="2">2 Months</option>
+                            <option value="3">3 Months</option>
+                            <option value="4">4 Months</option>
+                            <option value="5">5 Months</option>
+                            <option value="6">6 Months</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Loan Summary -->
+                <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
+                    <h3 class="small-title" style="margin-bottom: 1rem;">Loan Summary</h3>
+                    <div class="grid grid-cols-3 gap-6">
+                        <div>
+                            <p class="text-meta">Requested Amount</p>
+                            <p style="font-weight: 600; color: #000000; font-size: 1.125rem;" id="summaryAmount">
+                                KSh 0
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-meta">Interest (1%)</p>
+                            <p style="font-weight: 600; color: #000000; font-size: 1.125rem;" id="summaryInterest">
+                                KSh 0
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-meta">Total Repayment</p>
+                            <p style="font-weight: 600; color: #000000; font-size: 1.125rem;" id="summaryTotal">
+                                KSh 0
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guarantor Section -->
+                <div id="guarantorSection" style="display: none;">
+                    <h3 class="small-title mb-4">Guarantors Required</h3>
+                    
+                    <div class="alert alert-warning mb-6">
+                        <p style="margin: 0;">
+                            <strong>Shortfall:</strong> <span id="shortfallAmount">KSh 0</span><br>
+                            You need <span id="sharesNeeded">0</span> additional shares from guarantors.
+                        </p>
+                    </div>
+
+                    <button type="button" id="searchGuarantorsBtn" class="btn-secondary mb-6">
+                        Search for Guarantors
+                    </button>
+
+                    <div id="selectedGuarantors"></div>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn-primary">Submit Loan Request</button>
+                    <a href="/loans/page" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Policy Reminder -->
+        <div class="card">
+            <h3 class="small-title" style="margin-bottom: 1rem;">Loan Policy</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="padding: 0.75rem 0; border-bottom: 1px solid #E5E5E5;">
+                    <span style="font-weight: 600;">✓</span> Maximum loan = Your shares value
+                </li>
+                <li style="padding: 0.75rem 0; border-bottom: 1px solid #E5E5E5;">
+                    <span style="font-weight: 600;">✓</span> 1% interest on all loans
+                </li>
+                <li style="padding: 0.75rem 0; border-bottom: 1px solid #E5E5E5;">
+                    <span style="font-weight: 600;">✓</span> Maximum repayment period: 6 months
+                </li>
+                <li style="padding: 0.75rem 0;">
+                    <span style="font-weight: 600;">✓</span> Guarantors cannot have active loans
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Guarantor Search Modal -->
+    <div id="guarantorModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Select Guarantors</h2>
+                <button class="modal-close" id="closeGuarantorModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="guarantorList"></div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+
+    <script src="/js/loan-request.js"></script>
+</body>
+</html>

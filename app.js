@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const flash = require('connect-flash'); // ADD THIS
 const path = require('path');
 const ejsLayouts = require('express-ejs-layouts');
 
@@ -20,8 +21,6 @@ const csurf = require('csurf');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
 
-// ... (imports)
-
 const app = express();
 
 // Security Headers
@@ -29,8 +28,8 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
             imgSrc: ["'self'", "data:", "https:"],
             connectSrc: ["'self'"],
             fontSrc: ["'self'", "https:", "data:"],
@@ -48,14 +47,14 @@ app.use(express.static(path.join(__dirname, 'dist')))
 app.use(ejsLayouts);
 app.set('layout', 'layouts/main');
 app.use(cookieParser());
-// In app.js
 app.use(express.static('public'));
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'css')));
 
-// Session configuration (Keep for flash messages if needed, but not for auth)
+// Session configuration
 app.use(session({
     secret: process.env.SESSION_SECRET || 'sacco-secret-key',
     resave: false,
@@ -67,23 +66,28 @@ app.use(session({
     }
 }));
 
+// Flash middleware - ADD THIS AFTER SESSION
+app.use(flash());
+
 // CSRF Protection
 app.use(csurf({ cookie: { httpOnly: true, secure: process.env.NODE_ENV === 'production' } }));
 
-// Make user available to all views (JWT based)
+// Make user and flash messages available to all views
 app.use(async (req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
     res.locals.user = null;
     res.locals.isAdmin = false;
     res.locals.currentPath = req.path;
+    
+    // ADD FLASH MESSAGES TO LOCALS
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
 
     const token = req.cookies.token;
     if (token) {
         try {
             const payload = jwt.verify(token, process.env.JWT_SECRET || "a strong secret");
-            // Optional: Fetch fresh user from DB if needed, or use payload
-            // For performance, using payload is faster, but DB is safer for role changes/bans
-            // Let's fetch from DB to be safe as per original auth middleware logic
             const user = await User.findById(payload.id);
             if (user) {
                 res.locals.user = user;

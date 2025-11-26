@@ -1,0 +1,74 @@
+<div class="page-header">
+    <h1 class="page-title">Loan Management</h1>
+</div>
+
+<div class="card">
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+        <select id="statusFilter" style="padding: 0.5rem; border: 1px solid #E5E7EB; border-radius: 4px;">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="active">Active</option>
+            <option value="paid">Paid</option>
+            <option value="rejected">Rejected</option>
+        </select>
+        <button onclick="filterLoans()" style="padding: 0.5rem 1rem; background: #2563EB; color: white; border: none; border-radius: 4px; cursor: pointer;">Filter</button>
+    </div>
+
+    <% if (loans && loans.length > 0) { %>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 2px solid #E5E7EB;">
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase;">Borrower</th>
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase;">Requested</th>
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase;">Approved</th>
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase;">Balance</th>
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase;">Status</th>
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase;">Months</th>
+                    <th style="padding: 0.75rem; font-size: 0.875rem; color: #6B7280; text-transform: uppercase;">Date</th>
+                    <th style="padding: 0.75rem; text-align: right;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% loans.forEach(loan => { %>
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 1rem 0.75rem;">
+                            <div style="font-weight: 500;"><%= loan.borrower_name %></div>
+                            <div style="font-size: 0.75rem; color: #6B7280;"><%= loan.borrower_email %></div>
+                        </td>
+                        <td style="padding: 1rem 0.75rem;">KSh <%= parseFloat(loan.requested_amount).toLocaleString() %></td>
+                        <td style="padding: 1rem 0.75rem;">
+                            <%= loan.approved_amount ? 'KSh ' + parseFloat(loan.approved_amount).toLocaleString() : '-' %>
+                        </td>
+                        <td style="padding: 1rem 0.75rem;">
+                            <%= loan.balance_remaining ? 'KSh ' + parseFloat(loan.balance_remaining).toLocaleString() : '-' %>
+                        </td>
+                        <td style="padding: 1rem 0.75rem;">
+                            <span style="
+                                padding: 4px 12px;
+                                border-radius: 12px;
+                                font-size: 0.75rem;
+                                font-weight: 600;
+                                background: <%= loan.status === 'pending' ? '#FEF3C7' : loan.status === 'active' ? '#DBEAFE' : loan.status === 'paid' ? '#D1FAE5' : '#FEE2E2' %>;
+                                color: <%= loan.status === 'pending' ? '#D97706' : loan.status === 'active' ? '#2563EB' : loan.status === 'paid' ? '#059669' : '#DC2626' %>;
+                            "><%= loan.status %></span>
+                        </td>
+                        <td style="padding: 1rem 0.75rem;"><%= loan.repayment_months %></td>
+                        <td style="padding: 1rem 0.75rem;"><%= new Date(loan.created_at).toLocaleDateString() %></td>
+                        <td style="padding: 1rem 0.75rem; text-align: right;">
+                            <a href="/admin/loans/<%= loan.id %>" style="color: #2563EB; text-decoration: none; font-size: 0.875rem;">View</a>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p style="color: #6B7280; text-align: center; padding: 2rem;">No loans found.</p>
+    <% } %>
+</div>
+
+<script>
+function filterLoans() {
+    const status = document.getElementById('statusFilter').value;
+    window.location.href = '/admin/loans' + (status ? '?status=' + status : '');
+}
+</script>

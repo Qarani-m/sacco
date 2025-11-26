@@ -21,13 +21,21 @@ exports.showDashboard = async (req, res) => {
                 (SELECT COALESCE(SUM(balance_remaining), 0) FROM loans WHERE status = 'active') as total_loan_balance
         `);
 
-        res.json({
-            success: true,
-            stats: stats.rows[0]
+        // Get recent pending actions for the dashboard
+        const AdminAction = require('../models/AdminAction');
+        const recentActions = await AdminAction.getPending(); // Assuming this gets all, maybe limit?
+
+        res.render('admin/dashboard', {
+            title: 'Admin Dashboard',
+            layout: 'layouts/admin',
+            stats: stats.rows[0],
+            recentActions: recentActions.slice(0, 5), // Show top 5
+            pendingCount: stats.rows[0].pending_actions,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('Dashboard error:', error);
-        res.status(500).json({ error: 'Failed to load dashboard' });
+        res.status(500).render('error', { message: 'Failed to load dashboard', error });
     }
 };
 
@@ -40,13 +48,20 @@ exports.showPendingActions = async (req, res) => {
             action.verifications = await AdminAction.getVerifications(action.id);
         }
 
-        res.json({
-            success: true,
-            pending_actions: pendingActions
+        const db = require('../models/db');
+        const pendingCountResult = await db.query('SELECT COUNT(*) FROM admin_actions WHERE status = \'pending\'');
+        const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+        res.render('admin/pending-actions', {
+            title: 'Pending Actions',
+            layout: 'layouts/admin',
+            pending_actions: pendingActions,
+            pendingCount,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('Pending actions error:', error);
-        res.status(500).json({ error: 'Failed to fetch pending actions' });
+        res.status(500).render('error', { message: 'Failed to fetch pending actions', error });
     }
 };
 
@@ -237,13 +252,62 @@ exports.listMembers = async (req, res) => {
 
         const members = await User.getAllMembers(filters);
 
-        res.json({
-            success: true,
-            members
+        const db = require('../models/db');
+        const pendingCountResult = await db.query('SELECT COUNT(*) FROM admin_actions WHERE status = \'pending\'');
+        const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+        res.render('admin/members', {
+            title: 'Member Management',
+            layout: 'layouts/admin',
+            members,
+            filters: req.query,
+            pendingCount,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('List members error:', error);
-        res.status(500).json({ error: 'Failed to fetch members' });
+        res.status(500).render('error', { message: 'Failed to fetch members', error });
+    }
+};
+
+exports.editMemberForm = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const member = await User.findById(userId);
+        
+        if (!member) {
+            return res.status(404).render('error', { message: 'Member not found' });
+        }
+
+        const db = require('../models/db');
+        const pendingCountResult = await db.query('SELECT COUNT(*) FROM admin_actions WHERE status = \'pending\'');
+        const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+        res.render('admin/member-edit', {
+            title: 'Edit Member',
+            layout: 'layouts/admin',
+            member,
+            pendingCount,
+            user: res.locals.user || req.user
+        });
+    } catch (error) {
+        console.error('Edit member form error:', error);
+        res.status(500).render('error', { message: 'Failed to load member', error });
+    }
+};
+
+exports.updateMember = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { full_name, phone_number } = req.body;
+        
+        // Only allow updating specific fields
+        await User.update(userId, { full_name, phone_number });
+        
+        res.redirect('/admin/members');
+    } catch (error) {
+        console.error('Update member error:', error);
+        res.status(500).render('error', { message: 'Failed to update member', error });
     }
 };
 
@@ -345,20 +409,28 @@ exports.activateMember = async (req, res) => {
 exports.listLoans = async (req, res) => {
     try {
         const { status, borrower_id } = req.query;
-        
+
         const filters = {};
         if (status) filters.status = status;
         if (borrower_id) filters.borrower_id = borrower_id;
 
         const loans = await Loan.getAll(filters);
 
-        res.json({
-            success: true,
-            loans
+        const db = require('../models/db');
+        const pendingCountResult = await db.query('SELECT COUNT(*) FROM admin_actions WHERE status = \'pending\'');
+        const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+        res.render('admin/loans', {
+            title: 'Loan Management',
+            layout: 'layouts/admin',
+            loans,
+            filters: req.query,
+            pendingCount,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('List loans error:', error);
-        res.status(500).json({ error: 'Failed to fetch loans' });
+        res.status(500).render('error', { message: 'Failed to fetch loans', error });
     }
 };
 
@@ -500,19 +572,19 @@ exports.listWelfarePayments = async (req, res) => {
 
 exports.showReports = async (req, res) => {
     try {
-        res.json({
-            success: true,
-            available_reports: [
-                'loans',
-                'shares',
-                'welfare',
-                'savings',
-                'sacco_savings'
-            ]
+        const db = require('../models/db');
+        const pendingCountResult = await db.query('SELECT COUNT(*) FROM admin_actions WHERE status = \'pending\'');
+        const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+        res.render('admin/reports', {
+            title: 'Reports',
+            layout: 'layouts/admin',
+            pendingCount,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('Show reports error:', error);
-        res.status(500).json({ error: 'Failed to load reports' });
+        res.status(500).render('error', { message: 'Failed to load reports', error });
     }
 };
 
@@ -699,14 +771,21 @@ exports.listMessages = async (req, res) => {
         const inbox = await Message.getInbox(adminId);
         const unreadCount = await Message.getUnreadCount(adminId);
 
-        res.json({
-            success: true,
+        const db = require('../models/db');
+        const pendingCountResult = await db.query('SELECT COUNT(*) FROM admin_actions WHERE status = \'pending\'');
+        const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+        res.render('admin/messages', {
+            title: 'Messages',
+            layout: 'layouts/admin',
             messages: inbox,
-            unread_count: unreadCount
+            unread_count: unreadCount,
+            pendingCount,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('List messages error:', error);
-        res.status(500).json({ error: 'Failed to fetch messages' });
+        res.status(500).render('error', { message: 'Failed to fetch messages', error });
     }
 };
 
@@ -736,13 +815,20 @@ exports.listPendingDocuments = async (req, res) => {
         const Document = require('../models/Document');
         const pendingDocs = await Document.findPending();
 
-        res.json({
-            success: true,
-            documents: pendingDocs
+        const db = require('../models/db');
+        const pendingCountResult = await db.query('SELECT COUNT(*) FROM admin_actions WHERE status = \'pending\'');
+        const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+        res.render('admin/document-verification', {
+            title: 'Document Verification',
+            layout: 'layouts/admin',
+            documents: pendingDocs,
+            pendingCount,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('List pending documents error:', error);
-        res.status(500).json({ error: 'Failed to fetch documents' });
+        res.status(500).render('error', { message: 'Failed to fetch documents', error });
     }
 };
 
@@ -949,14 +1035,21 @@ exports.listNotifications = async (req, res) => {
         const notifications = await Notification.getByUser(adminId);
         const unreadCount = await Notification.getUnreadCount(adminId);
 
-        res.json({
-            success: true,
+        const db = require('../models/db');
+        const pendingCountResult = await db.query('SELECT COUNT(*) FROM admin_actions WHERE status = \'pending\'');
+        const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+        res.render('admin/notifications', {
+            title: 'Notifications',
+            layout: 'layouts/admin',
             notifications,
-            unread_count: unreadCount
+            unread_count: unreadCount,
+            pendingCount,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('List notifications error:', error);
-        res.status(500).json({ error: 'Failed to fetch notifications' });
+        res.status(500).render('error', { message: 'Failed to fetch notifications', error });
     }
 };
 

@@ -5,20 +5,29 @@ const User = require('../models/User');
 exports.viewInbox = async (req, res) => {
     try {
         const userId = req.user.id;
-        const messages = await Message.getInbox(userId);
+        const inbox = await Message.getInbox(userId);
+        const sent = await Message.getSent(userId);
         const unreadCount = await Message.getUnreadCount(userId);
+        
+        // Get admins and members for compose dropdown
+        const admins = await User.getAllAdmins();
+        const members = await User.getAllMembers({ is_active: true });
 
         res.render("member/messages", {
-            user: req.user,       // Logged-in user info
-            messages,             // Array of inbox messages
-            unreadCount        ,            unreadMessages:0,
-            unreadNotifications:0,
-            title:"m"   // Number of unread messages
+            title: 'Messages',
+            user: req.user,
+            unreadMessages: unreadCount,
+            unreadNotifications: 0,
+            inbox: inbox || [],
+            sent: sent || [],
+            unreadCount: unreadCount || 0,
+            admins: admins || [],
+            members: members || []
         });
 
     } catch (error) {
         console.error('View inbox error:', error);
-        res.status(500).send("Failed to load inbox page");
+        res.status(500).send("Failed to load messages page");
     }
 };
 

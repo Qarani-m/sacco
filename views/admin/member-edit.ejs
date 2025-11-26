@@ -1,0 +1,35 @@
+<div class="page-header">
+    <h1 class="page-title">Edit Member</h1>
+    <a href="/admin/members" style="color: #6B7280; text-decoration: none; font-size: 0.875rem;">&larr; Back to Members</a>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <form action="/admin/members/<%= member.id %>" method="POST">
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Full Name</label>
+            <input type="text" name="full_name" value="<%= member.full_name %>" required style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 1rem;">
+            <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #6B7280;">As it appears on official documents.</p>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Phone Number</label>
+            <input type="tel" name="phone_number" value="<%= member.phone_number %>" required style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 1rem;">
+            <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #6B7280;">Used for M-Pesa transactions and notifications.</p>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Email Address (Read Only)</label>
+            <input type="email" value="<%= member.email %>" disabled style="width: 100%; padding: 0.75rem; border: 1px solid #E5E7EB; background: #F9FAFB; border-radius: 6px; font-size: 1rem; color: #6B7280;">
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Role (Read Only)</label>
+            <input type="text" value="<%= member.role %>" disabled style="width: 100%; padding: 0.75rem; border: 1px solid #E5E7EB; background: #F9FAFB; border-radius: 6px; font-size: 1rem; color: #6B7280; text-transform: capitalize;">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+            <a href="/admin/members" style="padding: 0.75rem 1.5rem; color: #374151; text-decoration: none; font-weight: 500;">Cancel</a>
+            <button type="submit" style="background: #000; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 500; cursor: pointer;">Save Changes</button>
+        </div>
+    </form>
+</div>

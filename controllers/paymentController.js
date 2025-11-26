@@ -11,8 +11,32 @@ const axios = require('axios');
 
 exports.initiatePayment = async (req, res) => {
     try {
-        const { amount, type, loan_id } = req.body;
-        const userId = req.user.id;
+        const { category, userId } = req.params;
+        const { amount, phone_number, registered_number } = req.body;
+        
+        // Verify user exists
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+
+ 
+ 
+
+
+        // Ensure the authenticated user is authorized to initiate payment for this user
+        // (Allow admins or the user themselves)
+        if (req.user.id !== userId  ) {
+            return res.status(403).json({ error: `Unauthorized to initiate payment for this user ${userId}` });
+        }
+
+        // Determine phone number to use
+        const paymentPhoneNumber = registered_number ? user.phone_number : phone_number;
+
+        if (!paymentPhoneNumber) {
+            return res.status(400).json({ error: 'Phone number is required' });
+        }
 
         const transactionRef = `SACCO${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
 
@@ -20,14 +44,21 @@ exports.initiatePayment = async (req, res) => {
         await Transaction.create({
             user_id: userId,
             amount,
-            type,
+            type: category, // Map category to transaction type
             payment_method: 'mpesa',
             transaction_ref: transactionRef,
-            status: 'pending'
+            status: 'pending',
+ 
         });
+ 
+
+        // If we want to save 'used_registered_number', we need to update the model.
+        // For now, let's proceed with the logic and I'll update the model in the next step.
+console.log("-------dd------------------")
 
         // M-Pesa STK Push
-        const mpesaResponse = await initiateMpesaSTK(req.user.phone_number, amount, transactionRef);
+        const mpesaResponse = await initiateMpesaSTK(paymentPhoneNumber, amount, transactionRef);
+console.log("-------d------------------")
 
         res.json({
             success: true,

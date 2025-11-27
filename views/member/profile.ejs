@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<%= csrfToken %>">
     <title>My Profile - SACCO</title>
     <link rel="stylesheet" href="/css/design-system.css">
 </head>
@@ -52,64 +53,92 @@
             <!-- Document Upload -->
             <div class="card">
                 <h2 class="section-title mb-6">Identity Documents</h2>
-                
-                <% if (documents.length === 0) { %>
-                    <div class="alert alert-warning mb-6">
-                        <p style="margin: 0;">Please upload your ID documents for verification.</p>
-                    </div>
 
-                    <form id="documentUploadForm" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="idFront">ID Front</label>
-                            <input type="file" id="idFront" name="id_front" accept="image/*" required>
-                        </div>
+                <div class="alert alert-warning mb-6">
+                    <p style="margin: 0;">Please upload both front and back of your ID for verification.</p>
+                </div>
 
-                        <div class="form-group">
-                            <label for="idBack">ID Back</label>
-                            <input type="file" id="idBack" name="id_back" accept="image/*" required>
-                        </div>
-
-                        <button type="submit" class="btn-primary">Upload Documents</button>
-                    </form>
-                <% } else { %>
-                    <div class="space-y-4">
-                        <% documents.forEach(doc => { %>
+                <!-- ID Front Upload -->
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem;">ID Front</h3>
+                    <%
+                    const idFront = documents.find(d => d.document_type === 'id_front');
+                    %>
+                    <% if (!idFront || idFront.status === 'rejected') { %>
+                        <form class="document-upload-form" data-document-type="id_front" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <input type="file" name="document" accept="image/*,application/pdf" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Upload ID Front</button>
+                        </form>
+                        <% if (idFront && idFront.rejection_reason) { %>
+                            <p style="color: #EF4444; font-size: 0.875rem; margin-top: 0.5rem;">
+                                Previous rejection: <%= idFront.rejection_reason %>
+                            </p>
+                        <% } %>
+                    <% } else { %>
                         <div style="padding: 1rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                <p style="font-weight: 600; color: #000000; text-transform: capitalize;">
-                                    <%= doc.document_type.replace('_', ' ') %>
-                                </p>
-                                <% if (doc.verification_status === 'verified') { %>
-                                    <span style="padding: 0.25rem 0.75rem; background: #000000; color: #FFFFFF; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                                        Verified
-                                    </span>
-                                <% } else if (doc.verification_status === 'pending') { %>
-                                    <span style="padding: 0.25rem 0.75rem; background: #F5F5F5; color: #000000; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                                        Verification in Progress
-                                    </span>
-                                <% } else { %>
-                                    <span style="padding: 0.25rem 0.75rem; background: #EF4444; color: #FFFFFF; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                                        Rejected
-                                    </span>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <p style="font-weight: 600; color: #000000;">Status:
+                                        <% if (idFront.status === 'approved') { %>
+                                            <span style="color: #10B981;">Approved</span>
+                                        <% } else if (idFront.status === 'in_review') { %>
+                                            <span style="color: #F59E0B;">In Review</span>
+                                        <% } else { %>
+                                            <span style="color: #6B7280;">Pending</span>
+                                        <% } %>
+                                    </p>
+                                    <p class="text-meta">Uploaded <%= new Date(idFront.uploaded_at).toLocaleDateString() %></p>
+                                </div>
+                                <% if (idFront.status === 'approved') { %>
+                                    <span style="padding: 0.5rem 1rem; background: #10B981; color: #FFFFFF; border-radius: 4px;">✓</span>
                                 <% } %>
                             </div>
-                            <p class="text-meta">Uploaded <%= new Date(doc.uploaded_at).toLocaleDateString() %></p>
-                            <% if (doc.rejection_reason) { %>
-                                <p style="color: #EF4444; font-size: 0.875rem; margin-top: 0.5rem;">
-                                    Reason: <%= doc.rejection_reason %>
-                                </p>
-                            <% } %>
                         </div>
-                        <% }) %>
-                    </div>
-
-                    <% const hasRejected = documents.some(d => d.verification_status === 'rejected'); %>
-                    <% if (hasRejected) { %>
-                        <p class="text-secondary" style="margin-top: 1rem; font-size: 0.875rem;">
-                            Contact admin to delete rejected documents before uploading new ones.
-                        </p>
                     <% } %>
-                <% } %>
+                </div>
+
+                <!-- ID Back Upload -->
+                <div>
+                    <h3 style="font-weight: 600; margin-bottom: 1rem;">ID Back</h3>
+                    <%
+                    const idBack = documents.find(d => d.document_type === 'id_back');
+                    %>
+                    <% if (!idBack || idBack.status === 'rejected') { %>
+                        <form class="document-upload-form" data-document-type="id_back" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <input type="file" name="document" accept="image/*,application/pdf" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Upload ID Back</button>
+                        </form>
+                        <% if (idBack && idBack.rejection_reason) { %>
+                            <p style="color: #EF4444; font-size: 0.875rem; margin-top: 0.5rem;">
+                                Previous rejection: <%= idBack.rejection_reason %>
+                            </p>
+                        <% } %>
+                    <% } else { %>
+                        <div style="padding: 1rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <p style="font-weight: 600; color: #000000;">Status:
+                                        <% if (idBack.status === 'approved') { %>
+                                            <span style="color: #10B981;">Approved</span>
+                                        <% } else if (idBack.status === 'in_review') { %>
+                                            <span style="color: #F59E0B;">In Review</span>
+                                        <% } else { %>
+                                            <span style="color: #6B7280;">Pending</span>
+                                        <% } %>
+                                    </p>
+                                    <p class="text-meta">Uploaded <%= new Date(idBack.uploaded_at).toLocaleDateString() %></p>
+                                </div>
+                                <% if (idBack.status === 'approved') { %>
+                                    <span style="padding: 0.5rem 1rem; background: #10B981; color: #FFFFFF; border-radius: 4px;">✓</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
             </div>
         </div>
 

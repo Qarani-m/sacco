@@ -186,17 +186,24 @@ exports.viewSavings = async (req, res) => {
 
         const yearlyReport = await Savings.getYearlyReport(userId, currentYear);
 
-        res.json({
-            success: true,
+        const unreadNotifications = await Notification.getUnreadCount(userId);
+        const unreadMessages = await Message.getUnreadCount(userId);
+
+        res.render('member/savings', {
+            title: 'My Savings',
+            user: req.user,
+            unreadNotifications: unreadNotifications || 0,
+            unreadMessages: unreadMessages || 0,
             savings: {
-                previous_years: yearlyReport.previous_savings,
-                current_year: yearlyReport.current_year_savings,
-                total: yearlyReport.total_savings
-            }
+                previous_years: yearlyReport.previous_savings || 0,
+                current_year: yearlyReport.current_year_savings || 0,
+                total: yearlyReport.total_savings || 0
+            },
+            currentYear
         });
     } catch (error) {
         console.error('View savings error:', error);
-        res.status(500).json({ error: 'Failed to fetch savings' });
+        res.status(500).send('Failed to load savings page');
     }
 };
 
@@ -295,35 +302,7 @@ exports.markNotificationRead = async (req, res) => {
 // Additional imports for new features
 const Document = require('../models/Document');
 const MemberProfile = require('../models/MemberProfile');
-const multer = require('multer');
-const path = require('path');
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads/documents/');
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, req.user.id + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: function (req, file, cb) {
-        const allowedTypes = /jpeg|jpg|png|pdf/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-        
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb(new Error('Only images and PDF files are allowed'));
-        }
-    }
-});
+const NotificationService = require('../services/notificationService');
 
 // Show registration fee page
 exports.showRegistrationFeePage = async (req, res) => {
@@ -385,7 +364,7 @@ exports.payRegistrationFee = async (req, res) => {
 exports.showProfilePage = async (req, res) => {
     try {
         const userId = req.user.id;
-        const documents = await Document.findByUserId(userId);
+        const documents = await Document.getByMemberId(userId);
         const profileForm = await MemberProfile.findByUserId(userId);
 
         res.render('member/profile', {
@@ -403,43 +382,57 @@ exports.showProfilePage = async (req, res) => {
 };
 
 // Upload documents
-exports.uploadDocuments = [
-    upload.fields([
-        { name: 'id_front', maxCount: 1 },
-        { name: 'id_back', maxCount: 1 }
-    ]),
-    async (req, res) => {
-        try {
-            const userId = req.user.id;
+exports.uploadDocuments = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const documentType = req.body.documentType;
 
-            if (!req.files || !req.files.id_front || !req.files.id_back) {
-                return res.status(400).json({ error: 'Both ID front and back are required' });
-            }
-
-            await Document.create({
-                user_id: userId,
-                document_type: 'id_front',
-                file_path: req.files.id_front[0].path,
-                file_name: req.files.id_front[0].filename
+        // Validate file was uploaded
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                error: 'No file uploaded'
             });
-
-            await Document.create({
-                user_id: userId,
-                document_type: 'id_back',
-                file_path: req.files.id_back[0].path,
-                file_name: req.files.id_back[0].filename
-            });
-
-            res.json({
-                success: true,
-                message: 'Documents uploaded successfully'
-            });
-        } catch (error) {
-            console.error('Upload documents error:', error);
-            res.status(500).json({ error: 'Failed to upload documents' });
         }
+
+        // Validate document type
+        if (!['id_front', 'id_back'].includes(documentType)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid document type. Must be id_front or id_back'
+            });
+        }
+
+        // Save document to database
+        const document = await Document.createOrUpdate({
+            memberId: userId,
+            documentType: documentType,
+            filePath: req.file.path,
+            fileName: req.file.filename
+        });
+
+        // Notify all admins
+        const message = `${req.user.full_name} uploaded a new ${documentType.replace('_', ' ')} document`;
+        await NotificationService.notifyAllAdmins('document_upload', document.id, message);
+
+        res.json({
+            success: true,
+            message: 'Document uploaded successfully. Awaiting admin review.',
+            document: {
+                id: document.id,
+                type: document.document_type,
+                status: document.status,
+                uploadedAt: document.uploaded_at
+            }
+        });
+    } catch (error) {
+        console.error('Upload documents error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to upload document'
+        });
     }
-];
+};
 
 // Submit profile form
 exports.submitProfileForm = async (req, res) => {

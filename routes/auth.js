@@ -76,6 +76,10 @@ router.post('/reset-password/:token', authLimiter, [
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
 ], authController.resetPassword);
 
+// GET /auth/resend-verification
+// Show resend verification page
+router.get('/resend-verification', authController.showResendVerification);
+
 // POST /auth/resend-verification
 // Resend verification email
 router.post('/resend-verification', authLimiter, [

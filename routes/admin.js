@@ -142,4 +142,16 @@ router.get('/notifications', adminController.listNotifications);
 // Mark notification as read
 router.post('/notifications/:notificationId/read', adminController.markNotificationRead);
 
+// GET /admin/documents
+// View all pending and reviewed member documents
+router.get('/documents', adminController.listDocuments);
+
+// GET /admin/documents/:documentId
+// View specific document details
+router.get('/documents/:documentId', adminController.viewDocument);
+
+// POST /admin/documents/:documentId/review
+// Review and update document status (pending, in_review, approved, rejected)
+router.post('/documents/:documentId/review', adminController.reviewDocument);
+
 module.exports = router;

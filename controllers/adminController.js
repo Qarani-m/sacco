@@ -244,7 +244,7 @@ exports.showActionsHistory = async (req, res) => {
 exports.listMembers = async (req, res) => {
     try {
         const { role, is_active, registration_paid } = req.query;
-        
+
         const filters = {};
         if (role) filters.role = role;
         if (is_active !== undefined) filters.is_active = is_active === 'true';
@@ -255,6 +255,40 @@ exports.listMembers = async (req, res) => {
         const db = require('../models/db');
         const pendingCountResult = await db.query('SELECT COUNT(*) FROM admin_actions WHERE status = \'pending\'');
         const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+        // Get document verification status for each member
+        for (let member of members) {
+            const docsResult = await db.query(`
+                SELECT document_type, status
+                FROM member_documents
+                WHERE member_id = $1
+            `, [member.id]);
+
+            const docs = docsResult.rows;
+            const idFront = docs.find(d => d.document_type === 'id_front');
+            const idBack = docs.find(d => d.document_type === 'id_back');
+
+            // Determine overall verification status
+            if (!idFront && !idBack) {
+                member.verification_status = 'not_uploaded';
+                member.verification_progress = 0;
+            } else if (idFront?.status === 'approved' && idBack?.status === 'approved') {
+                member.verification_status = 'approved';
+                member.verification_progress = 100;
+            } else if (idFront?.status === 'rejected' || idBack?.status === 'rejected') {
+                member.verification_status = 'rejected';
+                member.verification_progress = 50;
+            } else if (idFront?.status === 'in_review' || idBack?.status === 'in_review') {
+                member.verification_status = 'in_review';
+                member.verification_progress = 75;
+            } else if (idFront || idBack) {
+                member.verification_status = 'pending';
+                member.verification_progress = 50;
+            } else {
+                member.verification_status = 'not_uploaded';
+                member.verification_progress = 0;
+            }
+        }
 
         res.render('admin/members', {
             title: 'Member Management',
@@ -1065,5 +1099,136 @@ exports.markNotificationRead = async (req, res) => {
     } catch (error) {
         console.error('Mark notification read error:', error);
         res.status(500).json({ error: 'Failed to mark notification' });
+    }
+};
+
+// Document Review Methods
+const Document = require('../models/Document');
+const NotificationService = require('../services/notificationService');
+
+exports.listDocuments = async (req, res) => {
+    try {
+        const { status } = req.query;
+        const filters = status ? { status } : {};
+
+        const documents = await Document.getAll(filters);
+        const pendingCount = await Document.getPendingCount();
+        const inReviewCount = await Document.getInReviewCount();
+
+        res.render('admin/documents', {
+            title: 'Member Documents',
+            layout: 'layouts/admin',
+            documents,
+            pendingCount,
+            inReviewCount,
+            currentStatus: status || 'all',
+            user: res.locals.user || req.user
+        });
+    } catch (error) {
+        console.error('List documents error:', error);
+        res.status(500).render('error', { message: 'Failed to load documents', error });
+    }
+};
+
+exports.viewDocument = async (req, res) => {
+    try {
+        const { documentId } = req.params;
+        const document = await Document.getById(documentId);
+
+        if (!document) {
+            return res.status(404).render('error', { message: 'Document not found' });
+        }
+
+        // Get member's other documents for context
+        const memberDocuments = await Document.getByMemberId(document.member_id);
+
+        res.render('admin/document-view', {
+            title: 'Review Document',
+            layout: 'layouts/admin',
+            document,
+            memberDocuments,
+            user: res.locals.user || req.user
+        });
+    } catch (error) {
+        console.error('View document error:', error);
+        res.status(500).render('error', { message: 'Failed to load document', error });
+    }
+};
+
+exports.reviewDocument = async (req, res) => {
+    try {
+        const { documentId } = req.params;
+        const { status, rejection_reason } = req.body;
+        const reviewerId = req.user.id;
+
+        // Validate status
+        if (!['pending', 'in_review', 'approved', 'rejected'].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid status'
+            });
+        }
+
+        // If rejecting, require a reason
+        if (status === 'rejected' && !rejection_reason) {
+            return res.status(400).json({
+                success: false,
+                error: 'Rejection reason is required'
+            });
+        }
+
+        // Update document status
+        const updatedDocument = await Document.updateStatus(
+            documentId,
+            status,
+            reviewerId,
+            rejection_reason || null
+        );
+
+        if (!updatedDocument) {
+            return res.status(404).json({
+                success: false,
+                error: 'Document not found'
+            });
+        }
+
+        // Create notification for the member
+        const document = await Document.getById(documentId);
+        let notificationMessage = '';
+
+        switch (status) {
+            case 'in_review':
+                notificationMessage = `Your ${document.document_type.replace('_', ' ')} is now under review`;
+                break;
+            case 'approved':
+                notificationMessage = `Your ${document.document_type.replace('_', ' ')} has been approved`;
+                break;
+            case 'rejected':
+                notificationMessage = `Your ${document.document_type.replace('_', ' ')} was rejected. Reason: ${rejection_reason}`;
+                break;
+        }
+
+        if (notificationMessage) {
+            await Notification.create({
+                user_id: document.member_id,
+                type: 'document_review',
+                title: 'Document Status Update',
+                message: notificationMessage,
+                related_entity_type: 'document',
+                related_entity_id: documentId
+            });
+        }
+
+        res.json({
+            success: true,
+            message: `Document status updated to ${status}`,
+            document: updatedDocument
+        });
+    } catch (error) {
+        console.error('Review document error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update document status'
+        });
     }
 };

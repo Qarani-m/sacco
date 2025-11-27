@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - SACCO</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body style="background: #F5F5F5;">
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+        <div style="width: 100%; max-width: 480px;">
+
+            <!-- Logo/Header -->
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; color: #000000;">SACCO Portal</h1>
+                <p style="color: #6B7280;">Resend Email Verification</p>
+            </div>
+
+            <!-- Main Card -->
+            <div class="card" style="padding: 2rem;">
+                <h2 class="section-title" style="margin-bottom: 1.5rem; text-align: center;">📧 Verify Your Email</h2>
+
+                <% if (typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
+                    <div class="alert alert-success" style="margin-bottom: 1.5rem;">
+                        <%= success_msg[0] %>
+                    </div>
+                <% } %>
+
+                <% if (typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
+                    <div class="alert alert-danger" style="margin-bottom: 1.5rem;">
+                        <%= error_msg[0] %>
+                    </div>
+                <% } %>
+
+                <p style="color: #374151; margin-bottom: 1.5rem; text-align: center;">
+                    Enter your email address to receive a new verification link.
+                </p>
+
+                <form action="/auth/resend-verification" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="<%= userEmail || '' %>"
+                            required
+                            placeholder="your@email.com"
+                            style="width: 100%;"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                        Send Verification Email
+                    </button>
+                </form>
+
+                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #E5E5E5; text-align: center;">
+                    <p style="color: #6B7280; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                        Already verified?
+                    </p>
+                    <a href="/auth/login" class="link-primary">Sign in to your account</a>
+                </div>
+
+                <% if (user) { %>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <a href="/members/dashboard" class="link-secondary">Back to Dashboard</a>
+                </div>
+                <% } %>
+            </div>
+
+            <!-- Info Box -->
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 8px;">
+                <p style="color: #6B7280; font-size: 0.875rem; margin: 0; line-height: 1.6;">
+                    <strong>Note:</strong> The verification link will be sent to your email address.
+                    Click the link in the email to verify your account. The link expires after 24 hours.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

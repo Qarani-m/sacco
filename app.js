@@ -48,6 +48,7 @@ app.use(ejsLayouts);
 app.set('layout', 'layouts/main');
 app.use(cookieParser());
 app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Middleware
 app.use(express.json());

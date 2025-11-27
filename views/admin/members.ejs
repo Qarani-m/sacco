@@ -40,6 +40,7 @@
                 <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Phone</th>
                 <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Role</th>
                 <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Status</th>
+                <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Verification</th>
                 <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Joined</th>
                 <th style="padding: 0.75rem 1rem; text-align: right;">Actions</th>
             </tr>
@@ -62,6 +63,23 @@
                             <span style="background: #D1FAE5; color: #059669; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">Active</span>
                         <% } else { %>
                             <span style="background: #FEE2E2; color: #DC2626; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">Inactive</span>
+                        <% } %>
+                    </td>
+                    <td style="padding: 1rem;">
+                        <% if (member.role === 'member') { %>
+                            <% if (member.verification_status === 'approved') { %>
+                                <span style="background: #D1FAE5; color: #059669; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">✓ Verified</span>
+                            <% } else if (member.verification_status === 'in_review') { %>
+                                <span style="background: #FEF3C7; color: #D97706; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">In Review</span>
+                            <% } else if (member.verification_status === 'rejected') { %>
+                                <span style="background: #FEE2E2; color: #DC2626; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">Rejected</span>
+                            <% } else if (member.verification_status === 'pending') { %>
+                                <span style="background: #E0E7FF; color: #4338CA; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">Pending</span>
+                            <% } else { %>
+                                <span style="background: #F3F4F6; color: #6B7280; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">Not Uploaded</span>
+                            <% } %>
+                        <% } else { %>
+                            <span style="color: #9CA3AF; font-size: 0.75rem;">N/A</span>
                         <% } %>
                     </td>
                     <td style="padding: 1rem; color: #6B7280; font-size: 0.875rem;">

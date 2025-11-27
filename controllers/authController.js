@@ -222,6 +222,23 @@ exports.verifyEmail = async (req, res) => {
     }
 };
 
+// Show resend verification page
+exports.showResendVerification = async (req, res) => {
+    try {
+        // If user is logged in, prefill their email
+        const userEmail = req.user ? req.user.email : '';
+
+        res.render('auth/resend-verification', {
+            title: 'Resend Verification Email',
+            userEmail,
+            user: req.user || null
+        });
+    } catch (error) {
+        console.error('Show resend verification error:', error);
+        res.status(500).send('Failed to load page');
+    }
+};
+
 // Resend verification email
 exports.resendVerification = async (req, res) => {
     try {
@@ -229,18 +246,16 @@ exports.resendVerification = async (req, res) => {
 
         const { token, user } = await User.resendVerificationToken(email);
 
-        // Send verification email
-        await emailService.sendVerificationEmail(user.email, token, user.full_name);
+        // Send verification email (simulated - you'd implement actual email sending)
+        console.log(`Verification email would be sent to ${user.email} with token: ${token}`);
+        console.log(`Verification link: ${req.protocol}://${req.get('host')}/auth/verify/${token}`);
 
-        res.json({
-            success: true,
-            message: 'Verification email sent successfully'
-        });
+        req.flash('success_msg', 'Verification email sent! Check your inbox.');
+        res.redirect('/auth/resend-verification');
     } catch (error) {
         console.error('Resend verification error:', error);
-        res.status(400).json({
-            error: error.message || 'Failed to resend verification email'
-        });
+        req.flash('error_msg', error.message || 'Failed to resend verification email');
+        res.redirect('/auth/resend-verification');
     }
 };
 

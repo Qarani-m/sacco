@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <title><%= title %> - SACCO Admin</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body>
+    <%- include('../layouts/admin-header') %>
+
+    <div class="container-xl">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">Member Documents</h1>
+            <p class="page-subtitle">Review and verify member identity documents</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-3 gap-6 mb-8">
+            <div class="card">
+                <p class="text-meta">Pending Review</p>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">
+                    <%= pendingCount %>
+                </h2>
+            </div>
+            <div class="card">
+                <p class="text-meta">In Review</p>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">
+                    <%= inReviewCount %>
+                </h2>
+            </div>
+            <div class="card">
+                <p class="text-meta">Total Documents</p>
+                <h2 style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0;">
+                    <%= documents.length %>
+                </h2>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div style="margin-bottom: 2rem; border-bottom: 2px solid #E5E5E5;">
+            <div style="display: flex; gap: 2rem;">
+                <a href="/admin/documents"
+                   style="padding: 1rem 0; border-bottom: 2px solid <%= currentStatus === 'all' ? '#000000' : 'transparent' %>; margin-bottom: -2px; font-weight: <%= currentStatus === 'all' ? '600' : '400' %>; text-decoration: none; color: #000000;">
+                    All Documents
+                </a>
+                <a href="/admin/documents?status=pending"
+                   style="padding: 1rem 0; border-bottom: 2px solid <%= currentStatus === 'pending' ? '#000000' : 'transparent' %>; margin-bottom: -2px; font-weight: <%= currentStatus === 'pending' ? '600' : '400' %>; text-decoration: none; color: #000000;">
+                    Pending (<%= pendingCount %>)
+                </a>
+                <a href="/admin/documents?status=in_review"
+                   style="padding: 1rem 0; border-bottom: 2px solid <%= currentStatus === 'in_review' ? '#000000' : 'transparent' %>; margin-bottom: -2px; font-weight: <%= currentStatus === 'in_review' ? '600' : '400' %>; text-decoration: none; color: #000000;">
+                    In Review (<%= inReviewCount %>)
+                </a>
+                <a href="/admin/documents?status=approved"
+                   style="padding: 1rem 0; border-bottom: 2px solid <%= currentStatus === 'approved' ? '#000000' : 'transparent' %>; margin-bottom: -2px; font-weight: <%= currentStatus === 'approved' ? '600' : '400' %>; text-decoration: none; color: #000000;">
+                    Approved
+                </a>
+                <a href="/admin/documents?status=rejected"
+                   style="padding: 1rem 0; border-bottom: 2px solid <%= currentStatus === 'rejected' ? '#000000' : 'transparent' %>; margin-bottom: -2px; font-weight: <%= currentStatus === 'rejected' ? '600' : '400' %>; text-decoration: none; color: #000000;">
+                    Rejected
+                </a>
+            </div>
+        </div>
+
+        <!-- Documents Table -->
+        <div class="card">
+            <% if (documents.length === 0) { %>
+                <div style="text-align: center; padding: 3rem 0; color: #6B7280;">
+                    <p>No documents found</p>
+                </div>
+            <% } else { %>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Email</th>
+                                <th>Document Type</th>
+                                <th>Status</th>
+                                <th>Uploaded</th>
+                                <th>Reviewed By</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% documents.forEach(doc => { %>
+                            <tr>
+                                <td style="font-weight: 600;"><%= doc.member_name %></td>
+                                <td><%= doc.member_email %></td>
+                                <td style="text-transform: capitalize;">
+                                    <%= doc.document_type.replace('_', ' ') %>
+                                </td>
+                                <td>
+                                    <% if (doc.status === 'approved') { %>
+                                        <span class="badge badge-success">Approved</span>
+                                    <% } else if (doc.status === 'in_review') { %>
+                                        <span class="badge badge-warning">In Review</span>
+                                    <% } else if (doc.status === 'rejected') { %>
+                                        <span class="badge badge-danger">Rejected</span>
+                                    <% } else { %>
+                                        <span class="badge badge-default">Pending</span>
+                                    <% } %>
+                                </td>
+                                <td><%= new Date(doc.uploaded_at).toLocaleDateString() %></td>
+                                <td><%= doc.reviewer_name || '-' %></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="/admin/documents/<%= doc.id %>" class="btn-sm btn-primary">
+                                            Review
+                                        </a>
+                                        <% if (doc.status === 'pending') { %>
+                                            <button class="btn-sm btn-secondary"
+                                                    onclick="quickReview('<%= doc.id %>', 'in_review')">
+                                                Mark In Review
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+
+    <script>
+        // Get CSRF token from meta tag
+        function getCsrfToken() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            return meta ? meta.getAttribute('content') : '';
+        }
+
+        async function quickReview(documentId, status) {
+            if (!confirm(`Mark this document as ${status.replace('_', ' ')}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/documents/${documentId}/review`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        status,
+                        _csrf: getCsrfToken()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to update status'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to update status. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

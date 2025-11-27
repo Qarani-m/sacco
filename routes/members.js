@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 const  registrationCheck  = require('../middleware/registrationCheck');
 const memberController = require('../controllers/membersController');
+const upload = require('../config/fileUpload');
 
 // All routes require authentication
 router.use(authMiddleware);
@@ -26,13 +27,14 @@ router.post('/registration/pay', memberController.payRegistrationFee);
 // router.use(registrationCheck);
 
 
+
 // GET /members/profile
 // View and edit member profile information
 router.get('/profile', memberController.showProfilePage);
 
 // POST /members/profile/upload-documents
 // Upload ID documents
-router.post('/profile/upload-documents', memberController.uploadDocuments);
+router.post('/profile/upload-documents', upload.single('document'), memberController.uploadDocuments);
 
 // POST /members/profile/submit-form
 // Submit one-time profile form

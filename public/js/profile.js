@@ -1,22 +1,34 @@
 // Profile Page JavaScript
 
-// Document Upload
-const uploadForm = document.getElementById('documentUploadForm');
-if (uploadForm) {
-    uploadForm.addEventListener('submit', async function(e) {
+// Get CSRF token from meta tag
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+
+// Document Upload - Handle multiple forms
+const uploadForms = document.querySelectorAll('.document-upload-form');
+uploadForms.forEach(form => {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const formData = new FormData();
-        const idFront = document.getElementById('idFront').files[0];
-        const idBack = document.getElementById('idBack').files[0];
+        const documentType = this.getAttribute('data-document-type');
+        const fileInput = this.querySelector('input[type="file"]');
+        const submitBtn = this.querySelector('button[type="submit"]');
 
-        if (!idFront || !idBack) {
-            alert('Please select both ID front and back images');
+        if (!fileInput.files[0]) {
+            alert('Please select a file');
             return;
         }
 
-        formData.append('id_front', idFront);
-        formData.append('id_back', idBack);
+        const formData = new FormData();
+        formData.append('document', fileInput.files[0]);
+        formData.append('documentType', documentType);
+        formData.append('_csrf', getCsrfToken());
+
+        // Disable button during upload
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Uploading...';
 
         try {
             const response = await fetch('/members/profile/upload-documents', {
@@ -27,17 +39,21 @@ if (uploadForm) {
             const data = await response.json();
 
             if (data.success) {
-                alert('Documents uploaded successfully! Awaiting admin verification.');
+                alert('Document uploaded successfully! Awaiting admin review.');
                 window.location.reload();
             } else {
-                alert('Error: ' + (data.error || 'Failed to upload documents'));
+                alert('Error: ' + (data.error || 'Failed to upload document'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload ' + documentType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to upload documents. Please try again.');
+            alert('Failed to upload document. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Upload ' + documentType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
     });
-}
+});
 
 // Profile Form Submit
 const profileForm = document.getElementById('profileFormSubmit');
@@ -51,7 +67,8 @@ if (profileForm) {
             address: document.getElementById('address').value,
             occupation: document.getElementById('occupation').value,
             next_of_kin_name: document.getElementById('nextOfKinName').value,
-            next_of_kin_phone: document.getElementById('nextOfKinPhone').value
+            next_of_kin_phone: document.getElementById('nextOfKinPhone').value,
+            _csrf: getCsrfToken()
         };
 
         if (!confirm('This form can only be submitted once. Are you sure all information is correct?')) {

@@ -63,6 +63,7 @@ document.getElementById('resendBtn').addEventListener('click', async function() 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'CSRF-Token': '<%= csrfToken %>'
             },
             body: JSON.stringify({
                 email: '<%= typeof user !== "undefined" ? user.email : "" %>'

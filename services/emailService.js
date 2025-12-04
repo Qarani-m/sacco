@@ -1,64 +1,54 @@
 // Email Service for SACCO System
-// For development: logs emails to console
-// For production: integrate with actual email provider (Gmail, SendGrid, etc.)
+const nodemailer = require("nodemailer");
 
 class EmailService {
-    constructor() {
-        this.isDevelopment = process.env.NODE_ENV !== 'production';
-        this.baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    }
+  constructor() {
+    this.isDevelopment = process.env.NODE_ENV !== "production";
+    this.baseUrl = process.env.BASE_URL || "http://localhost:3000";
 
-    // Send verification email with magic link
-    async sendVerificationEmail(email, token, userName) {
-        const verificationLink = `${this.baseUrl}/auth/verify/${token}`;
-        
-        const emailContent = {
-            to: email,
-            subject: 'Verify Your SACCO Account',
-            html: this.getVerificationEmailTemplate(userName, verificationLink),
-            text: `Hello ${userName},\n\nWelcome to SACCO! Please verify your email address by clicking the link below:\n\n${verificationLink}\n\nThis link will expire in 24 hours.\n\nIf you didn't create this account, please ignore this email.\n\nBest regards,\nSACCO Team`
-        };
+    // Initialize transporter
+    this.transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  }
 
-        if (this.isDevelopment) {
-            // Log to console in development
-            console.log('\n========== EMAIL VERIFICATION ==========');
-            console.log('To:', emailContent.to);
-            console.log('Subject:', emailContent.subject);
-            console.log('Verification Link:', verificationLink);
-            console.log('========================================\n');
-            return { success: true, message: 'Email logged to console (development mode)' };
-        } else {
-            // Send actual email in production
-            return await this.sendEmail(emailContent);
-        }
-    }
+  // Send verification email with magic link
+  async sendVerificationEmail(email, token, userName) {
+    const verificationLink = `${this.baseUrl}/auth/verify/${token}`;
 
-    // Send password reset email
-    async sendPasswordResetEmail(email, token, userName) {
-        const resetLink = `${this.baseUrl}/auth/reset-password/${token}`;
-        
-        const emailContent = {
-            to: email,
-            subject: 'Reset Your SACCO Password',
-            html: this.getPasswordResetEmailTemplate(userName, resetLink),
-            text: `Hello ${userName},\n\nYou requested to reset your password. Click the link below to reset it:\n\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.\n\nBest regards,\nSACCO Team`
-        };
+    const emailContent = {
+      to: email,
+      subject: "Verify Your SACCO Account",
+      html: this.getVerificationEmailTemplate(userName, verificationLink),
+      text: `Hello ${userName},\n\nWelcome to SACCO! Please verify your email address by clicking the link below:\n\n${verificationLink}\n\nThis link will expire in 24 hours.\n\nIf you didn't create this account, please ignore this email.\n\nBest regards,\nSACCO Team`,
+    };
 
-        if (this.isDevelopment) {
-            console.log('\n========== PASSWORD RESET ==========');
-            console.log('To:', emailContent.to);
-            console.log('Subject:', emailContent.subject);
-            console.log('Reset Link:', resetLink);
-            console.log('====================================\n');
-            return { success: true, message: 'Email logged to console (development mode)' };
-        } else {
-            return await this.sendEmail(emailContent);
-        }
-    }
+console.log(emailContent);
 
-    // HTML template for verification email
-    getVerificationEmailTemplate(userName, verificationLink) {
-        return `
+    return await this.sendEmail(emailContent);
+  }
+
+  // Send password reset email
+  async sendPasswordResetEmail(email, token, userName) {
+    const resetLink = `${this.baseUrl}/auth/reset-password/${token}`;
+
+    const emailContent = {
+      to: email,
+      subject: "Reset Your SACCO Password",
+      html: this.getPasswordResetEmailTemplate(userName, resetLink),
+      text: `Hello ${userName},\n\nYou requested to reset your password. Click the link below to reset it:\n\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.\n\nBest regards,\nSACCO Team`,
+    };
+
+    return await this.sendEmail(emailContent);
+  }
+
+  // HTML template for verification email
+  getVerificationEmailTemplate(userName, verificationLink) {
+    return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -98,11 +88,11 @@ class EmailService {
 </body>
 </html>
         `;
-    }
+  }
 
-    // HTML template for password reset email
-    getPasswordResetEmailTemplate(userName, resetLink) {
-        return `
+  // HTML template for password reset email
+  getPasswordResetEmailTemplate(userName, resetLink) {
+    return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -142,39 +132,42 @@ class EmailService {
 </body>
 </html>
         `;
+  }
+
+  // Send email using Nodemailer
+  async sendEmail(emailContent) {
+    try {
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.warn("Email credentials not found in environment variables");
+        if (this.isDevelopment) {
+          console.log(
+            "Mocking email send in dev mode due to missing credentials"
+          );
+          console.log("To:", emailContent.to);
+          console.log("Subject:", emailContent.subject);
+          return {
+            success: true,
+            message: "Email mocked (missing credentials)",
+          };
+        }
+        return { success: false, message: "Email configuration missing" };
+      }
+
+      const info = await this.transporter.sendMail({
+        from: `"SACCO System" <${process.env.EMAIL_USER}>`,
+        to: emailContent.to,
+        subject: emailContent.subject,
+        text: emailContent.text,
+        html: emailContent.html,
+      });
+
+      console.log("Email sent: %s", info.messageId);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error("Error sending email:", error);
+      return { success: false, error: error.message };
     }
-
-    // Send email using actual email service (for production)
-    async sendEmail(emailContent) {
-        // TODO: Integrate with actual email service
-        // Example with nodemailer:
-        /*
-        const nodemailer = require('nodemailer');
-        
-        const transporter = nodemailer.createTransporter({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            secure: false,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
-        });
-
-        const info = await transporter.sendMail({
-            from: `"${process.env.FROM_NAME}" <${process.env.FROM_EMAIL}>`,
-            to: emailContent.to,
-            subject: emailContent.subject,
-            text: emailContent.text,
-            html: emailContent.html
-        });
-
-        return { success: true, messageId: info.messageId };
-        */
-        
-        console.log('Production email sending not configured yet');
-        return { success: false, message: 'Email service not configured' };
-    }
+  }
 }
 
 module.exports = new EmailService();

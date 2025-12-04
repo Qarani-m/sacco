@@ -1,0 +1,171 @@
+<div class="page-header">
+    <h1 class="page-title">Loan Details</h1>
+    <div>
+        <a href="/admin/loans" class="btn btn-secondary">Back to Loans</a>
+    </div>
+</div>
+
+<div class="grid-container" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <!-- Loan Info -->
+    <div class="card">
+        <h3>Loan Information</h3>
+        <table class="details-table">
+            <tr>
+                <th>Borrower:</th>
+                <td><a href="/admin/members/<%= loan.borrower_id %>">View Profile</a></td>
+            </tr>
+            <tr>
+                <th>Amount Requested:</th>
+                <td>KSh <%= parseFloat(loan.requested_amount).toLocaleString() %></td>
+            </tr>
+            <tr>
+                <th>Amount Approved:</th>
+                <td>
+                    <% if (loan.approved_amount) { %>
+                        KSh <%= parseFloat(loan.approved_amount).toLocaleString() %>
+                    <% } else { %>
+                        -
+                    <% } %>
+                </td>
+            </tr>
+            <tr>
+                <th>Interest Rate:</th>
+                <td><%= loan.interest_rate %>%</td>
+            </tr>
+            <tr>
+                <th>Repayment Period:</th>
+                <td><%= loan.repayment_months %> months</td>
+            </tr>
+            <tr>
+                <th>Status:</th>
+                <td>
+                    <span class="badge badge-<%= loan.status === 'active' ? 'success' : (loan.status === 'pending' ? 'warning' : 'secondary') %>">
+                        <%= loan.status %>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>Date Requested:</th>
+                <td><%= new Date(loan.created_at).toLocaleDateString() %></td>
+            </tr>
+        </table>
+
+        <!-- Actions -->
+        <% if (loan.status === 'pending') { %>
+            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
+                <h3>Admin Actions</h3>
+                <div style="display: flex; gap: 1rem;">
+                    <form action="/admin/loans/<%= loan.id %>/approve" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div class="form-group">
+                            <label>Approved Amount</label>
+                            <input type="number" name="approved_amount" value="<%= loan.requested_amount %>" class="form-control" required>
+                        </div>
+                        <button type="button" onclick="promptApprove(this.form)" class="btn btn-success">Approve Loan</button>
+                    </form>
+
+                    <form action="/admin/loans/<%= loan.id %>/reject" method="POST" style="align-self: flex-end;">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="button" onclick="promptReject(this.form)" class="btn btn-danger">Reject Loan</button>
+                    </form>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Guarantors -->
+    <div class="card">
+        <h3>Guarantors</h3>
+        <% if (guarantors && guarantors.length > 0) { %>
+            <ul class="list-group">
+                <% guarantors.forEach(g => { %>
+                    <li class="list-group-item">
+                        <div>
+                            <strong><%= g.guarantor_name %></strong>
+                            <div class="text-sm text-muted">Pledged: <%= g.shares_pledged %> shares</div>
+                        </div>
+                        <span class="badge badge-<%= g.status === 'accepted' ? 'success' : (g.status === 'pending' ? 'warning' : 'danger') %>">
+                            <%= g.status %>
+                        </span>
+                    </li>
+                <% }); %>
+            </ul>
+        <% } else { %>
+            <p>No guarantors listed.</p>
+        <% } %>
+    </div>
+</div>
+
+<!-- Repayment Schedule -->
+<div class="card" style="margin-top: 1.5rem;">
+    <h3>Repayment Schedule</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Due Date</th>
+                <th>Principal</th>
+                <th>Interest</th>
+                <th>Total Due</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% schedule.forEach(item => { %>
+                <tr>
+                    <td><%= item.month %></td>
+                    <td><%= new Date(item.due_date).toLocaleDateString() %></td>
+                    <td>KSh <%= item.principal.toLocaleString() %></td>
+                    <td>KSh <%= item.interest.toLocaleString() %></td>
+                    <td>KSh <%= item.total_due.toLocaleString() %></td>
+                    <td>KSh <%= item.balance.toLocaleString() %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+<script>
+function promptApprove(form) {
+    const reason = prompt("Please enter a reason/comment for approval:");
+    if (reason) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'reason';
+        input.value = reason;
+        form.appendChild(input);
+        form.submit();
+    }
+}
+
+function promptReject(form) {
+    const reason = prompt("Please enter a reason for rejection:");
+    if (reason) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'reason';
+        input.value = reason;
+        form.appendChild(input);
+        form.submit();
+    }
+}
+</script>
+
+<style>
+    .details-table th {
+        text-align: left;
+        padding: 0.5rem;
+        width: 180px;
+    }
+    .list-group {
+        list-style: none;
+        padding: 0;
+    }
+    .list-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #F3F4F6;
+    }
+</style>

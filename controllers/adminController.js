@@ -358,16 +358,18 @@ exports.viewMember = async (req, res) => {
         const loans = await Loan.getByUser(userId);
         const shares = await Share.getHistory(userId);
 
-        res.json({
-            success: true,
-            user,
+        res.render('admin/member-detail', {
+            title: 'Member Details',
+            layout: 'layouts/admin',
+            member: user,
             stats,
             loans,
-            shares
+            shares,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('View member error:', error);
-        res.status(500).json({ error: 'Failed to fetch member details' });
+        res.status(500).render('error', { message: 'Failed to fetch member details', error });
     }
 };
 
@@ -488,16 +490,18 @@ exports.viewLoan = async (req, res) => {
             loan.repayment_months
         );
 
-        res.json({
-            success: true,
+        res.render('admin/loan-detail', {
+            title: 'Loan Details',
+            layout: 'layouts/admin',
             loan,
             guarantors,
             repayments,
-            schedule
+            schedule,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('View loan error:', error);
-        res.status(500).json({ error: 'Failed to fetch loan details' });
+        res.status(500).render('error', { message: 'Failed to fetch loan details', error });
     }
 };
 
@@ -834,13 +838,16 @@ exports.viewMessage = async (req, res) => {
 
         await Message.markAsRead(messageId);
 
-        res.json({
-            success: true,
-            thread
+        res.render('admin/message-detail', {
+            title: 'Message Thread',
+            layout: 'layouts/admin',
+            thread,
+            messageId,
+            user: res.locals.user || req.user
         });
     } catch (error) {
         console.error('View message error:', error);
-        res.status(500).json({ error: 'Failed to fetch message' });
+        res.status(500).render('error', { message: 'Failed to fetch message', error });
     }
 };
 
@@ -925,6 +932,22 @@ exports.rejectDocument = async (req, res) => {
     }
 };
 
+exports.showMessageForm = async (req, res) => {
+    try {
+        const members = await User.getAllMembers({ is_active: true });
+        
+        res.render('admin/message-new', {
+            title: 'New Message',
+            layout: 'layouts/admin',
+            members,
+            user: res.locals.user || req.user
+        });
+    } catch (error) {
+        console.error('Show message form error:', error);
+        res.status(500).render('error', { message: 'Failed to load message form', error });
+    }
+};
+
 exports.sendMessage = async (req, res) => {
     try {
         const { recipient_id, subject, body } = req.body;
@@ -996,6 +1019,22 @@ exports.replyMessage = async (req, res) => {
     } catch (error) {
         console.error('Reply message error:', error);
         res.status(500).json({ error: 'Failed to send reply' });
+    }
+};
+
+exports.showReminders = async (req, res) => {
+    try {
+        const members = await User.getAllMembers({ is_active: true, registration_paid: true });
+        
+        res.render('admin/reminders', {
+            title: 'Send Reminders',
+            layout: 'layouts/admin',
+            members,
+            user: res.locals.user || req.user
+        });
+    } catch (error) {
+        console.error('Show reminders error:', error);
+        res.status(500).render('error', { message: 'Failed to load reminders page', error });
     }
 };
 

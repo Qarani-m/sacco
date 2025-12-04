@@ -1,0 +1,195 @@
+<div class="page-header">
+    <h1 class="page-title">Member Details: <%= member.full_name %></h1>
+    <div>
+        <a href="/admin/members/<%= member.id %>/edit" class="btn btn-secondary">Edit Member</a>
+        <a href="/admin/members" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="grid-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <!-- Profile Info -->
+    <div class="card">
+        <h3>Profile Information</h3>
+        <table class="details-table">
+            <tr>
+                <th>Email:</th>
+                <td><%= member.email %></td>
+            </tr>
+            <tr>
+                <th>Phone:</th>
+                <td><%= member.phone_number %></td>
+            </tr>
+            <tr>
+                <th>Status:</th>
+                <td>
+                    <span class="badge badge-<%= member.is_active ? 'success' : 'danger' %>">
+                        <%= member.is_active ? 'Active' : 'Inactive' %>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>Registration Fee:</th>
+                <td>
+                    <span class="badge badge-<%= member.registration_paid ? 'success' : 'warning' %>">
+                        <%= member.registration_paid ? 'Paid' : 'Unpaid' %>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>Joined:</th>
+                <td><%= new Date(member.created_at).toLocaleDateString() %></td>
+            </tr>
+        </table>
+
+        <div style="margin-top: 1rem;">
+            <% if (member.is_active) { %>
+                <form action="/admin/members/<%= member.id %>/deactivate" method="POST" style="display: inline;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="button" onclick="promptDeactivate(this.form)" class="btn btn-danger">Deactivate Member</button>
+                </form>
+            <% } else { %>
+                <form action="/admin/members/<%= member.id %>/activate" method="POST" style="display: inline;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="button" onclick="promptActivate(this.form)" class="btn btn-success">Activate Member</button>
+                </form>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Financial Stats -->
+    <div class="card">
+        <h3>Financial Overview</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-label">Total Shares</div>
+                <div class="stat-value"><%= stats.total_shares %></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Total Savings</div>
+                <div class="stat-value">KSh <%= parseFloat(stats.total_savings).toLocaleString() %></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Active Loans</div>
+                <div class="stat-value"><%= stats.active_loans %></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Loan Balance</div>
+                <div class="stat-value">KSh <%= parseFloat(stats.loan_balance).toLocaleString() %></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loans History -->
+<div class="card" style="margin-top: 1.5rem;">
+    <h3>Loan History</h3>
+    <% if (loans && loans.length > 0) { %>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Balance</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% loans.forEach(loan => { %>
+                    <tr>
+                        <td>KSh <%= parseFloat(loan.requested_amount).toLocaleString() %></td>
+                        <td><%= new Date(loan.created_at).toLocaleDateString() %></td>
+                        <td><span class="badge badge-<%= loan.status === 'active' ? 'success' : (loan.status === 'pending' ? 'warning' : 'secondary') %>"><%= loan.status %></span></td>
+                        <td>KSh <%= parseFloat(loan.balance_remaining || 0).toLocaleString() %></td>
+                        <td><a href="/admin/loans/<%= loan.id %>">View</a></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No loans found.</p>
+    <% } %>
+</div>
+
+<!-- Shares History -->
+<div class="card" style="margin-top: 1.5rem;">
+    <h3>Share Purchase History</h3>
+    <% if (shares && shares.length > 0) { %>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Quantity</th>
+                    <th>Amount Paid</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% shares.forEach(share => { %>
+                    <tr>
+                        <td><%= share.quantity %></td>
+                        <td>KSh <%= parseFloat(share.amount_paid).toLocaleString() %></td>
+                        <td><%= new Date(share.purchase_date).toLocaleDateString() %></td>
+                        <td><%= share.status %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No share purchases found.</p>
+    <% } %>
+</div>
+
+<script>
+function promptDeactivate(form) {
+    const reason = prompt("Please enter a reason for deactivation:");
+    if (reason) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'reason';
+        input.value = reason;
+        form.appendChild(input);
+        form.submit();
+    }
+}
+
+function promptActivate(form) {
+    const reason = prompt("Please enter a reason for activation:");
+    if (reason) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'reason';
+        input.value = reason;
+        form.appendChild(input);
+        form.submit();
+    }
+}
+</script>
+
+<style>
+    .details-table th {
+        text-align: left;
+        padding: 0.5rem;
+        width: 150px;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    .stat-item {
+        background: #F9FAFB;
+        padding: 1rem;
+        border-radius: 4px;
+        text-align: center;
+    }
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6B7280;
+    }
+    .stat-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+    }
+</style>

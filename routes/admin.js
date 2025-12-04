@@ -122,6 +122,10 @@ router.get('/messages', adminController.listMessages);
 // View specific message thread
 router.get('/messages/:messageId', adminController.viewMessage);
 
+// GET /admin/messages/new
+// Show form to send a new message
+router.get('/messages/new', adminController.showMessageForm);
+
 // POST /admin/messages/send
 // Send message to member(s) - payment reminders, announcements, etc.
 router.post('/messages/send', adminController.sendMessage);
@@ -129,6 +133,10 @@ router.post('/messages/send', adminController.sendMessage);
 // POST /admin/messages/:messageId/reply
 // Reply to a message from member
 router.post('/messages/:messageId/reply', adminController.replyMessage);
+
+// GET /admin/reminders
+// Show reminders page
+router.get('/reminders', adminController.showReminders);
 
 // POST /admin/reminders/send
 // Send bulk payment reminders to members

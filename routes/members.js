@@ -24,7 +24,7 @@ router.get('/registration-fee', memberController.showRegistrationFeePage);
 router.post('/registration/pay', memberController.payRegistrationFee);
 
 // All routes below require registration fee to be paid
-// router.use(registrationCheck);
+router.use(registrationCheck);
 
 
 

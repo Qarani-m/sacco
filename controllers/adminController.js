@@ -628,22 +628,62 @@ exports.approveLoan = async (req, res) => {
       return res.status(403).json({ error: "Cannot approve your own loan" });
     }
 
-    const action = await AdminAction.create({
-      initiated_by: adminId,
-      action_type: "update",
-      entity_type: "loan",
-      entity_id: loanId,
-      reason,
-      action_data: { status: "approved", approved_amount },
-    });
+    const db = require("../models/db");
 
-    // Automatically add the initiator's approval
-    await AdminAction.addVerification({
-      action_id: action.id,
-      verifier_id: adminId,
-      decision: "approved",
-      comment: "Initiated and approved",
-    });
+    // Check if there's already a pending approval action for this loan
+    const existingActionQuery = await db.query(
+      `
+      SELECT * FROM admin_actions 
+      WHERE entity_type = 'loan' 
+      AND entity_id = $1 
+      AND status = 'pending'
+      AND action_data->>'status' = 'approved'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `,
+      [loanId]
+    );
+
+    let action;
+
+    if (existingActionQuery.rows.length > 0) {
+      // Use existing action
+      action = existingActionQuery.rows[0];
+
+      // Check if this admin has already verified
+      const hasVerified = await AdminAction.hasVerified(action.id, adminId);
+      if (hasVerified) {
+        return res
+          .status(400)
+          .json({ error: "You have already verified this action" });
+      }
+
+      // Add this admin's verification to the existing action
+      await AdminAction.addVerification({
+        action_id: action.id,
+        verifier_id: adminId,
+        decision: "approved",
+        comment: reason,
+      });
+    } else {
+      // Create new action
+      action = await AdminAction.create({
+        initiated_by: adminId,
+        action_type: "update",
+        entity_type: "loan",
+        entity_id: loanId,
+        reason,
+        action_data: { status: "approved", approved_amount },
+      });
+
+      // Automatically add the initiator's approval
+      await AdminAction.addVerification({
+        action_id: action.id,
+        verifier_id: adminId,
+        decision: "approved",
+        comment: "Initiated and approved",
+      });
+    }
 
     // Check if we have 2/3 majority (need to count approvals)
     const approvals = await AdminAction.countApprovals(action.id);
@@ -678,22 +718,62 @@ exports.rejectLoan = async (req, res) => {
     const { reason } = req.body;
     const adminId = req.user.id;
 
-    const action = await AdminAction.create({
-      initiated_by: adminId,
-      action_type: "update",
-      entity_type: "loan",
-      entity_id: loanId,
-      reason,
-      action_data: { status: "rejected" },
-    });
+    const db = require("../models/db");
 
-    // Automatically add the initiator's rejection
-    await AdminAction.addVerification({
-      action_id: action.id,
-      verifier_id: adminId,
-      decision: "approved", // They approve the rejection action
-      comment: "Initiated and approved rejection",
-    });
+    // Check if there's already a pending rejection action for this loan
+    const existingActionQuery = await db.query(
+      `
+      SELECT * FROM admin_actions 
+      WHERE entity_type = 'loan' 
+      AND entity_id = $1 
+      AND status = 'pending'
+      AND action_data->>'status' = 'rejected'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `,
+      [loanId]
+    );
+
+    let action;
+
+    if (existingActionQuery.rows.length > 0) {
+      // Use existing action
+      action = existingActionQuery.rows[0];
+
+      // Check if this admin has already verified
+      const hasVerified = await AdminAction.hasVerified(action.id, adminId);
+      if (hasVerified) {
+        return res
+          .status(400)
+          .json({ error: "You have already verified this action" });
+      }
+
+      // Add this admin's verification to the existing action
+      await AdminAction.addVerification({
+        action_id: action.id,
+        verifier_id: adminId,
+        decision: "approved", // They approve the rejection action
+        comment: reason,
+      });
+    } else {
+      // Create new action
+      action = await AdminAction.create({
+        initiated_by: adminId,
+        action_type: "update",
+        entity_type: "loan",
+        entity_id: loanId,
+        reason,
+        action_data: { status: "rejected" },
+      });
+
+      // Automatically add the initiator's rejection
+      await AdminAction.addVerification({
+        action_id: action.id,
+        verifier_id: adminId,
+        decision: "approved", // They approve the rejection action
+        comment: "Initiated and approved rejection",
+      });
+    }
 
     // Check if we have 2/3 majority
     const approvals = await AdminAction.countApprovals(action.id);

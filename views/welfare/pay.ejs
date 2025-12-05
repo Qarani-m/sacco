@@ -38,7 +38,7 @@
                     </div>
 
                     <div class="alert alert-info" style="margin-bottom: 1.5rem;">
-                        <p style="margin: 0; font-size: 0.875rem;">You will receive an M-Pesa STK Push prompt on your registered phone number.</p>
+                        <p style="margin: 0; font-size: 0.875rem;">You will receive an M-Pesa STK Push prompt on your phone.</p>
                     </div>
 
                     <button type="submit" class="btn-primary w-full">Pay Welfare</button>
@@ -47,48 +47,24 @@
         </div>
     </div>
 
+    <%- include('../partials/payment-modal') %>
     <%- include('../layouts/footer') %>
+    <script src="/js/payment-modal.js"></script>
     <script>
         const form = document.getElementById('payWelfareForm');
 
-        form.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            const button = form.querySelector('button[type="submit"]');
-            button.disabled = true;
-            button.textContent = 'Processing...';
 
-            try {
-                const response = await fetch('/payments/initiate/welfare/<%= user.id %>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': '<%= csrfToken %>'
-                    },
-                    body: JSON.stringify({ 
-                        amount: 300,
-                        phone_number: '<%= user.phone_number %>',
-                        registered_number: true
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    alert('Payment initiated! Check your phone for M-Pesa prompt.');
-                    setTimeout(() => window.location.href = '/members/dashboard', 2000);
-                } else {
-
-                    alert(data.error || 'Failed to initiate payment');
-                    button.disabled = false;
-                    button.textContent = 'Pay Welfare';
-                }
-            } catch (error) {
-                console.error('Errort:', error);
-                alert('An error occurred. Please try again.');
-                button.disabled = false;
-                button.textContent = 'Pay Welfare';
-            }
+            // Open payment modal
+            paymentModal.open({
+                title: 'Pay Welfare',
+                amount: 300,
+                category: 'welfare',
+                userId: '<%= user.id %>',
+                userPhone: '<%= user.phone_number %>',
+                csrfToken: '<%= csrfToken %>'
+            });
         });
     </script>
 </body>

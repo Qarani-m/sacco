@@ -41,6 +41,7 @@ const showBuyForm = async (req, res) => {
       user: req.user,
       unreadNotifications: 0,
       unreadMessages: 0,
+      csrfToken: req.csrfToken(),
     });
   } catch (err) {
     console.error("showBuyForm error:", err);

@@ -155,8 +155,8 @@
                         <% loanHistory.forEach(loan => { %>
                         <tr>
                             <td>#<%= loan.id.substring(0, 8) %></td>
-                            <td>KSh <%= loan.approved_amount.toLocaleString() %></td>
-                            <td>KSh <%= (loan.approved_amount * 0.01).toLocaleString() %></td>
+                            <td>KSh <%= (loan.approved_amount || loan.requested_amount || 0).toLocaleString() %></td>
+                            <td>KSh <%= ((loan.approved_amount || loan.requested_amount || 0) * 0.01).toLocaleString() %></td>
                             <td><%= loan.repayment_months %> months</td>
                             <td>
                                 <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">

@@ -91,6 +91,7 @@ exports.showRequestForm = async (req, res) => {
       maxLoan,
       unreadNotifications: 0,
       unreadMessages: 0,
+      csrfToken: req.csrfToken(),
     });
   } catch (error) {
     console.error("Show loan form error:", error);
@@ -211,12 +212,18 @@ exports.viewLoanDetails = async (req, res) => {
     const loan = await Loan.findById(loanId);
 
     if (!loan) {
-      return res.status(404).json({ error: "Loan not found" });
+      return res.status(404).render("errors/404", {
+        title: "Loan Not Found",
+        message: "The requested loan could not be found",
+      });
     }
 
     // Check authorization
     if (loan.borrower_id !== req.user.id && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Unauthorized" });
+      return res.status(403).render("errors/403", {
+        title: "Access Denied",
+        message: "You don't have permission to view this loan",
+      });
     }
 
     const guarantors = await LoanGuarantor.getByLoan(loanId);
@@ -224,15 +231,34 @@ exports.viewLoanDetails = async (req, res) => {
       loanId
     );
 
-    res.json({
-      success: true,
+    // Calculate repayment schedule if approved
+    let schedule = null;
+    if (loan.approved_amount) {
+      const scheduleData = Loan.calculateRepaymentSchedule(
+        loan.approved_amount,
+        loan.interest_rate,
+        loan.repayment_months
+      );
+      schedule = scheduleData;
+    }
+
+    res.render("loans/details", {
+      title: "Loan Details",
+      user: req.user,
       loan,
       guarantors,
       repayments,
+      schedule,
+      unreadNotifications: 0,
+      unreadMessages: 0,
+      csrfToken: req.csrfToken(),
     });
   } catch (error) {
     console.error("View loan details error:", error);
-    res.status(500).json({ error: "Failed to fetch loan details" });
+    res.status(500).render("errors/500", {
+      title: "Server Error",
+      error,
+    });
   }
 };
 

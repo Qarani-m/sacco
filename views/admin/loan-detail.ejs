@@ -40,7 +40,9 @@
                 <th>Status:</th>
                 <td>
                     <span class="badge badge-<%= loan.status === 'active' ? 'success' : (loan.status === 'pending' ? 'warning' : 'secondary') %>">
-                        <%= loan.status %>
+                        <%= loan.status === 'pending' && loan.approval_count !== undefined 
+                            ? `Pending ${loan.approval_count}/3` 
+                            : loan.status %>
                     </span>
                 </td>
             </tr>
@@ -61,12 +63,11 @@
                             <label>Approved Amount</label>
                             <input type="number" name="approved_amount" value="<%= loan.requested_amount %>" class="form-control" required>
                         </div>
-                        <button type="button" onclick="promptApprove(this.form)" class="btn btn-success">Approve Loan</button>
+                        <button type="button" class="btn btn-success" id="approveBtn">Approve Loan</button>
                     </form>
 
-                    <form action="/admin/loans/<%= loan.id %>/reject" method="POST" style="align-self: flex-end;">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button type="button" onclick="promptReject(this.form)" class="btn btn-danger">Reject Loan</button>
+                    <form id="rejectForm" style="align-self: flex-end;">
+                        <button type="button" class="btn btn-danger" id="rejectBtn">Reject Loan</button>
                     </form>
                 </div>
             </div>
@@ -99,56 +100,209 @@
 <!-- Repayment Schedule -->
 <div class="card" style="margin-top: 1.5rem;">
     <h3>Repayment Schedule</h3>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Month</th>
-                <th>Due Date</th>
-                <th>Principal</th>
-                <th>Interest</th>
-                <th>Total Due</th>
-                <th>Balance</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% schedule.forEach(item => { %>
+    <% if (schedule && schedule.schedule) { %>
+        <div style="margin-bottom: 1rem; padding: 1rem; background: #F9FAFB; border-radius: 4px;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                <div>
+                    <strong>Total Amount:</strong> KSh <%= schedule.totalAmount %>
+                </div>
+                <div>
+                    <strong>Total Interest:</strong> KSh <%= schedule.totalInterest %>
+                </div>
+            </div>
+        </div>
+        <table class="table">
+            <thead>
                 <tr>
-                    <td><%= item.month %></td>
-                    <td><%= new Date(item.due_date).toLocaleDateString() %></td>
-                    <td>KSh <%= item.principal.toLocaleString() %></td>
-                    <td>KSh <%= item.interest.toLocaleString() %></td>
-                    <td>KSh <%= item.total_due.toLocaleString() %></td>
-                    <td>KSh <%= item.balance.toLocaleString() %></td>
+                    <th>Month</th>
+                    <th>Principal</th>
+                    <th>Interest</th>
+                    <th>Monthly Payment</th>
                 </tr>
-            <% }); %>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <% schedule.schedule.forEach(item => { %>
+                    <tr>
+                        <td><%= item.month %></td>
+                        <td>KSh <%= item.principal %></td>
+                        <td>KSh <%= item.interest %></td>
+                        <td>KSh <%= item.payment %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>Repayment schedule will be available once the loan is approved.</p>
+    <% } %>
+</div>
+
+<!-- Reason Modal -->
+<div id="reasonModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 id="reasonModalTitle">Enter Reason</h3>
+            <button class="modal-close" id="closeReasonModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="reasonInput">Reason/Comment</label>
+                <textarea id="reasonInput" rows="4" class="form-control" placeholder="Enter your reason or comment..." required></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelReason">Cancel</button>
+            <button type="button" class="btn btn-primary" id="submitReason">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 id="successModalTitle">Action Submitted</h3>
+            <button class="modal-close" id="closeSuccessModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align: center; padding: 2rem 0;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">✓</div>
+                <p id="successMessage" style="font-size: 1.125rem; margin-bottom: 1rem;"></p>
+                <div id="actionDetails" style="padding: 1rem; background: #F9FAFB; border-radius: 4px; text-align: left;"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="closeSuccess">OK</button>
+        </div>
+    </div>
 </div>
 
 <script>
-function promptApprove(form) {
-    const reason = prompt("Please enter a reason/comment for approval:");
-    if (reason) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'reason';
-        input.value = reason;
-        form.appendChild(input);
-        form.submit();
-    }
-}
+document.addEventListener('DOMContentLoaded', function() {
+    const approveBtn = document.getElementById('approveBtn');
+    const rejectBtn = document.getElementById('rejectBtn');
+    const reasonModal = document.getElementById('reasonModal');
+    const successModal = document.getElementById('successModal');
+    const reasonInput = document.getElementById('reasonInput');
+    const reasonModalTitle = document.getElementById('reasonModalTitle');
+    
+    let currentAction = null;
+    let approvedAmount = null;
 
-function promptReject(form) {
-    const reason = prompt("Please enter a reason for rejection:");
-    if (reason) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'reason';
-        input.value = reason;
-        form.appendChild(input);
-        form.submit();
+    // Open reason modal for approve
+    if (approveBtn) {
+        approveBtn.addEventListener('click', function() {
+            const amountInput = document.querySelector('input[name="approved_amount"]');
+            approvedAmount = amountInput ? amountInput.value : '<%= loan.requested_amount %>';
+            currentAction = 'approve';
+            reasonModalTitle.textContent = 'Approve Loan - Enter Reason';
+            reasonInput.value = '';
+            reasonModal.style.display = 'flex';
+        });
     }
-}
+
+    // Open reason modal for reject
+    if (rejectBtn) {
+        rejectBtn.addEventListener('click', function() {
+            currentAction = 'reject';
+            reasonModalTitle.textContent = 'Reject Loan - Enter Reason';
+            reasonInput.value = '';
+            reasonModal.style.display = 'flex';
+        });
+    }
+
+    // Close reason modal
+    document.getElementById('closeReasonModal').addEventListener('click', closeReasonModal);
+    document.getElementById('cancelReason').addEventListener('click', closeReasonModal);
+
+    function closeReasonModal() {
+        reasonModal.style.display = 'none';
+        reasonInput.value = '';
+        currentAction = null;
+    }
+
+    // Submit reason and perform action
+    document.getElementById('submitReason').addEventListener('click', async function() {
+        const reason = reasonInput.value.trim();
+        if (!reason) {
+            alert('Please enter a reason');
+            return;
+        }
+
+        const submitBtn = this;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        // Store the action type before any async operations
+        const actionType = currentAction;
+
+        try {
+            const url = `/admin/loans/<%= loan.id %>/${actionType}`;
+            const body = { reason };
+            
+            if (actionType === 'approve') {
+                body.approved_amount = approvedAmount;
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': '<%= csrfToken %>'
+                },
+                body: JSON.stringify(body)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                closeReasonModal();
+                showSuccessModal(data, actionType);
+            } else {
+                alert('Error: ' + (data.error || 'Failed to process action'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit';
+        }
+    });
+
+    function showSuccessModal(data, actionType) {
+        document.getElementById('successMessage').textContent = data.message;
+        
+        const actionLabel = actionType === 'approve' ? 'Approval' : 'Rejection';
+        const detailsHtml = `
+            <p style="margin-bottom: 0.5rem;"><strong>Action Type:</strong> ${actionLabel}</p>
+            <p style="margin-bottom: 0.5rem;"><strong>Status:</strong> ${data.executed ? 'Executed' : 'Pending (Requires 2/3 admin approval)'}</p>
+            <p style="margin-bottom: 0.5rem;"><strong>Action ID:</strong> ${data.action.id.substring(0, 8)}...</p>
+            <p style="margin: 0;"><strong>Note:</strong> ${data.executed ? 'The action has been executed.' : 'Other admins will be notified to review this action.'}</p>
+        `;
+        
+        document.getElementById('actionDetails').innerHTML = detailsHtml;
+        successModal.style.display = 'flex';
+    }
+
+    // Close success modal
+    document.getElementById('closeSuccessModal').addEventListener('click', closeSuccessModal);
+    document.getElementById('closeSuccess').addEventListener('click', closeSuccessModal);
+
+    function closeSuccessModal() {
+        successModal.style.display = 'none';
+        window.location.href = '/admin/loans';
+    }
+
+    // Close modals on outside click
+    reasonModal.addEventListener('click', function(e) {
+        if (e.target === this) closeReasonModal();
+    });
+    
+    successModal.addEventListener('click', function(e) {
+        if (e.target === this) closeSuccessModal();
+    });
+});
 </script>
 
 <style>
@@ -167,5 +321,75 @@ function promptReject(form) {
         align-items: center;
         padding: 0.75rem 0;
         border-bottom: 1px solid #F3F4F6;
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    
+    .modal-container {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #F3F4F6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6B7280;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+    }
+    
+    .modal-close:hover {
+        background: #F3F4F6;
+    }
+    
+    .modal-body {
+        padding: 2rem;
+    }
+    
+    .modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #F3F4F6;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
     }
 </style>

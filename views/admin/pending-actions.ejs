@@ -2,63 +2,155 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta viewport="width=device-width, initial-scale=1.0">
     <title>Pending Actions - SACCO Admin</title>
     <link rel="stylesheet" href="/css/admin.css">
 </head>
-<body>
-    <%- include('../layouts/admin-header') %>
-    
-    <div class="container">
-        <h1>Pending Admin Actions (Requires 2/3 Approval)</h1>
+
+<body style="background: #F9FAFB; color: #111827; font-family: 'Inter', sans-serif;">
+ 
+
+    <div class="container" style="margin-top: 2rem;">
+        
+        <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 1.5rem;">Pending Admin Actions (Requires 2/3 Approval)</h1>
 
         <% if (pending_actions.length === 0) { %>
-            <div class="alert alert-info">No pending actions</div>
+
+            <div style="background: #EFF6FF; border-left: 4px solid #3B82F6; padding: 1rem 1.25rem; border-radius: 6px; color: #1E40AF;">
+                No pending actions.
+            </div>
+
         <% } else { %>
-            <div class="actions-list">
+
+            <div class="actions-list" 
+                 style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+
                 <% pending_actions.forEach(action => { %>
-                <div class="action-card">
-                    <div class="action-header">
-                        <h3><%= action.action_type.toUpperCase() %> - <%= action.entity_type %></h3>
-                        <span class="badge badge-warning">Pending</span>
+
+                <% 
+                    // Determine the detail page URL based on entity type
+                    let detailUrl = '#';
+                    if (action.entity_type === 'loan' && action.entity_id) {
+                        detailUrl = `/admin/loans/${action.entity_id}`;
+                    } else if (action.entity_type === 'user' && action.entity_id) {
+                        detailUrl = `/admin/members/${action.entity_id}`;
+                    }
+                %>
+
+                <a href="<%= detailUrl %>" 
+                   style="text-decoration: none; color: inherit; display: block; transition: transform 0.2s, box-shadow 0.2s;"
+                   onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.12)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)';">
+
+                <div class="action-card" 
+                     style="background: white; border-radius: 12px; padding: 1.5rem; 
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #E5E7EB;
+                            cursor: pointer;">
+
+                    <!-- Header -->
+                    <div class="action-header" 
+                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin: 0; color: #111827;">
+                            <%= action.action_type.toUpperCase() %> – <%= action.entity_type %>
+                        </h3>
+
+                        <span style="background: #FEF3C7; color: #B45309; padding: 4px 12px;
+                                     border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">
+                            Pending
+                        </span>
                     </div>
-                    <div class="action-body">
+
+                    <!-- Body -->
+                    <div class="action-body" style="color: #374151; font-size: 0.95rem;">
+
                         <p><strong>Initiated by:</strong> <%= action.initiator_name %></p>
                         <p><strong>Reason:</strong> <%= action.reason %></p>
-                        <p><strong>Date:</strong> <%= new Date(action.created_at).toLocaleString() %></p>
-                        
-                        <div class="verifications">
-                            <h4>Verifications:</h4>
+
+                        <p style="margin-bottom: 1rem;">
+                            <strong>Date:</strong> 
+                            <%= new Date(action.created_at).toLocaleString() %>
+                        </p>
+
+                        <!-- Verifications -->
+                        <div class="verifications" style="margin-top: 1rem;">
+                            <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem;">Verifications (<%= action.verifications.length %>/3):</h4>
+
                             <% action.verifications.forEach(v => { %>
-                                <div class="verification">
-                                    <span><%= v.verifier_name %></span>
-                                    <span class="badge <%= v.decision === 'approved' ? 'badge-success' : 'badge-danger' %>">
-                                        <%= v.decision %>
-                                    </span>
+                                <div class="verification" 
+                                     style="padding: 0.75rem 1rem; background: #F9FAFB; border-radius: 8px;
+                                            margin-bottom: 0.75rem; border: 1px solid #E5E7EB;">
+
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-weight: 500;"><%= v.verifier_name %></span>
+
+                                        <span class="badge"
+                                              style="padding: 3px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;
+                                                     color: white;
+                                                     background: <%= v.decision === 'approved' ? '#10B981' : '#EF4444' %>;">
+                                            <%= v.decision %>
+                                        </span>
+                                    </div>
+
                                     <% if (v.comment) { %>
-                                        <p class="comment"><%= v.comment %></p>
+                                        <p class="comment" 
+                                           style="font-size: 0.8rem; color: #6B7280; margin-top: 6px;">
+                                            <%= v.comment %>
+                                        </p>
                                     <% } %>
+
                                 </div>
                             <% }) %>
                         </div>
 
+                        <!-- Buttons -->
                         <% if (action.initiated_by !== user.id) { %>
                             <% const hasVerified = action.verifications.some(v => v.verifier_id === user.id); %>
+
                             <% if (!hasVerified) { %>
-                                <div class="action-buttons">
-                                    <button onclick="verifyAction('<%= action.id %>', 'approved')" class="btn btn-success">Approve</button>
-                                    <button onclick="verifyAction('<%= action.id %>', 'rejected')" class="btn btn-danger">Reject</button>
+
+                                <div class="action-buttons" 
+                                     style="display: flex; gap: 0.75rem; margin-top: 1.25rem;"
+                                     onclick="event.preventDefault(); event.stopPropagation();">
+
+                                    <button onclick="verifyAction('<%= action.id %>', 'approved'); event.stopPropagation();"
+                                            style="flex: 1; background: #10B981; color: white; border: none;
+                                                   padding: 0.75rem; border-radius: 8px; font-size: 0.9rem;
+                                                   font-weight: 600; cursor: pointer;">
+                                        Approve
+                                    </button>
+
+                                    <button onclick="verifyAction('<%= action.id %>', 'rejected'); event.stopPropagation();"
+                                            style="flex: 1; background: #EF4444; color: white; border: none;
+                                                   padding: 0.75rem; border-radius: 8px; font-size: 0.9rem;
+                                                   font-weight: 600; cursor: pointer;">
+                                        Reject
+                                    </button>
+
                                 </div>
+
                             <% } else { %>
-                                <p class="text-muted">You have already verified this action</p>
+
+                                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.85rem;">
+                                    ✓ You have already verified this action.
+                                </p>
+
                             <% } %>
                         <% } else { %>
-                            <p class="text-muted">You initiated this action</p>
+
+                            <p style="color: #6B7280; margin-top: 1rem; font-size: 0.85rem;">
+                                ℹ️ You initiated this action.
+                            </p>
+
                         <% } %>
+
                     </div>
                 </div>
+
+                </a>
+
                 <% }) %>
             </div>
+
         <% } %>
     </div>
 

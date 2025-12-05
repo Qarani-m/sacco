@@ -50,7 +50,11 @@
                                 font-weight: 600;
                                 background: <%= loan.status === 'pending' ? '#FEF3C7' : loan.status === 'active' ? '#DBEAFE' : loan.status === 'paid' ? '#D1FAE5' : '#FEE2E2' %>;
                                 color: <%= loan.status === 'pending' ? '#D97706' : loan.status === 'active' ? '#2563EB' : loan.status === 'paid' ? '#059669' : '#DC2626' %>;
-                            "><%= loan.status %></span>
+                            ">
+                                <%= loan.status === 'pending' && loan.approval_count !== null 
+                                    ? `Pending ${loan.approval_count}/3` 
+                                    : loan.status %>
+                            </span>
                         </td>
                         <td style="padding: 1rem 0.75rem;"><%= loan.repayment_months %></td>
                         <td style="padding: 1rem 0.75rem;"><%= new Date(loan.created_at).toLocaleDateString() %></td>

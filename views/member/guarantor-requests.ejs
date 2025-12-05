@@ -176,15 +176,31 @@
     <%- include('../layouts/footer') %>
 
     <script>
+        const csrfToken = '<%= csrfToken %>';
+
         async function acceptRequest(requestId) {
-            if (!confirm('Are you sure you want to accept this guarantor request? Your shares will be pledged.')) {
+            const shares = prompt('How many shares do you want to pledge? (Enter a number)');
+            
+            if (!shares || isNaN(shares) || parseInt(shares) < 1) {
+                alert('Please enter a valid number of shares');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to pledge ${shares} shares for this loan?`)) {
                 return;
             }
 
             try {
-                const response = await fetch(`/guarantors/accept/${requestId}`, {
+                const response = await fetch(`/guarantors/requests/${requestId}/respond`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({
+                        decision: 'accepted',
+                        shares_to_pledge: parseInt(shares)
+                    })
                 });
 
                 const data = await response.json();
@@ -207,9 +223,15 @@
             }
 
             try {
-                const response = await fetch(`/guarantors/decline/${requestId}`, {
+                const response = await fetch(`/guarantors/requests/${requestId}/respond`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({
+                        decision: 'declined'
+                    })
                 });
 
                 const data = await response.json();

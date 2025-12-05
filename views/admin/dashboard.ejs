@@ -28,7 +28,7 @@
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <h2 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Recent Pending Actions</h2>
-            <a href="/admin/pending-actions" style="color: #2563EB; text-decoration: none; font-size: 0.875rem;">View All</a>
+            <a href="/admin/loans?status=pending" style="color: #2563EB; text-decoration: none; font-size: 0.875rem;">View All</a>
         </div>
         
         <% if (recentActions && recentActions.length > 0) { %>
@@ -57,7 +57,15 @@
                                 </span>
                             </td>
                             <td style="padding: 1rem 0; text-align: right;">
-                                <a href="/admin/pending-actions" style="color: #2563EB; text-decoration: none; font-size: 0.875rem;">Review</a>
+                                <% 
+                                    let reviewUrl = '/admin/pending-actions';
+                                    if (action.entity_type === 'loan' && action.entity_id) {
+                                        reviewUrl = `/admin/loans/${action.entity_id}`;
+                                    } else if (action.entity_type === 'user' && action.entity_id) {
+                                        reviewUrl = `/admin/members/${action.entity_id}`;
+                                    }
+                                %>
+                                <a href="<%= reviewUrl %>" style="color: #2563EB; text-decoration: none; font-size: 0.875rem;">Review</a>
                             </td>
                         </tr>
                     <% }); %>

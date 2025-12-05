@@ -1,8 +1,14 @@
 const express = require("express");
 const session = require("express-session");
-const flash = require("connect-flash"); // ADD THIS
+const flash = require("connect-flash");
 const path = require("path");
 const ejsLayouts = require("express-ejs-layouts");
+const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
+const csurf = require("csurf");
+const jwt = require("jsonwebtoken");
+const User = require("./models/User");
+const whitelistMiddleware = require("./middleware/whitelistMiddleware");
 
 // Import routes
 const authRoutes = require("./routes/auth");
@@ -15,11 +21,6 @@ const welfareRoutes = require("./routes/welfare");
 const paymentRoutes = require("./routes/payments");
 const messageRoutes = require("./routes/messages");
 const reportRoutes = require("./routes/reports");
-const cookieParser = require("cookie-parser");
-const helmet = require("helmet");
-const csurf = require("csurf");
-const jwt = require("jsonwebtoken");
-const User = require("./models/User");
 
 const app = express();
 
@@ -48,14 +49,18 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "dist")));
 app.use(ejsLayouts);
 app.set("layout", "layouts/main");
+
+// Cookie parser MUST come before CSRF
 app.use(cookieParser());
+
+// Static files
 app.use(express.static("public"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(express.static(path.join(__dirname, "css")));
 
-// Middleware
+// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "css")));
 
 // Session configuration
 app.use(
@@ -71,28 +76,42 @@ app.use(
   })
 );
 
-// Flash middleware - ADD THIS AFTER SESSION
+// Flash middleware - AFTER SESSION
 app.use(flash());
 
-// CSRF Protection
-app.use(
-  csurf({
-    cookie: { httpOnly: true, secure: process.env.NODE_ENV === "production" },
-  })
-);
+// CSRF Protection with excluded paths
+const excludedPaths = ["/payments/mpesa/callback", "/mpesa/callback"];
 
-// Make user and flash messages available to all views
+app.use((req, res, next) => {
+  if (excludedPaths.includes(req.path)) {
+    return next();
+  }
+
+  // Apply CSRF protection for non-excluded paths
+  csurf({
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    },
+    ignoreMethods: ["GET", "HEAD", "OPTIONS"],
+  })(req, res, next);
+});
+
+// Make user, CSRF token, and flash messages available to all views
 app.use(async (req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
+  // Only set CSRF token if the function exists (it won't exist on excluded paths)
+  res.locals.csrfToken =
+    typeof req.csrfToken === "function" ? req.csrfToken() : "";
   res.locals.user = null;
   res.locals.isAdmin = false;
   res.locals.currentPath = req.path;
 
-  // ADD FLASH MESSAGES TO LOCALS
+  // Flash messages
   res.locals.success_msg = req.flash("success_msg");
   res.locals.error_msg = req.flash("error_msg");
   res.locals.error = req.flash("error");
 
+  // Check for JWT token
   const token = req.cookies.token;
   if (token) {
     try {
@@ -111,6 +130,15 @@ app.use(async (req, res, next) => {
   }
   next();
 });
+
+const paymentController = require("./controllers/paymentController");
+
+// M-Pesa callback route (before other routes, no CSRF needed)
+app.post(
+  "/mpesa/callback",
+  whitelistMiddleware,
+  paymentController.mpesaCallback
+);
 
 // Routes
 app.use("/auth", authRoutes);
@@ -145,6 +173,16 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
+
+  // Handle CSRF token errors
+  if (err.code === "EBADCSRFTOKEN") {
+    res.status(403).render("errors/403", {
+      title: "Invalid CSRF Token",
+      message: "Form submission failed. Please refresh and try again.",
+    });
+    return;
+  }
+
   res.status(err.status || 500).render("errors/500", {
     title: "Server Error",
     error: process.env.NODE_ENV === "development" ? err : {},

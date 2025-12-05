@@ -75,7 +75,7 @@ exports.showRegistrationPage = async (req, res) => {
 exports.payRegistrationFee = async (req, res) => {
   try {
     const userId = req.user.id;
-    const amount = 1000;
+    const amount = 1;//--- REG FEE
     const transactionRef = `REG${Date.now()}${Math.random()
       .toString(36)
       .substr(2, 9)}`;

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Loan - SACCO</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container-2xl">
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">Request Loan</h1>
+            <p class="page-subtitle">Apply for a loan based on your shares</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6 mb-12">
+            <div class="card">
+                <h3 class="small-title" style="margin-bottom: 1.5rem;">📊 Your Eligibility</h3>
+                <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1rem;">
+                    <p class="text-secondary" style="margin-bottom: 0.5rem;">Total Shares</p>
+                    <p style="font-size: 1.5rem; font-weight: 600; color: #000;"><%= totalShares || 0 %> shares</p>
+                    <p class="text-meta" style="margin-top: 0.5rem;">Worth KSh <%= ((totalShares || 0) * 1000).toLocaleString() %></p>
+                </div>
+                <div style="padding: 1.5rem; background: #F0FDF4; border: 1px solid #D1FAE5; margin-bottom: 1rem;">
+                    <p class="text-secondary" style="margin-bottom: 0.5rem;">Available Shares</p>
+                    <p style="font-size: 1.5rem; font-weight: 600; color: #000;"><%= availableShares || 0 %> shares</p>
+                    <p class="text-meta" style="margin-top: 0.5rem;">Not pledged as guarantor</p>
+                </div>
+                <div style="padding: 1.5rem; background: #FEF2F2; border: 1px solid #FECACA;">
+                    <p class="text-secondary" style="margin-bottom: 0.5rem;">Maximum Loan (Without Guarantors)</p>
+                    <p style="font-size: 1.75rem; font-weight: 600; color: #000;">KSh <%= maxLoan.toLocaleString() %></p>
+                    <p class="text-meta" style="margin-top: 0.5rem;">Based on available shares</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="small-title" style="margin-bottom: 1.5rem;">💰 Loan Request</h3>
+                <% if (maxLoan === 0) { %>
+                    <div class="alert alert-warning">
+                        <p style="margin: 0;">You need to purchase shares before you can request a loan.</p>
+                    </div>
+                    <a href="/shares/buy" class="btn-primary w-full" style="margin-top: 1.5rem;">Buy Shares</a>
+                <% } else { %>
+                <form id="loanRequestForm">
+                    <div class="form-group">
+                        <label for="amount">Loan Amount (KSh)</label>
+                        <input type="number" id="amount" name="amount" min="1000" max="<%= maxLoan %>" step="100" required class="w-full px-4 py-4 bg-white text-black">
+                        <p class="text-meta" style="margin-top: 0.5rem;">Max: KSh <%= maxLoan.toLocaleString() %></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="purpose">Loan Purpose</label>
+                        <textarea id="purpose" name="purpose" rows="3" required class="w-full px-4 py-4 bg-white text-black"></textarea>
+                    </div>
+
+                    <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                        <p style="margin: 0; font-size: 0.875rem;"><strong>Interest Rate:</strong> 1% per month</p>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;"><strong>Repayment:</strong> Up to 6 months</p>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full">Submit Loan Request</button>
+                </form>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script>
+        const form = document.getElementById('loanRequestForm');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const amount = parseInt(document.getElementById('amount').value);
+                const purpose = document.getElementById('purpose').value;
+                
+                const button = form.querySelector('button[type="submit"]');
+                button.disabled = true;
+                button.textContent = 'Submitting...';
+
+                try {
+                    const response = await fetch('/loans/request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '<%= csrfToken %>'
+                        },
+                        body: JSON.stringify({ amount, purpose })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Loan request submitted successfully!');
+                        window.location.href = '/members/dashboard';
+                    } else {
+                        alert(data.error || 'Failed to submit loan request');
+                        button.disabled = false;
+                        button.textContent = 'Submit Loan Request';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                    button.disabled = false;
+                    button.textContent = 'Submit Loan Request';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

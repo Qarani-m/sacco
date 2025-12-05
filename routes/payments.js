@@ -12,7 +12,7 @@ router.use(authMiddleware);
 // Triggers M-Pesa STK push prompt
 router.post('/initiate/:category/:userId', paymentController.initiatePayment);
  
-
+ 
 // POST /payments/mpesa/callback
 // M-Pesa callback endpoint (receives payment confirmation)
 // Validates payment and updates transaction status

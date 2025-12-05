@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay Welfare - SACCO</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container-2xl">
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">Welfare Payment</h1>
+            <p class="page-subtitle">Contribute to the welfare fund</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6 mb-12">
+            <div class="card">
+                <h3 class="small-title" style="margin-bottom: 1.5rem;">🏥 Welfare Fund</h3>
+                <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1.5rem;">
+                    <p class="text-secondary" style="margin-bottom: 0.5rem;">Payment Amount</p>
+                    <p style="font-size: 2rem; font-weight: 300; color: #000;">KSh 300</p>
+                    <p class="text-meta" style="margin-top: 0.5rem;">Standard welfare contribution</p>
+                </div>
+                <div class="alert alert-info">
+                    <p style="margin: 0; font-size: 0.875rem;">Welfare payments support members during emergencies and special occasions.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="small-title" style="margin-bottom: 1.5rem;">💳 Make Payment</h3>
+                <form id="payWelfareForm">
+                    <div style="padding: 1.5rem; background: #F0FDF4; border: 1px solid #D1FAE5; margin-bottom: 1.5rem;">
+                        <p style="font-weight: 600; color: #000; margin-bottom: 0.5rem;">Amount to Pay</p>
+                        <p style="font-size: 1.75rem; font-weight: 300; color: #000;">KSh 300</p>
+                    </div>
+
+                    <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                        <p style="margin: 0; font-size: 0.875rem;">You will receive an M-Pesa STK Push prompt on your registered phone number.</p>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full">Pay Welfare</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script>
+        const form = document.getElementById('payWelfareForm');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const button = form.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.textContent = 'Processing...';
+
+            try {
+                const response = await fetch('/payments/initiate/welfare/<%= user.id %>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': '<%= csrfToken %>'
+                    },
+                    body: JSON.stringify({ 
+                        amount: 300,
+                        phone_number: '<%= user.phone_number %>',
+                        registered_number: true
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Payment initiated! Check your phone for M-Pesa prompt.');
+                    setTimeout(() => window.location.href = '/members/dashboard', 2000);
+                } else {
+
+                    alert(data.error || 'Failed to initiate payment');
+                    button.disabled = false;
+                    button.textContent = 'Pay Welfare';
+                }
+            } catch (error) {
+                console.error('Errort:', error);
+                alert('An error occurred. Please try again.');
+                button.disabled = false;
+                button.textContent = 'Pay Welfare';
+            }
+        });
+    </script>
+</body>
+</html>

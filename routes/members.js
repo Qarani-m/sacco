@@ -21,7 +21,7 @@ router.get('/registration-fee', memberController.showRegistrationFeePage);
 
 // POST /members/registration/pay
 // Initiate registration fee payment (KSh 1,000)
-router.post('/registration/pay', memberController.payRegistrationFee);
+router.post('/registration/payC', memberController.payRegistrationFee);
 
 // All routes below require registration fee to be paid
 router.use(registrationCheck);

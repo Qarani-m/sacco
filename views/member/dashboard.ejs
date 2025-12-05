@@ -678,7 +678,7 @@
                     },
                     body: JSON.stringify({ 
                         phone_number: phoneNumber,
-                        amount: 1000,
+                        amount: 1,
                         registered_number: selectedOption === 'registered'
                     })
                 });
@@ -693,15 +693,52 @@
                             <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">
                                 Please check your phone (${phoneNumber}) and enter your M-PESA PIN to complete the payment.
                             </p>
+                            <div style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <div class="spinner" style="width: 16px; height: 16px; border: 2px solid #000; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                <span style="font-size: 0.875rem;">Waiting for confirmation...</span>
+                            </div>
                         </div>
+                        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
                     `;
                     
-                    // Optionally close modal after a few seconds
-                    setTimeout(() => {
-                        closeRegistrationModal();
-                        // Reload page to update registration status
-                        location.reload();
+                    // Start polling for payment status
+                    const transactionRef = data.transaction_ref;
+                    let attempts = 0;
+                    const maxAttempts = 24; // 2 minutes (5s interval)
+                    
+                    const pollInterval = setInterval(async () => {
+                        attempts++;
+                        try {
+                            const statusRes = await fetch(`/payments/status/${transactionRef}`);
+                            const statusData = await statusRes.json();
+                            
+                            if (statusData.status === 'completed') {
+                                clearInterval(pollInterval);
+                                modalStatus.innerHTML = `
+                                    <div class="alert-inline success">
+                                        <p style="margin: 0; font-weight: 600;">✓ Payment Successful!</p>
+                                        <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">
+                                            Redirecting...
+                                        </p>
+                                    </div>
+                                `;
+                                setTimeout(() => location.reload(), 2000);
+                            } else if (statusData.status === 'failed') {
+                                clearInterval(pollInterval);
+                                modalStatus.innerHTML = `<div class="alert-inline error">Payment failed or cancelled. Please try again.</div>`;
+                                payButton.disabled = false;
+                                payButton.textContent = 'Send STK Push';
+                            } else if (attempts >= maxAttempts) {
+                                clearInterval(pollInterval);
+                                modalStatus.innerHTML = `<div class="alert-inline">Payment is taking longer than expected. Please check your messages for confirmation.</div>`;
+                                payButton.disabled = false;
+                                payButton.textContent = 'Send STK Push';
+                            }
+                        } catch (err) {
+                            console.error('Polling error:', err);
+                        }
                     }, 5000);
+                    
                 } else {
                     modalStatus.innerHTML = `<div class="alert-inline error">Error: ${data.message || 'Payment initiation failed'}</div>`;
                     payButton.disabled = false;

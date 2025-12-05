@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Shares - SACCO</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+    
+    <div class="container-2xl">
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">Buy Shares</h1>
+            <p class="page-subtitle">Purchase shares to increase your loan eligibility</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6 mb-12">
+            <div class="card">
+                <h3 class="small-title" style="margin-bottom: 1.5rem;">📊 Your Shares</h3>
+                <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1.5rem;">
+                    <p class="text-secondary" style="margin-bottom: 0.5rem;">Current Shares</p>
+                    <p style="font-size: 2rem; font-weight: 300; color: #000;"><%= totalShares || 0 %></p>
+                    <p class="text-meta" style="margin-top: 0.5rem;">Worth KSh <%= ((totalShares || 0) * 1000).toLocaleString() %></p>
+                </div>
+                <div style="padding: 1.5rem; background: #F0FDF4; border: 1px solid #D1FAE5;">
+                    <p class="text-secondary" style="margin-bottom: 0.5rem;">Maximum Allowed</p>
+                    <p style="font-size: 1.5rem; font-weight: 600; color: #000;">50 shares</p>
+                    <p class="text-meta" style="margin-top: 0.5rem;">KSh 50,000 total</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="small-title" style="margin-bottom: 1.5rem;">💰 Purchase Shares</h3>
+                <form id="buySharesForm">
+                    <div class="form-group">
+                        <label for="quantity">Number of Shares</label>
+                        <input type="number" id="quantity" name="quantity" min="1" max="49" required class="w-full px-4 py-4 bg-white text-black">
+                        <p class="text-meta" style="margin-top: 0.5rem;">KSh 1,000 per share</p>
+                    </div>
+
+                    <div style="padding: 1rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin: 1.5rem 0;">
+                        <p class="text-secondary" style="margin-bottom: 0.5rem;">Total Amount</p>
+                        <p id="totalAmount" style="font-size: 1.5rem; font-weight: 600; color: #000;">KSh 0</p>
+                    </div>
+
+                    <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                        <p style="margin: 0; font-size: 0.875rem;">Payment will be processed via M-Pesa STK Push</p>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full">Purchase Shares</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../layouts/footer') %>
+    <script>
+        const quantityInput = document.getElementById('quantity');
+        const totalAmountEl = document.getElementById('totalAmount');
+        const form = document.getElementById('buySharesForm');
+
+        quantityInput.addEventListener('input', () => {
+            const quantity = parseInt(quantityInput.value) || 0;
+            const total = quantity * 1000;
+            totalAmountEl.textContent = `KSh ${total.toLocaleString()}`;
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const quantity = parseInt(quantityInput.value);
+            
+            if (!quantity || quantity < 1) {
+                alert('Please enter a valid quantity');
+                return;
+            }
+
+            try {
+                const response = await fetch('/shares/buy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': '<%= csrfToken %>'
+                    },
+                    body: JSON.stringify({ 
+                        quantity,
+                        phone_number: '<%= user.phone_number %>',
+                        registered_number: true
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Payment initiated! Check your phone for M-Pesa prompt.');
+                    setTimeout(() => window.location.href = '/members/dashboard', 2000);
+                } else {
+                console.log(data)
+
+                    alert(data.error || 'Failed to initiate payment');
+                }
+            } catch (error) {
+                console.error('Errorr:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -42,7 +42,7 @@
             <form id="buySharesForm" class="space-y-6">
                 <div class="form-group">
                     <label for="quantity">Number of Shares</label>
-                    <input type="number" id="quantity" name="quantity" required min="1" value="1">
+                    <input type="number" id="quantity" name="quantity" required min="1"  max="50"value="13">
                 </div>
 
                 <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
@@ -99,7 +99,8 @@
                     alert('Error: ' + data.error);
                 }
             } catch (error) {
-                alert('Failed to initiate payment');
+ 
+                alert('dFailed tfo initiate payment');
             }
         });
     </script>

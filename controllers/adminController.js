@@ -855,6 +855,7 @@ exports.showReports = async (req, res) => {
       title: "Reports",
       layout: "layouts/admin",
       pendingCount,
+      csrfToken: req.csrfToken(),
       user: res.locals.user || req.user,
     });
   } catch (error) {

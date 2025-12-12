@@ -226,7 +226,7 @@ class User {
     // Generate a unique token
     const token = jwt.sign(
       { id: userId, purpose: "email_verification" },
-      process.env.JWT_SECRET || "a strong secret",
+      process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
 
@@ -252,10 +252,7 @@ class User {
 
     try {
       // Verify JWT token
-      const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET || "a strong secret"
-      );
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Check if token exists and hasn't expired
       const query = `

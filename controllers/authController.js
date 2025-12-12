@@ -44,7 +44,7 @@ exports.login = async (req, res) => {
         full_name: user.full_name,
         registration_paid: user.registration_paid,
       },
-      process.env.JWT_SECRET || "a strong secret",
+      process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
@@ -117,7 +117,7 @@ exports.register = async (req, res) => {
         full_name: user.full_name,
         registration_paid: user.registration_paid,
       },
-      process.env.JWT_SECRET || "a strong secret",
+      process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
@@ -167,7 +167,12 @@ exports.forgotPassword = async (req, res) => {
     const user = await User.findByEmail(email);
 
     if (!user) {
-      return res.status(404).json({ error: "Email not found" });
+      // Don't reveal if user exists or not
+      return res.json({
+        success: true,
+        message:
+          "If an account exists with that email, a password reset link has been sent.",
+      });
     }
 
     const resetToken = jwt.sign(
@@ -185,7 +190,8 @@ exports.forgotPassword = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Password reset link sent to email",
+      message:
+        "If an account exists with that email, a password reset link has been sent.",
     });
   } catch (error) {
     console.error("Forgot password error:", error);

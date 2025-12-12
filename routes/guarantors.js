@@ -6,7 +6,7 @@ const guarantorController = require('../controllers/guarantorController');
 
 // All routes require authentication and registration fee paid
 router.use(authMiddleware);
-// router.use(registrationCheck);
+router.use(registrationCheck);
 
 
 

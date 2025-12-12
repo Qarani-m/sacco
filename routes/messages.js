@@ -1,49 +1,47 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authMiddleware = require('../middleware/auth');
-const messageController = require('../controllers/messageController');
-const  registrationCheck  = require('../middleware/registrationCheck');
+const authMiddleware = require("../middleware/auth");
+const messageController = require("../controllers/messageController");
+const registrationCheck = require("../middleware/registrationCheck");
 
 // All routes require authentication
 router.use(authMiddleware);
 
-// router.use(registrationCheck);
-
+router.use(registrationCheck);
 
 /* ============================
    DISPLAY ROUTES (Render Pages / Views)
    ============================ */
 
 // View inbox with all received messages
-router.get('/', messageController.viewInbox);
+router.get("/", messageController.viewInbox);
 
 // View sent messages
-router.get('/sent', messageController.viewSent);
+router.get("/sent", messageController.viewSent);
 
 // Display message composition form
-router.get('/compose', messageController.showComposeForm);
+router.get("/compose", messageController.showComposeForm);
 
 // View specific message and its thread (replies)
-router.get('/:messageId', messageController.viewMessage);
+router.get("/:messageId", messageController.viewMessage);
 
 // Search messages by sender, subject, or content
-router.get('/search', messageController.searchMessages);
-
+router.get("/search", messageController.searchMessages);
 
 /* ============================
    ACTION ROUTES (API / Logic)
    ============================ */
 
 // Send new message to member or admin
-router.post('/send', messageController.sendMessage);
+router.post("/send", messageController.sendMessage);
 
 // Reply to a message
-router.post('/:messageId/reply', messageController.replyMessage);
+router.post("/:messageId/reply", messageController.replyMessage);
 
 // Mark message as read
-router.post('/:messageId/read', messageController.markAsRead);
+router.post("/:messageId/read", messageController.markAsRead);
 
 // Delete message
-router.delete('/:messageId', messageController.deleteMessage);
+router.delete("/:messageId", messageController.deleteMessage);
 
 module.exports = router;

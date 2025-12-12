@@ -90,7 +90,7 @@
             modal.addEventListener('show.bs.modal', async () => {
                 container.innerHTML = '<p>Loading notifications...</p>';
                 try {
-                    const res = await fetch('/members/notifications/json');
+                    const res = await fetch('/members/notifications');
                     const data = await res.json();
 
                     if (!data.notifications || data.notifications.length === 0) {
@@ -118,7 +118,7 @@
 
             setInterval(async () => {
                 try {
-                    const res = await fetch('/members/notifications/json');
+                    const res = await fetch('/members/notifications');
                     const data = await res.json();
                     if (badge) {
                         const unreadCount = data.notifications.filter(n => !n.read).length;

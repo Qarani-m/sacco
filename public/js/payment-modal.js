@@ -244,7 +244,7 @@ class PaymentModal {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": this.csrfToken,
+          "CSRF-Token": this.csrfToken,
         },
         body: JSON.stringify(payload),
       });

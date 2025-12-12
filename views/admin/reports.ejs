@@ -55,9 +55,14 @@
                             <option value="rejected">Rejected</option>
                         </select>
                     </div>
-                    <button type="submit" style="width: 100%; background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                        Generate Report
-                    </button>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button type="submit" style="flex: 1; background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                            View Report
+                        </button>
+                        <button type="button" onclick="downloadReport('loans', 'loanReportForm')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                            Download Excel
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -77,9 +82,14 @@
                     View comprehensive breakdown of all member share holdings, total value, and distribution statistics.
                 </p>
                 
-                <button onclick="generateShareReport()" style="width: 100%; background: linear-gradient(135deg, #F093FB 0%, #F5576C 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                    Generate Report
-                </button>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button onclick="generateShareReport()" style="flex: 1; background: linear-gradient(135deg, #F093FB 0%, #F5576C 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                        View Report
+                    </button>
+                    <button onclick="downloadReport('shares')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                        Download Excel
+                    </button>
+                </div>
             </div>
 
             <!-- Welfare Report -->
@@ -99,9 +109,14 @@
                         <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">Year</label>
                         <input type="number" name="year" value="<%= new Date().getFullYear() %>" style="width: 100%; padding: 0.625rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.875rem;">
                     </div>
-                    <button type="submit" style="width: 100%; background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                        Generate Report
-                    </button>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button type="submit" style="flex: 1; background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                            View Report
+                        </button>
+                        <button type="button" onclick="downloadReport('welfare', 'welfareReportForm')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                            Download Excel
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -113,7 +128,7 @@
                     </div>
                     <div>
                         <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Savings Report</h3>
-                        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Member savings overview</p>
+                        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Member savings (interest)</p>
                     </div>
                 </div>
                 
@@ -122,31 +137,15 @@
                         <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">Year</label>
                         <input type="number" name="year" value="<%= new Date().getFullYear() %>" style="width: 100%; padding: 0.625rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.875rem;">
                     </div>
-                    <button type="submit" style="width: 100%; background: linear-gradient(135deg, #43E97B 0%, #38F9D7 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                        Generate Report
-                    </button>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button type="submit" style="flex: 1; background: linear-gradient(135deg, #43E97B 0%, #38F9D7 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                            View Report
+                        </button>
+                        <button type="button" onclick="downloadReport('savings', 'savingsReportForm')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                            Download Excel
+                        </button>
+                    </div>
                 </form>
-            </div>
-
-            <!-- SACCO Savings (Interest) -->
-            <div class="report-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #E5E7EB;">
-                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #FA709A 0%, #FEE140 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
-                        <span style="font-size: 1.5rem;">🏦</span>
-                    </div>
-                    <div>
-                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">SACCO Interest</h3>
-                        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Collective interest earnings</p>
-                    </div>
-                </div>
-                
-                <p style="color: #6B7280; font-size: 0.875rem; margin-bottom: 1.5rem; line-height: 1.5;">
-                    View total interest collected from loans and SACCO collective savings breakdown by year.
-                </p>
-                
-                <button onclick="generateSaccoSavingsReport()" style="width: 100%; background: linear-gradient(135deg, #FA709A 0%, #FEE140 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                    Generate Report
-                </button>
             </div>
 
             <!-- Member Statistics -->
@@ -165,9 +164,14 @@
                     Comprehensive statistics on total members, active members, registration status, and growth trends.
                 </p>
                 
-                <button onclick="generateMemberStats()" style="width: 100%; background: linear-gradient(135deg, #30CFD0 0%, #330867 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                    Generate Report
-                </button>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button onclick="generateMemberStats()" style="flex: 1; background: linear-gradient(135deg, #30CFD0 0%, #330867 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                        View Report
+                    </button>
+                    <button onclick="downloadReport('members')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                        Download Excel
+                    </button>
+                </div>
             </div>
 
         </div>

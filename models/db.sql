@@ -13,6 +13,9 @@ CREATE TABLE users (
     role VARCHAR(20) NOT NULL CHECK (role IN ('member', 'admin')),
     is_active BOOLEAN DEFAULT true,
     registration_paid BOOLEAN DEFAULT false,
+    verification_token VARCHAR(255),
+    verification_token_expires TIMESTAMP,
+    email_verified BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

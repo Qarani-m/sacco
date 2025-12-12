@@ -14,7 +14,7 @@ document
     };
 
     try {
-      const response = await fetch("/admin/reports/loans", {
+      const response = await fetch("/admin/reports/sacco/loans", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,7 +39,7 @@ document
 // Share Report
 async function generateShareReport() {
   try {
-    const response = await fetch("/admin/reports/shares", {
+    const response = await fetch("/admin/reports/sacco/shares", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -70,7 +70,7 @@ document
     const year = formData.get("year");
 
     try {
-      const response = await fetch("/admin/reports/welfare", {
+      const response = await fetch("/admin/reports/sacco/welfare", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +102,7 @@ document
     const year = formData.get("year");
 
     try {
-      const response = await fetch("/admin/reports/savings", {
+      const response = await fetch("/admin/reports/sacco/savings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -124,34 +124,10 @@ document
     }
   });
 
-// SACCO Savings Report
-async function generateSaccoSavingsReport() {
-  try {
-    const response = await fetch("/admin/reports/sacco-savings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-Token": window.csrfToken,
-      },
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      displaySaccoSavingsReport(result.report);
-    } else {
-      alert("Error generating report: " + (result.error || "Unknown error"));
-    }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Failed to generate report");
-  }
-}
-
 // Member Statistics
 async function generateMemberStats() {
   try {
-    const response = await fetch("/admin/reports/member-stats", {
+    const response = await fetch("/admin/reports/sacco/members", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -172,16 +148,24 @@ async function generateMemberStats() {
   }
 }
 
-// Store current report data for export
-let currentReportData = null;
-let currentReportType = null;
+// Download Function
+function downloadReport(type, formId) {
+  let url = `/admin/reports/download/${type}?`;
+
+  if (formId) {
+    const form = document.getElementById(formId);
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+    url += params.toString();
+  }
+
+  // Trigger download
+  window.location.href = url;
+}
 
 // Display Functions
 
 function displayLoanReport(report) {
-  currentReportData = report;
-  currentReportType = "loan";
-
   const content = `
         <div style="margin-bottom: 2rem;">
             <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Loan Statistics</h3>
@@ -272,9 +256,6 @@ function displayLoanReport(report) {
 }
 
 function displayShareReport(report) {
-  currentReportData = report;
-  currentReportType = "share";
-
   const content = `
         <div style="margin-bottom: 2rem;">
             <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Share Statistics</h3>
@@ -333,9 +314,6 @@ function displayShareReport(report) {
 }
 
 function displayWelfareReport(report) {
-  currentReportData = report;
-  currentReportType = "welfare";
-
   const content = `
         <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Welfare Contributions - ${
           report.year
@@ -384,9 +362,6 @@ function displayWelfareReport(report) {
 }
 
 function displaySavingsReport(report) {
-  currentReportData = report;
-  currentReportType = "savings";
-
   const content = `
         <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Member Savings - ${
           report.year
@@ -429,9 +404,6 @@ function displaySavingsReport(report) {
 }
 
 function displaySaccoSavingsReport(report) {
-  currentReportData = report;
-  currentReportType = "sacco";
-
   const content = `
         <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">SACCO Collective Savings (Interest)</h3>
         <div style="overflow-x: auto;">
@@ -470,9 +442,6 @@ function displaySaccoSavingsReport(report) {
 }
 
 function displayMemberStatsReport(report) {
-  currentReportData = report;
-  currentReportType = "member";
-
   const content = `
         <div style="margin-bottom: 2rem;">
             <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Member Statistics</h3>
@@ -512,90 +481,8 @@ function showReport(content) {
 
 function closeReport() {
   document.getElementById("reportResults").style.display = "none";
-  currentReportData = null;
-  currentReportType = null;
 }
 
 function printReport() {
   window.print();
-}
-
-function exportReport() {
-  if (!currentReportData || !currentReportType) {
-    alert("No report data to export");
-    return;
-  }
-
-  let csvContent = "";
-  let filename = "";
-
-  switch (currentReportType) {
-    case "loan":
-      filename = "loan_report.csv";
-      csvContent = "Borrower,Amount,Balance,Status,Date\n";
-      currentReportData.loans.forEach((loan) => {
-        csvContent += `"${loan.borrower_name}",${
-          loan.approved_amount || loan.requested_amount
-        },${loan.balance_remaining || 0},${loan.status},${new Date(
-          loan.created_at
-        ).toLocaleDateString()}\n`;
-      });
-      break;
-    case "share":
-      filename = "share_report.csv";
-      csvContent = "Member,Email,Total Shares,Total Value\n";
-      currentReportData.member_summary.forEach((member) => {
-        csvContent += `"${member.full_name}","${member.email}",${member.total_shares},${member.total_value}\n`;
-      });
-      break;
-    case "welfare":
-      filename = `welfare_report_${currentReportData.year}.csv`;
-      csvContent = "Member,Amount,Date,Method\n";
-      if (currentReportData.payments) {
-        currentReportData.payments.forEach((payment) => {
-          csvContent += `"${payment.member_name}",${payment.amount},${new Date(
-            payment.payment_date
-          ).toLocaleDateString()},${payment.payment_method}\n`;
-        });
-      }
-      break;
-    case "savings":
-      filename = `savings_report_${currentReportData.year}.csv`;
-      csvContent = "Member,Amount,Type\n";
-      if (currentReportData.savings) {
-        currentReportData.savings.forEach((saving) => {
-          csvContent += `"${saving.member_name}",${saving.amount},${saving.type}\n`;
-        });
-      }
-      break;
-    case "sacco":
-      filename = "sacco_savings_report.csv";
-      csvContent = "Year,Total Interest Collected\n";
-      if (currentReportData.savings) {
-        currentReportData.savings.forEach((saving) => {
-          csvContent += `${saving.year},${saving.total_interest_collected}\n`;
-        });
-      }
-      break;
-    case "member":
-      filename = "member_statistics.csv";
-      csvContent = "Metric,Count\n";
-      csvContent += `Total Members,${currentReportData.total_members || 0}\n`;
-      csvContent += `Active Members,${currentReportData.active_members || 0}\n`;
-      csvContent += `Registered & Paid,${
-        currentReportData.registered_members || 0
-      }\n`;
-      break;
-  }
-
-  // Create and download CSV file
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  link.setAttribute("href", url);
-  link.setAttribute("download", filename);
-  link.style.visibility = "hidden";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 }

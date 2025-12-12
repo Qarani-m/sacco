@@ -80,10 +80,11 @@ app.use(
 app.use(flash());
 
 // CSRF Protection with excluded paths
+// CSRF Protection with excluded paths
 const excludedPaths = ["/payments/mpesa/callback", "/mpesa/callback"];
 
 app.use((req, res, next) => {
-  if (excludedPaths.includes(req.path)) {
+  if (excludedPaths.includes(req.path) || req.path.startsWith("/api")) {
     return next();
   }
 
@@ -140,7 +141,10 @@ app.post(
   paymentController.mpesaCallback
 );
 
+const apiRoutes = require("./routes/api");
+
 // Routes
+app.use("/api", apiRoutes);
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/members", memberRoutes);

@@ -56,6 +56,7 @@ class PaymentService {
       const formattedPhone = phoneNumber.startsWith("0")
         ? `254${phoneNumber.slice(1)}`
         : phoneNumber;
+console.log("formattedPhone")
 
       const response = await axios.post(
         `${this.baseUrl}/mpesa/stkpush/v1/processrequest`,
@@ -64,7 +65,7 @@ class PaymentService {
           Password: password,
           Timestamp: timestamp,
           TransactionType: "CustomerPayBillOnline",
-          Amount: Math.ceil(amount), // Ensure integer
+          Amount: Math.ceil(1), // Ensure integer
           PartyA: formattedPhone,
           PartyB: this.shortcode,
           PhoneNumber: formattedPhone,

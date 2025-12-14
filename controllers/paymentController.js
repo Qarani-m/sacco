@@ -14,7 +14,6 @@ exports.initiatePayment = async (req, res) => {
   try {
     const { category, userId } = req.params;
     const { amount, phone_number, registered_number } = req.body;
-
     // Verify user exists
     const user = await User.findById(userId);
     if (!user) {

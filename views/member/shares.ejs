@@ -166,7 +166,9 @@
 
     </div>
 
+    <%- include('../partials/payment-modal') %>
     <%- include('../layouts/footer') %>
+    <script src="/js/payment-modal.js"></script>
 
     <script>
         function updateTotal() {
@@ -177,7 +179,7 @@
 
         document.getElementById('quantity').addEventListener('input', updateTotal);
 
-        document.getElementById('purchaseSharesForm').addEventListener('submit', async function(e) {
+        document.getElementById('purchaseSharesForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const quantity = parseInt(document.getElementById('quantity').value);
@@ -188,29 +190,20 @@
                 return;
             }
 
-            try {
-                const response = await fetch('/shares/buy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ quantity })
-                });
+            const amount = quantity * 1000;
 
-                const data = await response.json();
-
-                if (data.success) {
-                    alert(data.message || 'Share purchase initiated! Check your phone for M-Pesa prompt.');
-                    if (data.transaction_ref) {
-                        window.location.href = `/payments/status/${data.transaction_ref}`;
-                    } else {
-                        window.location.reload();
-                    }
-                } else {
-                    alert('Error: ' + (data.error || 'Failed to purchase shares'));
+            // Open payment modal
+            paymentModal.open({
+                title: 'Purchase Shares',
+                amount: amount,
+                category: 'shares',
+                userId: '<%= user.id %>',
+                userPhone: '<%= user.phone_number %>',
+                csrfToken: '<%= csrfToken %>',
+                metadata: {
+                    quantity: quantity
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to initiate purchase. Please try again.');
-            }
+            });
         });
     </script>
 </body>

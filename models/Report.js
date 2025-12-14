@@ -126,29 +126,38 @@ class Report {
         return result.rows;
     }
 
-    static async getSaccoSavings(filters = {}) {
-        let query = `
-            SELECT SUM(amount) AS total_savings, SUM(interest_collected) AS total_interest
-            FROM sacco_savings
-            WHERE 1=1
-        `;
-        const params = [];
-        let i = 1;
+ static async getSaccoSavings(filters = {}) {
+    let query = `
+        SELECT
+            SUM(sy.total_amount) AS total_savings,
+            SUM(ss.total_interest_collected) AS total_interest
+        FROM sacco_savings ss
+        LEFT JOIN (
+            SELECT year, SUM(amount) AS total_amount
+            FROM savings
+            GROUP BY year
+        ) sy ON sy.year = ss.year
+        WHERE 1=1
+    `;
 
-        if (filters.year) {
-            query += ` AND EXTRACT(YEAR FROM date) = $${i++}`;
-            params.push(filters.year);
-        }
+    const params = [];
+    let i = 1;
 
-        const result = await db.query(query, params);
-        return result.rows[0];
+    if (filters.year) {
+        query += ` AND ss.year = $${i++}`;
+        params.push(filters.year);
     }
+
+    const result = await db.query(query, params);
+    return result.rows[0];
+}
+
 
     static async getMemberStats() {
         const query = `
             SELECT COUNT(*) AS total_members,
-                   SUM(CASE WHEN active THEN 1 ELSE 0 END) AS active_members,
-                   SUM(CASE WHEN active THEN 0 ELSE 1 END) AS inactive_members
+                   SUM(CASE WHEN is_active THEN 1 ELSE 0 END) AS active_members,
+                   SUM(CASE WHEN is_active THEN 0 ELSE 1 END) AS inactive_members
             FROM users
         `;
         const result = await db.query(query);

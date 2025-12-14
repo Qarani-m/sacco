@@ -14,7 +14,7 @@ document
     };
 
     try {
-      const response = await fetch("/admin/reports/sacco/loans", {
+      const response = await fetch("/reports/sacco/loans", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,7 +39,7 @@ document
 // Share Report
 async function generateShareReport() {
   try {
-    const response = await fetch("/admin/reports/sacco/shares", {
+    const response = await fetch("/reports/sacco/shares", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -70,7 +70,7 @@ document
     const year = formData.get("year");
 
     try {
-      const response = await fetch("/admin/reports/sacco/welfare", {
+      const response = await fetch("/reports/sacco/welfare", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +102,7 @@ document
     const year = formData.get("year");
 
     try {
-      const response = await fetch("/admin/reports/sacco/savings", {
+      const response = await fetch("/reports/sacco/savings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,7 +127,7 @@ document
 // Member Statistics
 async function generateMemberStats() {
   try {
-    const response = await fetch("/admin/reports/sacco/members", {
+    const response = await fetch("/reports/sacco/members", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -150,7 +150,7 @@ async function generateMemberStats() {
 
 // Download Function
 function downloadReport(type, formId) {
-  let url = `/admin/reports/download/${type}?`;
+  let url = `/reports/download/${type}?`;
 
   if (formId) {
     const form = document.getElementById(formId);

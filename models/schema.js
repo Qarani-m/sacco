@@ -210,6 +210,31 @@ CREATE TABLE IF NOT EXISTS welfare_payments (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS member_profile_forms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    national_id TEXT,
+    date_of_birth DATE,
+    address TEXT,
+    occupation TEXT,
+    next_of_kin_name TEXT,
+    next_of_kin_phone TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS admin_notifications (
+    id SERIAL PRIMARY KEY,
+    admin_id TEXT NOT NULL,
+    notification_type TEXT NOT NULL,
+    reference_id INTEGER,
+    message TEXT NOT NULL,
+    read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(admin_id) REFERENCES users(id) ON DELETE CASCADE
+);
 `;
 
 module.exports = {

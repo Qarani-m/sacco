@@ -23,11 +23,24 @@ router.use((req, res, next) => {
 
 // GET /admin/register
 // Show registration form
-router.get("/register", (req, res) => {
-  res.render("admin/register", {
-    title: "Register Member",
-    layout: "layouts/admin",
-  });
+router.get("/register", async (req, res) => {
+  try {
+    const db = require("../models/db");
+    const pendingCountResult = await db.query(
+      "SELECT COUNT(*) FROM admin_actions WHERE status = 'pending'"
+    );
+    const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+    res.render("admin/register", {
+      title: "Register Member",
+      layout: "layouts/admin",
+      pendingCount,
+      user: req.user,
+    });
+  } catch (error) {
+    console.error("Register page error:", error);
+    res.status(500).render("errors/500", { title: "Server Error", error });
+  }
 });
 
 // POST /admin/register
@@ -157,13 +170,13 @@ router.post(
 // View messages from members and other admins
 router.get("/messages", adminController.listMessages);
 
-// GET /admin/messages/:messageId
-// View specific message thread
-router.get("/messages/:messageId", adminController.viewMessage);
-
 // GET /admin/messages/new
 // Show form to send a new message
 router.get("/messages/new", adminController.showMessageForm);
+
+// GET /admin/messages/:messageId
+// View specific message thread
+router.get("/messages/:messageId", adminController.viewMessage);
 
 // POST /admin/messages/send
 // Send message to member(s) - payment reminders, announcements, etc.

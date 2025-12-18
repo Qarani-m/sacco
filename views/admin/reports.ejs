@@ -5,9 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - SACCO Admin</title>
     <link rel="stylesheet" href="/css/admin.css">
+    <style>
+        /* Override specific styles for B&W Flat Theme */
+        .report-card {
+            background: white !important;
+            border: 1px solid #000 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        .report-icon-container {
+            background: #000 !important;
+            border-radius: 0 !important;
+            color: white !important;
+        }
+        .btn-flat-black {
+            background: #000 !important;
+            color: white !important;
+            border: 1px solid #000 !important;
+            border-radius: 0 !important;
+            padding: 0.75rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+        }
+        .btn-flat-black:hover {
+            background: white !important;
+            color: black !important;
+        }
+        .btn-flat-outline {
+            background: white !important;
+            color: black !important;
+            border: 1px solid #000 !important;
+            border-radius: 0 !important;
+            padding: 0.75rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+        }
+        .btn-flat-outline:hover {
+            background: #000 !important;
+            color: white !important;
+        }
+        input, select {
+            border-radius: 0 !important;
+            border: 1px solid #000 !important;
+            padding: 0.625rem !important;
+        }
+        h1, h2, h3 {
+            color: #000 !important;
+        }
+    </style>
 </head>
-<body style="background: #F9FAFB; color: #111827; font-family: 'Inter', sans-serif;">
-
+<body style="background: white; color: black; font-family: 'Inter', sans-serif;">
 
     <script>
         // Make CSRF token available globally
@@ -16,160 +69,160 @@
 
     <div class="container" style="margin-top: 2rem; max-width: 1400px;">
         
-        <div class="page-header" style="margin-bottom: 2rem;">
-            <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem;">Financial Reports</h1>
-            <p style="color: #6B7280; font-size: 0.95rem;">Generate comprehensive reports for loans, shares, welfare, and member statistics</p>
+        <div class="page-header" style="margin-bottom: 2rem; border-bottom: 1px solid #000; padding-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase;">Financial Reports</h1>
+            <p style="color: #666; font-size: 0.95rem;">Generate comprehensive reports for loans, shares, welfare, and member statistics</p>
         </div>
 
         <!-- Reports Grid -->
         <div class="reports-grid" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); margin-bottom: 2rem;">
             
             <!-- Loan Report -->
-            <div class="report-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #E5E7EB;">
+            <div class="report-card" style="padding: 1.5rem;">
                 <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                    <div class="report-icon-container" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
                         <span style="font-size: 1.5rem;">💰</span>
                     </div>
                     <div>
-                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Loan Report</h3>
-                        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Detailed loan analysis</p>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Loan Report</h3>
+                        <p style="font-size: 0.85rem; color: #666; margin: 0;">Detailed loan analysis</p>
                     </div>
                 </div>
                 
                 <form id="loanReportForm" style="margin-top: 1.25rem;">
                     <div class="form-group" style="margin-bottom: 1rem;">
-                        <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">Start Date</label>
-                        <input type="date" name="start_date" style="width: 100%; padding: 0.625rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.875rem;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: #000; text-transform: uppercase;">Start Date</label>
+                        <input type="date" name="start_date" style="width: 100%;">
                     </div>
                     <div class="form-group" style="margin-bottom: 1rem;">
-                        <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">End Date</label>
-                        <input type="date" name="end_date" style="width: 100%; padding: 0.625rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.875rem;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: #000; text-transform: uppercase;">End Date</label>
+                        <input type="date" name="end_date" style="width: 100%;">
                     </div>
                     <div class="form-group" style="margin-bottom: 1.25rem;">
-                        <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">Status</label>
-                        <select name="status" style="width: 100%; padding: 0.625rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.875rem;">
-                            <option value="">All Statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="active">Active</option>
-                            <option value="paid">Paid</option>
-                            <option value="rejected">Rejected</option>
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: #000; text-transform: uppercase;">Status</label>
+                        <select name="status" style="width: 100%;">
+                            <option value="">ALL STATUSES</option>
+                            <option value="pending">PENDING</option>
+                            <option value="active">ACTIVE</option>
+                            <option value="paid">PAID</option>
+                            <option value="rejected">REJECTED</option>
                         </select>
                     </div>
                     <div style="display: flex; gap: 0.75rem;">
-                        <button type="submit" style="flex: 1; background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                        <button type="submit" class="btn-flat-black" style="flex: 1;">
                             View Report
                         </button>
-                        <button type="button" onclick="downloadReport('loans', 'loanReportForm')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                            Download Excel
+                        <button type="button" onclick="downloadReport('loans', 'loanReportForm')" class="btn-flat-outline" style="flex: 1;">
+                            Download CSV
                         </button>
                     </div>
                 </form>
             </div>
 
             <!-- Share Report -->
-            <div class="report-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #E5E7EB;">
+            <div class="report-card" style="padding: 1.5rem;">
                 <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #F093FB 0%, #F5576C 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                    <div class="report-icon-container" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
                         <span style="font-size: 1.5rem;">📊</span>
                     </div>
                     <div>
-                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Share Report</h3>
-                        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Member share holdings</p>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Share Report</h3>
+                        <p style="font-size: 0.85rem; color: #666; margin: 0;">Member share holdings</p>
                     </div>
                 </div>
                 
-                <p style="color: #6B7280; font-size: 0.875rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                <p style="color: #666; font-size: 0.875rem; margin-bottom: 1.5rem; line-height: 1.5;">
                     View comprehensive breakdown of all member share holdings, total value, and distribution statistics.
                 </p>
                 
                 <div style="display: flex; gap: 0.75rem;">
-                    <button onclick="generateShareReport()" style="flex: 1; background: linear-gradient(135deg, #F093FB 0%, #F5576C 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                    <button onclick="generateShareReport()" class="btn-flat-black" style="flex: 1;">
                         View Report
                     </button>
-                    <button onclick="downloadReport('shares')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                        Download Excel
+                    <button onclick="downloadReport('shares')" class="btn-flat-outline" style="flex: 1;">
+                        Download CSV
                     </button>
                 </div>
             </div>
 
             <!-- Welfare Report -->
-            <div class="report-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #E5E7EB;">
+            <div class="report-card" style="padding: 1.5rem;">
                 <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                    <div class="report-icon-container" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
                         <span style="font-size: 1.5rem;">🏥</span>
                     </div>
                     <div>
-                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Welfare Report</h3>
-                        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Annual contributions</p>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Welfare Report</h3>
+                        <p style="font-size: 0.85rem; color: #666; margin: 0;">Annual contributions</p>
                     </div>
                 </div>
                 
                 <form id="welfareReportForm" style="margin-top: 1.25rem;">
                     <div class="form-group" style="margin-bottom: 1.25rem;">
-                        <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">Year</label>
-                        <input type="number" name="year" value="<%= new Date().getFullYear() %>" style="width: 100%; padding: 0.625rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.875rem;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: #000; text-transform: uppercase;">Year</label>
+                        <input type="number" name="year" value="<%= new Date().getFullYear() %>" style="width: 100%;">
                     </div>
                     <div style="display: flex; gap: 0.75rem;">
-                        <button type="submit" style="flex: 1; background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                        <button type="submit" class="btn-flat-black" style="flex: 1;">
                             View Report
                         </button>
-                        <button type="button" onclick="downloadReport('welfare', 'welfareReportForm')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                            Download Excel
+                        <button type="button" onclick="downloadReport('welfare', 'welfareReportForm')" class="btn-flat-outline" style="flex: 1;">
+                            Download CSV
                         </button>
                     </div>
                 </form>
             </div>
 
             <!-- Savings Report -->
-            <div class="report-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #E5E7EB;">
+            <div class="report-card" style="padding: 1.5rem;">
                 <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #43E97B 0%, #38F9D7 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                    <div class="report-icon-container" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
                         <span style="font-size: 1.5rem;">💵</span>
                     </div>
                     <div>
-                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Savings Report</h3>
-                        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Member savings (3% interest)</p>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Savings Report</h3>
+                        <p style="font-size: 0.85rem; color: #666; margin: 0;">Member savings (3% interest)</p>
                     </div>
                 </div>
                 
                 <form id="savingsReportForm" style="margin-top: 1.25rem;">
                     <div class="form-group" style="margin-bottom: 1.25rem;">
-                        <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151;">Year</label>
-                        <input type="number" name="year" value="<%= new Date().getFullYear() %>" style="width: 100%; padding: 0.625rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.875rem;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: #000; text-transform: uppercase;">Year</label>
+                        <input type="number" name="year" value="<%= new Date().getFullYear() %>" style="width: 100%;">
                     </div>
                     <div style="display: flex; gap: 0.75rem;">
-                        <button type="submit" style="flex: 1; background: linear-gradient(135deg, #43E97B 0%, #38F9D7 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                        <button type="submit" class="btn-flat-black" style="flex: 1;">
                             View Report
                         </button>
-                        <button type="button" onclick="downloadReport('savings', 'savingsReportForm')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                            Download Excel
+                        <button type="button" onclick="downloadReport('savings', 'savingsReportForm')" class="btn-flat-outline" style="flex: 1;">
+                            Download CSV
                         </button>
                     </div>
                 </form>
             </div>
 
             <!-- Member Statistics -->
-            <div class="report-card" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #E5E7EB;">
+            <div class="report-card" style="padding: 1.5rem;">
                 <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #30CFD0 0%, #330867 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                    <div class="report-icon-container" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
                         <span style="font-size: 1.5rem;">👥</span>
                     </div>
                     <div>
-                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Member Statistics</h3>
-                        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Membership overview</p>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Member Statistics</h3>
+                        <p style="font-size: 0.85rem; color: #666; margin: 0;">Membership overview</p>
                     </div>
                 </div>
                 
-                <p style="color: #6B7280; font-size: 0.875rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                <p style="color: #666; font-size: 0.875rem; margin-bottom: 1.5rem; line-height: 1.5;">
                     Comprehensive statistics on total members, active members, registration status, and growth trends.
                 </p>
                 
                 <div style="display: flex; gap: 0.75rem;">
-                    <button onclick="generateMemberStats()" style="flex: 1; background: linear-gradient(135deg, #30CFD0 0%, #330867 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                    <button onclick="generateMemberStats()" class="btn-flat-black" style="flex: 1;">
                         View Report
                     </button>
-                    <button onclick="downloadReport('members')" style="flex: 1; background: #10B981; color: white; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-                        Download Excel
+                    <button onclick="downloadReport('members')" class="btn-flat-outline" style="flex: 1;">
+                        Download CSV
                     </button>
                 </div>
             </div>
@@ -177,17 +230,17 @@
         </div>
 
         <!-- Report Results Section -->
-        <div id="reportResults" class="report-results" style="display: none; background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #E5E7EB;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #E5E7EB;">
-                <h2 style="font-size: 1.5rem; font-weight: 700; margin: 0;">Report Results</h2>
+        <div id="reportResults" class="report-results" style="display: none; background: white; border: 1px solid #000; padding: 2rem; border-radius: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #000;">
+                <h2 style="font-size: 1.5rem; font-weight: 700; margin: 0; text-transform: uppercase;">Report Results</h2>
                 <div style="display: flex; gap: 0.75rem;">
-                    <button onclick="printReport()" style="background: #3B82F6; color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                    <button onclick="printReport()" class="btn-flat-outline">
                         🖨️ Print
                     </button>
-                    <button onclick="exportReport()" style="background: #10B981; color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                    <button onclick="exportReport()" class="btn-flat-outline">
                         📥 Export CSV
                     </button>
-                    <button onclick="closeReport()" style="background: #6B7280; color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                    <button onclick="closeReport()" class="btn-flat-black">
                         ✕ Close
                     </button>
                 </div>

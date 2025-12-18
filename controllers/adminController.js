@@ -1483,11 +1483,18 @@ exports.viewDocument = async (req, res) => {
     // Get member's other documents for context
     const memberDocuments = await Document.getByMemberId(document.member_id);
 
+    const db = require("../models/db");
+    const pendingCountResult = await db.query(
+      "SELECT COUNT(*) FROM admin_actions WHERE status = 'pending'"
+    );
+    const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
     res.render("admin/document-view", {
       title: "Review Document",
       layout: "layouts/admin",
       document,
       memberDocuments,
+      pendingCount,
       user: res.locals.user || req.user,
     });
   } catch (error) {

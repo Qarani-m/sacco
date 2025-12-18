@@ -14,7 +14,7 @@ class PaymentAllocationService {
    * 3. Share purchases
    * 4. Personal savings (surplus)
    *
-   * 1% loan interest goes to SACCO savings
+   * 3% loan interest goes to SACCO savings
    */
   static async allocatePayment(userId, totalAmount, transactionRef) {
     const allocation = {
@@ -60,12 +60,12 @@ class PaymentAllocationService {
           await SaccoSavings.create({
             amount: loanInterest,
             source: "loan_interest",
-            description: `1% interest from loan ${loan.id.substring(0, 8)}`,
+            description: `3% interest from loan ${loan.id.substring(0, 8)}`,
           });
         } else {
           // Partial payment
           const paymentAmount = allocation.remaining;
-          const principalPortion = paymentAmount / 1.01;
+          const principalPortion = paymentAmount / 1.03;
           const interestPortion = paymentAmount - principalPortion;
 
           allocation.loan_repayment += principalPortion;
@@ -78,7 +78,7 @@ class PaymentAllocationService {
           await SaccoSavings.create({
             amount: interestPortion,
             source: "loan_interest",
-            description: `1% interest from loan ${loan.id.substring(0, 8)}`,
+            description: `3% interest from loan ${loan.id.substring(0, 8)}`,
           });
         }
       }

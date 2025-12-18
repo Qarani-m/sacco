@@ -7,7 +7,8 @@
     "dev": "tailwindcss -i ./public/css/tailwind.css -o ./public/css/output.css --watch",
     "build": "tailwindcss -i ./public/css/tailwind.css -o ./public/css/output.css --minify",
     "start": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed-sqlite": "node scripts/init-sqlite.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +16,7 @@
   "dependencies": {
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "connect-flash": "^0.1.1",
     "connect-pg-simple": "^10.0.0",
     "cookie-parser": "^1.4.7",

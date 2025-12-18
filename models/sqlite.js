@@ -3,10 +3,12 @@ const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const fs = require("fs");
 
-const dbPath = path.resolve(__dirname, "../sacco.sqlite");
+const dbPath = path.resolve(__dirname, "../sacco.db");
 const { schema } = require("./schema");
 
 let db;
+
+const bcrypt = require("bcryptjs");
 
 function connect() {
   return new Promise((resolve, reject) => {
@@ -16,13 +18,65 @@ function connect() {
         reject(err);
       } else {
         console.log("Connected to SQLite database at", dbPath);
-        db.exec(schema, (err) => {
+        db.exec(schema, async (err) => {
           if (err) {
             console.error("Error initializing SQLite schema:", err);
             reject(err);
           } else {
             console.log("SQLite schema initialized");
-            resolve(db);
+
+            // Auto-seed if empty
+            try {
+              db.get(
+                "SELECT count(*) as count FROM users",
+                async (err, row) => {
+                  if (err) {
+                    console.error("Error checking users:", err);
+                    // Non-fatal, just resolve
+                    resolve(db);
+                    return;
+                  }
+
+                  if (row && row.count === 0) {
+                    console.log("Seeding SQLite database...");
+                    const salt = await bcrypt.genSalt(10);
+                    const passwordHash = await bcrypt.hash("password123", salt);
+                    const adminId = uuidv4();
+                    const memberId = uuidv4();
+
+                    const stmt = db.prepare(
+                      "INSERT INTO users (id, email, password_hash, full_name, phone_number, role, is_active, email_verified) VALUES (?, ?, ?, ?, ?, ?, 1, 1)"
+                    );
+
+                    stmt.run(
+                      adminId,
+                      "admin@sacco.com",
+                      passwordHash,
+                      "System Admin",
+                      "0700000000",
+                      "admin"
+                    );
+                    stmt.run(
+                      memberId,
+                      "member@sacco.com",
+                      passwordHash,
+                      "John Doe",
+                      "0711111111",
+                      "member"
+                    );
+                    stmt.finalize();
+
+                    console.log(
+                      "✅ SQLite seeded with admin@sacco.com & member@sacco.com (pass: password123)"
+                    );
+                  }
+                  resolve(db);
+                }
+              );
+            } catch (seedErr) {
+              console.error("Seeding error:", seedErr);
+              resolve(db);
+            }
           }
         });
       }

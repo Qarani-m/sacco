@@ -1,5 +1,3 @@
-const db = require("./db");
-
 const schema = `
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,

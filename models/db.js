@@ -18,6 +18,7 @@ const pool = new Pool({
 
 // Initialize connection
 (async () => {
+  // 1. Try Local PostgreSQL
   try {
     const client = await pool.connect();
     console.log("✅ Connected to PostgreSQL database");
@@ -26,22 +27,54 @@ const pool = new Pool({
 
     pool.on("error", (err) => {
       console.error("Unexpected PostgreSQL error:", err);
-      // Could switch to SQLite here if PG dies mid-run
     });
+    return;
   } catch (err) {
     console.warn("⚠️ PostgreSQL connection failed:", err.message);
-    console.log("🔄 Attempting fallback to SQLite...");
+  }
 
+  // 2. Try Neon (Serverless Postgres)
+  if (process.env.DATABASE_URL) {
+    console.log("🔄 Attempting fallback to Neon (Serverless Postgres)...");
     try {
-      await sqlite.connect();
-      currentDb = "sqlite";
-      queryFn = sqlite.query;
-      console.log("✅ Fallback to SQLite successful");
-    } catch (sqliteErr) {
-      console.error("❌ FATAL: Both PostgreSQL and SQLite connections failed");
-      console.error("SQLite Error:", sqliteErr);
-      process.exit(-1);
+      const { neon } = await import("@neondatabase/serverless");
+      const sql = neon(process.env.DATABASE_URL);
+
+      // Test connection
+      await sql`SELECT 1`;
+
+      currentDb = "neon";
+      console.log("✅ Connected to Neon database");
+
+      queryFn = async (text, params) => {
+        // Neon driver accepts (query, params) signature
+        const rows = await sql(text, params);
+        // Adapt to pg-style result object
+        return {
+          rows: rows,
+          rowCount: rows.length,
+          // Neon doesn't easily give fields/command info in basic mode, but rows is most important
+        };
+      };
+      return;
+    } catch (neonErr) {
+      console.warn("⚠️ Neon connection failed:", neonErr.message);
     }
+  } else {
+    console.log("ℹ️ No DATABASE_URL provided, skipping Neon fallback.");
+  }
+
+  // 3. Fallback to SQLite
+  console.log("🔄 Attempting fallback to SQLite...");
+  try {
+    await sqlite.connect();
+    currentDb = "sqlite";
+    queryFn = sqlite.query;
+    console.log("✅ Fallback to SQLite successful");
+  } catch (sqliteErr) {
+    console.error("❌ FATAL: All database connections failed");
+    console.error("SQLite Error:", sqliteErr);
+    process.exit(-1);
   }
 })();
 

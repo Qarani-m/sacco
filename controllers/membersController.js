@@ -426,6 +426,17 @@ exports.uploadDocuments = async (req, res) => {
       fileName: req.file.filename,
     });
 
+    // Create pending admin action
+    const AdminAction = require("../models/AdminAction");
+    await AdminAction.create({
+      initiated_by: userId,
+      action_type: "update",
+      entity_type: "document",
+      entity_id: document.id,
+      reason: "Document upload requires review",
+      action_data: { status: "approved" }, // Implied action is approval
+    });
+
     // Notify all admins
     const message = `${
       req.user.full_name

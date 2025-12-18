@@ -1,5 +1,4 @@
 const sqlite3 = require("sqlite3").verbose();
-const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const fs = require("fs");
 
@@ -10,8 +9,17 @@ let db;
 
 const bcrypt = require("bcryptjs");
 
+// UUID will be imported dynamically
+let uuidv4;
+
 function connect() {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    // Dynamic import for UUID (ESM)
+    if (!uuidv4) {
+      const uuidModule = await import("uuid");
+      uuidv4 = uuidModule.v4;
+    }
+
     db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
         console.error("Error opening SQLite database:", err);

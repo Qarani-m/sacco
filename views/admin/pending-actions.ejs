@@ -34,6 +34,8 @@
                         detailUrl = `/admin/loans/${action.entity_id}`;
                     } else if (action.entity_type === 'user' && action.entity_id) {
                         detailUrl = `/admin/members/${action.entity_id}`;
+                    } else if (action.entity_type === 'document' && action.entity_id) {
+                        detailUrl = `/admin/documents/${action.entity_id}`;
                     }
                 %>
 

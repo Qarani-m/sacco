@@ -75,7 +75,7 @@ exports.showRegistrationPage = async (req, res) => {
 exports.payRegistrationFee = async (req, res) => {
   try {
     const userId = req.user.id;
-    const amount = 1;//--- REG FEE
+    const amount = 1; //--- REG FEE
     const transactionRef = `REG${Date.now()}${Math.random()
       .toString(36)
       .substr(2, 9)}`;
@@ -353,7 +353,7 @@ exports.payRegistrationFee = async (req, res) => {
     await Transaction.create({
       user_id: userId,
       amount,
-      type: "registration_fee",
+      type: "registration",
       payment_method: "mpesa",
       transaction_ref: transactionRef,
       status: "completed",
@@ -424,6 +424,17 @@ exports.uploadDocuments = async (req, res) => {
       documentType: documentType,
       filePath: req.file.path,
       fileName: req.file.filename,
+    });
+
+    // Create pending admin action
+    const AdminAction = require("../models/AdminAction");
+    await AdminAction.create({
+      initiated_by: userId,
+      action_type: "update",
+      entity_type: "document",
+      entity_id: document.id,
+      reason: "Document upload requires review",
+      action_data: { status: "approved" }, // Implied action is approval
     });
 
     // Notify all admins

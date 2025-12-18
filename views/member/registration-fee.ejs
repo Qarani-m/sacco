@@ -386,7 +386,10 @@
             try {
                 const response = await fetch('/members/registration/pay', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'CSRF-Token': '<%= csrfToken %>'
+                    },
                     body: JSON.stringify({ 
                         phone_number: phoneNumber 
                     })

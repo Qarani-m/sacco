@@ -85,6 +85,7 @@ const buyShares = async (req, res) => {
       : phone_number;
 
     if (!paymentPhoneNumber) {
+      console.log("Phone number is reequired");
       return res.status(400).json({ error: "Phone number is required" });
     }
 

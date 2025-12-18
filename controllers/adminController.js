@@ -214,6 +214,46 @@ async function executeAdminAction(action) {
         }
         break;
 
+      case "document":
+        if (action_type === "update") {
+          const Document = require("../models/Document");
+          const NotificationService = require("../services/notificationService");
+
+          await Document.updateStatus(
+            entity_id,
+            action_data.status,
+            action.initiated_by === action.verifications[0]?.verifier_id
+              ? action.verifications[0].verifier_id
+              : "system", // Approximate reviewer
+            action_data.rejection_reason || null
+          );
+
+          // Notify member
+          const doc = await Document.getById(entity_id);
+          let notificationMessage = "";
+          if (action_data.status === "approved") {
+            notificationMessage = `Your ${doc.document_type.replace(
+              "_",
+              " "
+            )} has been approved`;
+          } else if (action_data.status === "rejected") {
+            notificationMessage = `Your ${doc.document_type.replace(
+              "_",
+              " "
+            )} was rejected`;
+          }
+
+          if (notificationMessage) {
+            await NotificationService.createNotification(
+              doc.member_id,
+              "document_review",
+              doc.id, // Using doc.id (int) here, which we fixed to allow in text column
+              notificationMessage
+            );
+          }
+        }
+        break;
+
       case "payment_transaction":
         if (action_type === "update" && action_data.status === "completed") {
           const Transaction = require("../models/Transaction");
@@ -1483,11 +1523,18 @@ exports.viewDocument = async (req, res) => {
     // Get member's other documents for context
     const memberDocuments = await Document.getByMemberId(document.member_id);
 
+    const db = require("../models/db");
+    const pendingCountResult = await db.query(
+      "SELECT COUNT(*) FROM admin_actions WHERE status = 'pending'"
+    );
+    const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
     res.render("admin/document-view", {
       title: "Review Document",
       layout: "layouts/admin",
       document,
       memberDocuments,
+      pendingCount,
       user: res.locals.user || req.user,
     });
   } catch (error) {

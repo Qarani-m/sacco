@@ -49,7 +49,7 @@
                         <p style="margin: 0; font-size: 0.875rem;">Payment will be processed via M-Pesa STK Push</p>
                     </div>
 
-                    <button type="submit" class="btn-primary w-full">Purchase Shares</button>
+                    <button type="button" id="purchaseBtn" class="btn-primary w-full">Purchase Shares</button>
                 </form>
             </div>
         </div>
@@ -69,7 +69,7 @@
             totalAmountEl.textContent = `KSh ${total.toLocaleString()}`;
         });
 
-        form.addEventListener('submit', (e) => {
+        document.getElementById('purchaseBtn').addEventListener('click', (e) => {
             e.preventDefault();
             const quantity = parseInt(quantityInput.value);
             

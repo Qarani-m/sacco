@@ -15,7 +15,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./models/db.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./models/db_docker.sql:/docker-entrypoint-initdb.d/01-init.sql
     networks:
       - sacco_network
     healthcheck:

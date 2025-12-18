@@ -8,8 +8,19 @@
     <link rel="stylesheet" href="/css/design-system.css">
 </head>
 <body>
-    <%- include('../layouts/admin-header') %>
 
+<style>
+    .data-table th,
+    .data-table td {
+        padding: 18px 20px;      /* increases row height */
+        line-height: 1.6;
+        vertical-align: middle;
+    }
+
+    .data-table tbody tr {
+        min-height: 64px;
+    }
+</style>
     <div class="container-xl">
         <!-- Page Header -->
         <div class="page-header">
@@ -73,58 +84,59 @@
                     <p>No documents found</p>
                 </div>
             <% } else { %>
-                <div style="overflow-x: auto;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Member</th>
-                                <th>Email</th>
-                                <th>Document Type</th>
-                                <th>Status</th>
-                                <th>Uploaded</th>
-                                <th>Reviewed By</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% documents.forEach(doc => { %>
-                            <tr>
-                                <td style="font-weight: 600;"><%= doc.member_name %></td>
-                                <td><%= doc.member_email %></td>
-                                <td style="text-transform: capitalize;">
-                                    <%= doc.document_type.replace('_', ' ') %>
-                                </td>
-                                <td>
-                                    <% if (doc.status === 'approved') { %>
-                                        <span class="badge badge-success">Approved</span>
-                                    <% } else if (doc.status === 'in_review') { %>
-                                        <span class="badge badge-warning">In Review</span>
-                                    <% } else if (doc.status === 'rejected') { %>
-                                        <span class="badge badge-danger">Rejected</span>
-                                    <% } else { %>
-                                        <span class="badge badge-default">Pending</span>
-                                    <% } %>
-                                </td>
-                                <td><%= new Date(doc.uploaded_at).toLocaleDateString() %></td>
-                                <td><%= doc.reviewer_name || '-' %></td>
-                                <td>
-                                    <div class="btn-group">
-                                        <a href="/admin/documents/<%= doc.id %>" class="btn-sm btn-primary">
-                                            Review
-                                        </a>
-                                        <% if (doc.status === 'pending') { %>
-                                            <button class="btn-sm btn-secondary"
-                                                    onclick="quickReview('<%= doc.id %>', 'in_review')">
-                                                Mark In Review
-                                            </button>
-                                        <% } %>
-                                    </div>
-                                </td>
-                            </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
+             
+<div style="overflow-x: auto;">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Member</th>
+                <th>Email</th>
+                <th>Document Type</th>
+                <th>Status</th>
+                <th>Uploaded</th>
+                <th>Reviewed By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% documents.forEach(doc => { %>
+            <tr>
+                <td style="font-weight: 600;"><%= doc.member_name %></td>
+                <td><%= doc.member_email %></td>
+                <td style="text-transform: capitalize;">
+                    <%= doc.document_type.replace('_', ' ') %>
+                </td>
+                <td>
+                    <% if (doc.status === 'approved') { %>
+                        <span class="badge badge-success">Approved</span>
+                    <% } else if (doc.status === 'in_review') { %>
+                        <span class="badge badge-warning">In Review</span>
+                    <% } else if (doc.status === 'rejected') { %>
+                        <span class="badge badge-danger">Rejected</span>
+                    <% } else { %>
+                        <span class="badge badge-default">Pending</span>
+                    <% } %>
+                </td>
+                <td><%= new Date(doc.uploaded_at).toLocaleDateString() %></td>
+                <td><%= doc.reviewer_name || '-' %></td>
+                <td>
+                    <div class="btn-group">
+                        <a href="/admin/documents/<%= doc.id %>" class="btn-sm btn-primary">
+                            Review
+                        </a>
+                        <% if (doc.status === 'pending') { %>
+                            <button class="btn-sm btn-secondary"
+                                    onclick="quickReview('<%= doc.id %>', 'in_review')">
+                                Mark In Review
+                            </button>
+                        <% } %>
+                    </div>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
             <% } %>
         </div>
     </div>

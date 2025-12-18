@@ -200,7 +200,8 @@ class PaymentModal {
       console.error("No payment data available");
       return;
     }
-
+console.log(this.currentPaymentData)
+console.log("phoneNumber")
     const selectedOption = document.querySelector(
       'input[name="payment_phone_option"]:checked'
     )?.value;
@@ -210,6 +211,10 @@ class PaymentModal {
       phoneNumber = this.userPhone;
     } else {
       phoneNumber = document.getElementById("payment_custom_phone")?.value;
+
+
+
+
 
       // Validate custom phone number
       if (!phoneNumber) {
@@ -244,7 +249,7 @@ class PaymentModal {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": this.csrfToken,
+          "CSRF-Token": this.csrfToken,
         },
         body: JSON.stringify(payload),
       });
@@ -256,7 +261,7 @@ class PaymentModal {
           `
                     <p style="margin: 0; font-weight: 600;">✓ STK Push Sent!</p>
                     <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">
-                        Please check your phone (${phoneNumber}) and enter your M-PESA PIN to complete the payment.
+                        Please check your phone ---->(${phoneNumber}) and enter your M-PESA PIN to complete the payment.
                     </p>
                     <div style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;">
                         <div class="spinner" style="width: 16px; height: 16px; border: 2px solid #000; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>

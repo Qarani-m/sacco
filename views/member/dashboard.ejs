@@ -72,7 +72,7 @@
                     <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
                         Balance: KSh <%= (stats.loan_balance || 0).toLocaleString() %>
                     </p>
-                    <p class="text-meta" style="margin-top: 0.5rem;">1% Interest</p>
+                    <p class="text-meta" style="margin-top: 0.5rem;">3% Interest</p>
                     <% if (user.registration_paid && stats.active_loans === 0) { %>
                         <a href="/loans/request" class="btn-small" style="margin-top: 1rem;">Request Loan</a>
                     <% } else if (stats.active_loans > 0) { %>
@@ -156,7 +156,7 @@
                     <a href="/loans/request" class="card-hover" style="padding: 1.5rem; text-align: center; text-decoration: none;">
                         <div style="font-size: 2rem; margin-bottom: 0.5rem;">💵</div>
                         <p style="font-weight: 600; color: #000000; margin-bottom: 0.25rem;">Request Loan</p>
-                        <p class="text-secondary" style="font-size: 0.75rem;">1% interest rate</p>
+                        <p class="text-secondary" style="font-size: 0.75rem;">3% interest rate</p>
                     </a>
                 <% } %>
                 <a href="/welfare/pay" class="card-hover" style="padding: 1.5rem; text-align: center; text-decoration: none;">
@@ -188,7 +188,7 @@
             <h2 class="section-title mb-6">⚠️ Active Loans - Payment Priority</h2>
             <div class="alert alert-info" style="margin-bottom: 1.5rem;">
                 <p style="margin: 0; font-size: 0.875rem;">
-                    <strong>Payment Priority:</strong> Loan Repayment → Welfare → Shares. Interest (1%) goes to SACCO savings.
+                    <strong>Payment Priority:</strong> Loan Repayment → Welfare → Shares. Interest (3%) goes to SACCO savings.
                 </p>
             </div>
             <% active_loans.forEach(loan => { %>
@@ -279,7 +279,7 @@
                             <span style="font-weight: 600;">✓</span> Maximum loan = Your shares value
                         </li>
                         <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
-                            <span style="font-weight: 600;">✓</span> 1% interest on all loans
+                            <span style="font-weight: 600;">✓</span> 3% interest on all loans
                         </li>
                         <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
                             <span style="font-weight: 600;">✓</span> Repayment period: Up to 6 months

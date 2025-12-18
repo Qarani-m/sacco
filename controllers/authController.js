@@ -77,7 +77,7 @@ exports.register = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       req.flash("error_msg", errors.array()[0].msg);
-      return res.redirect("/auth/register");
+      return res.redirect("/admin/register");
     }
 
     const { email, password, full_name, phone_number, role } = req.body;
@@ -85,7 +85,7 @@ exports.register = async (req, res) => {
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
       req.flash("error_msg", "Email already registered");
-      return res.redirect("/auth/register");
+      return res.redirect("/admin/register");
     }
 
     const user = await User.create({
@@ -131,13 +131,13 @@ exports.register = async (req, res) => {
 
     req.flash(
       "success_msg",
-      "Registration successful! Please verify your email."
+      "Member registered successfully! Verification email sent."
     );
-    return res.redirect("/auth/verify-email");
+    return res.redirect("/admin/members");
   } catch (error) {
     console.error("Registration error:", error);
     req.flash("error_msg", "Registration failed. Please try again.");
-    return res.redirect("/auth/register");
+    return res.redirect("/admin/register");
   }
 };
 exports.logout = (req, res) => {
@@ -168,10 +168,10 @@ exports.forgotPassword = async (req, res) => {
 
     if (!user) {
       // Don't reveal if user exists or not
-      return res.json({
-        success: true,
-        message:
-          "If an account exists with that email, a password reset link has been sent.",
+      return res.render("auth/forgot-password-sent", {
+        title: "Reset Link Sent",
+        layout: "layouts/auth",
+        email: email,
       });
     }
 
@@ -188,14 +188,15 @@ exports.forgotPassword = async (req, res) => {
       user.full_name
     );
 
-    res.json({
-      success: true,
-      message:
-        "If an account exists with that email, a password reset link has been sent.",
+    res.render("auth/forgot-password-sent", {
+      title: "Reset Link Sent",
+      layout: "layouts/auth",
+      email: user.email,
     });
   } catch (error) {
     console.error("Forgot password error:", error);
-    res.status(500).json({ error: "Failed to process request" });
+    req.flash("error_msg", "Failed to process request");
+    res.redirect("/auth/forgot-password");
   }
 };
 
@@ -207,22 +208,37 @@ exports.resetPassword = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array()[0].msg });
+      // If validation fails, re-render the reset password page with errors
+      // Use token from body if available, or params (though this POST usually comes from the form which has token in body)
+      const token = req.body.token || req.params.token;
+      return res.render("auth/reset-password", {
+        title: "Reset Password",
+        token: token,
+        layout: "layouts/auth",
+        error: errors.array()[0].msg,
+        csrfToken: req.csrfToken && req.csrfToken(),
+      });
     }
 
-    const { token } = req.params;
-    const { password } = req.body;
+    // Token usually comes from the form body in the POST request
+    const { token, password } = req.body;
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     await User.updatePassword(decoded.id, password);
 
-    res.json({
-      success: true,
-      message: "Password reset successful",
+    // Render success page
+    res.render("auth/reset-success", {
+      title: "Password Reset Successful",
+      layout: "layouts/auth",
     });
   } catch (error) {
     console.error("Reset password error:", error);
-    res.status(400).json({ error: "Invalid or expired token" });
+    // If token invalid, redirect to forgot password with error
+    req.flash(
+      "error_msg",
+      "Invalid or expired token. Please request a new link."
+    );
+    res.redirect("/auth/forgot-password");
   }
 };
 

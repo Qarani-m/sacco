@@ -11,7 +11,7 @@
     </div>
 
     <!-- Registration Form -->
-    <form id="registerForm" action="/auth/register" method="POST" class="space-y-6">
+    <form id="registerForm" action="/admin/register" method="POST" class="space-y-6">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
         <!-- Full Name -->
@@ -21,7 +21,7 @@
                 type="text"
                 id="full_name"
                 name="full_name"
-                value="Martin"
+                value=""
                 required
             >
         </div>
@@ -33,7 +33,7 @@
                 type="email"
                 id="email"
                 name="email"
-                value="em@g.c"
+                value=""
                 required
             >
         </div>
@@ -45,7 +45,7 @@
                 type="tel"
                 id="phone_number"
                 name="phone_number"
-                value="254704847676"
+                value=""
                 placeholder="254XXXXXXXXX"
                 required
             >
@@ -58,7 +58,7 @@
                 type="password"
                 id="password"
                 name="password"
-                value="password1234!!"
+                value=""
                 required
             >
         </div>
@@ -70,24 +70,21 @@
                 type="password"
                 id="confirm_password"
                 name="confirm_password"
-                value="password1234!!"
+                value=""
                 required
             >
         </div>
 
         <!-- Submit Button -->
         <button type="submit" class="btn-primary">
-            Create Account
+            Register Member
         </button>
 
     </form>
 
     <!-- Links -->
     <div class="text-center mt-6">
-        <p class="text-secondary">
-            Already have an account?
-            <a href="/auth/login" class="link-primary">Login</a>
-        </p>
+        <a href="/admin/members" class="link-primary">Back to Members List</a>
     </div>
 
     <!-- Alerts -->

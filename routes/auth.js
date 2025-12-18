@@ -14,12 +14,6 @@ router.get("/login", (req, res) => {
   res.render("auth/login.ejs", { title: "Login", layout: "layouts/auth" });
 });
 
-// GET /auth/register
-// Render registration page
-router.get("/register", (req, res) => {
-  res.render("auth/register", { title: "Register", layout: "layouts/auth" });
-});
-
 // GET /auth/forgot-password
 // Render forgot password page
 router.get("/forgot-password", (req, res) => {
@@ -61,29 +55,6 @@ router.post(
     body("password").notEmpty().withMessage("Password is required"),
   ],
   authController.login
-);
-
-// POST /auth/register
-router.post(
-  "/register",
-  authLimiter,
-  [
-    body("email").isEmail().withMessage("Please enter a valid email"),
-    body("password")
-      .isLength({ min: 8 })
-      .withMessage("Password must be at least 8 characters long")
-      .matches(/[a-z]/)
-      .withMessage("Password must contain at least one lowercase letter")
-      .matches(/[A-Z]/)
-      .withMessage("Password must contain at least one uppercase letter")
-      .matches(/[0-9]/)
-      .withMessage("Password must contain at least one number")
-      .matches(/[\W_]/)
-      .withMessage("Password must contain at least one special character"),
-    body("full_name").notEmpty().withMessage("Full name is required"),
-    body("phone_number").notEmpty().withMessage("Phone number is required"),
-  ],
-  authController.register
 );
 
 // GET /auth/logout (changed from POST to GET)

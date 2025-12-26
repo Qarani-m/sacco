@@ -384,7 +384,7 @@ exports.seedDatabase = async (req, res) => {
     } catch (error) {
       results.errors.push(`Member creation failed: ${error.message}`);
     }
-
+  
     // Return HTML response with results
     const html = `
 <!DOCTYPE html>

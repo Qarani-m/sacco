@@ -73,6 +73,9 @@ exports.showRegister = (req, res) => {
 };
 
 exports.register = async (req, res) => {
+
+  console.log(`------------------------------${Object.keys(req.body)}-------------------------------------------`)
+  console.log(`------------------------------${req.body.email}-------------------------------------------`)
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

@@ -5,7 +5,8 @@
       "Bash(chmod:*)",
       "Bash(test:*)",
       "Bash(node models/migrations/run_document_verification_migration.js:*)",
-      "Bash(node models/migrations/run_email_verification_migration.js:*)"
+      "Bash(node models/migrations/run_email_verification_migration.js:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

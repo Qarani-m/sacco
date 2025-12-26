@@ -59,31 +59,49 @@ function query(text, params = []) {
     if (hasReturning) {
       // Remove RETURNING clause for SQLite execution
       const cleanText = sqliteText.replace(/RETURNING\s+.*/i, "");
+      const returningColumns = returningMatch[1].trim();
 
       db.run(cleanText, params, function (err) {
         if (err) return reject(err);
 
-        if (isInsert && this.lastID) {
-          // For auto-increment ID, fetch the row
-          // BUT our schema uses UUIDs mostly, which are generated in app or DB defaults?
-          // The schema.js doesn't show default UUIDs in SQLite, so models MUST generate them.
+        const lastID = this.lastID;
+        const changes = this.changes;
 
-          // If the model provided a UUID, we can't easily fetch back without knowing it.
-          // Assumption: Models provide IDs or we rely on 'changes'.
+        if ((isInsert || isUpdate) && (lastID || changes > 0)) {
+          // Extract table name from the query
+          let tableName;
+          if (isInsert) {
+            const insertMatch = text.match(/INSERT\s+INTO\s+(\w+)/i);
+            tableName = insertMatch ? insertMatch[1] : null;
+          } else {
+            const updateMatch = text.match(/UPDATE\s+(\w+)/i);
+            tableName = updateMatch ? updateMatch[1] : null;
+          }
 
-          resolve({
-            rows: [{ id: this.lastID, ...params }], // Mock return
-            rowCount: this.changes,
-          });
+          if (tableName && lastID) {
+            // Fetch the inserted/updated row using lastID
+            const selectQuery = `SELECT ${returningColumns} FROM ${tableName} WHERE id = ?`;
+            db.get(selectQuery, [lastID], (err, row) => {
+              if (err) {
+                console.error("Error fetching inserted row:", err);
+                return reject(err);
+              }
+              resolve({
+                rows: row ? [row] : [],
+                rowCount: changes,
+              });
+            });
+          } else {
+            // Fallback if we can't determine table or ID
+            resolve({
+              rows: [{}],
+              rowCount: changes,
+            });
+          }
         } else {
-          // Start of complex RETURNING handling
-          // For now, return what we can.
-          // Ideally models should be updated to not rely on RETURNING if possible,
-          // or we do a subsequent SELECT if we have the ID.
-
           resolve({
-            rows: [{}], // Empty object as fallback checking
-            rowCount: this.changes,
+            rows: [{}],
+            rowCount: changes,
           });
         }
       });

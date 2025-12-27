@@ -136,6 +136,8 @@ console.log(emailContent);
 
   // Send email using Nodemailer
   async sendEmail(emailContent) {
+
+    console.log(emailContent)
     try {
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.warn("Email credentials not found in environment variables");

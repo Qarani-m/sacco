@@ -11,6 +11,9 @@ exports.login = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.status(400).json({ success: false, message: errors.array()[0].msg });
+      }
       req.flash("error_msg", errors.array()[0].msg);
       return res.redirect("/auth/login");
     }
@@ -21,17 +24,26 @@ exports.login = async (req, res) => {
 
     if (!user) {
       console.error(`email: ${email}, Password: ${password}`);
+      if (req.headers['content-type'] === 'application/json') {
+        return res.status(401).json({ success: false, message: "Invalid credentials" });
+      }
       req.flash("error_msg", "Invalid credentials");
       return res.redirect("/auth/login");
     }
 
     if (!user.is_active) {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.status(403).json({ success: false, message: "Account is deactivated" });
+      }
       req.flash("error_msg", "Account is deactivated");
       return res.redirect("/auth/login");
     }
 
     const isValid = await User.verifyPassword(password, user.password_hash);
     if (!isValid) {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.status(401).json({ success: false, message: "Invalid credentials" });
+      }
       req.flash("error_msg", "Invalid credentials");
       return res.redirect("/auth/login");
     }
@@ -60,10 +72,17 @@ exports.login = async (req, res) => {
       user.role === "admin" ? "/admin/dashboard" : "/members/dashboard";
     // const redirectUrl = user.role === 'admin' ? '/admin/dashboard' : '/members/dashboard';
 
+    if (req.headers['content-type'] === 'application/json') {
+      return res.json({ success: true, message: "Login successful!", redirectUrl });
+    }
+
     req.flash("success_msg", "Login successful!");
     return res.redirect(redirectUrl);
   } catch (error) {
     console.error("Login error:", error);
+    if (req.headers['content-type'] === 'application/json') {
+      return res.status(500).json({ success: false, message: "Login failed. Please try again." });
+    }
     req.flash("error_msg", "Login failed. Please try again.");
     return res.redirect("/auth/login");
   }
@@ -76,6 +95,9 @@ exports.register = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.status(400).json({ success: false, message: errors.array()[0].msg });
+      }
       req.flash("error_msg", errors.array()[0].msg);
       return res.redirect("/admin/register");
     }
@@ -84,6 +106,9 @@ exports.register = async (req, res) => {
 
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.status(409).json({ success: false, message: "Email already registered" });
+      }
       req.flash("error_msg", "Email already registered");
       return res.redirect("/admin/register");
     }
@@ -108,7 +133,19 @@ exports.register = async (req, res) => {
       user.full_name
     );
 
-    // Create session token
+    if (req.headers['content-type'] === 'application/json') {
+      return res.json({
+        success: true,
+        message: "Member registered successfully! Verification email sent.",
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name
+        }
+      });
+    }
+
+    // Create session token (only for non-JSON requests)
     const sessionToken = jwt.sign(
       {
         id: user.id,
@@ -136,6 +173,9 @@ exports.register = async (req, res) => {
     return res.redirect("/admin/members");
   } catch (error) {
     console.error("Registration error:", error);
+    if (req.headers['content-type'] === 'application/json') {
+      return res.status(500).json({ success: false, message: "Registration failed. Please try again." });
+    }
     req.flash("error_msg", "Registration failed. Please try again.");
     return res.redirect("/admin/register");
   }

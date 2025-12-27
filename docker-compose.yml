@@ -1,9 +1,9 @@
 version: "3.9"
 
 services:
-  # PostgreSQL Database
+  # PostakdNgreSQL Database
   postgres:
-    image: postgres:17-alpine
+    image: postgres:17
     container_name: sacco_postgres
     restart: unless-stopped
     environment:

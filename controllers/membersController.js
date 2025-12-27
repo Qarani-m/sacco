@@ -63,8 +63,8 @@ exports.showRegistrationPage = async (req, res) => {
   try {
     res.json({
       success: true,
-      registration_fee: 1000,
-      message: "Please pay KSh 1,000 registration fee to access SACCO features",
+      registration_fee: 2, // Testing: 2 bob (change to 1000 for production)
+      message: "Please pay KSh 2 registration fee to access SACCO features",
     });
   } catch (error) {
     console.error("Show registration page error:", error);
@@ -75,30 +75,48 @@ exports.showRegistrationPage = async (req, res) => {
 exports.payRegistrationFee = async (req, res) => {
   try {
     const userId = req.user.id;
-    const amount = 1; //--- REG FEE
-    const transactionRef = `REG${Date.now()}${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    const amount = 2; // Testing: 2 bob (change to 1000 for production)
+    const { phone_number } = req.body;
 
     const user = await User.findById(userId);
     if (user.registration_paid) {
       return res.status(400).json({ error: "Registration fee already paid" });
     }
 
+    // Determine phone number to use
+    const paymentPhoneNumber = phone_number || user.phone_number;
+
+    if (!paymentPhoneNumber) {
+      return res.status(400).json({ error: "Phone number is required" });
+    }
+
+    // Initiate M-Pesa STK Push
+    const paymentService = require("../services/paymentService");
+    const mpesaResponse = await paymentService.initiateSTKPush(
+      paymentPhoneNumber,
+      amount,
+      `REG${Date.now()}`,
+      `Registration Fee`
+    );
+
+    // Create transaction with CheckoutRequestID
+    const Transaction = require("../models/Transaction");
     await Transaction.create({
       user_id: userId,
       amount,
       type: "registration",
       payment_method: "mpesa",
-      transaction_ref: transactionRef,
+      transaction_ref: mpesaResponse.CheckoutRequestID,
+      mpesa_merchant_request_id: mpesaResponse.MerchantRequestID,
       status: "pending",
     });
 
     res.json({
       success: true,
-      message: "Check your phone for M-Pesa prompt",
+      message: "STK push sent! Check your phone for M-Pesa prompt",
       amount,
-      transaction_ref: transactionRef,
+      transaction_ref: mpesaResponse.CheckoutRequestID,
+      checkout_request_id: mpesaResponse.CheckoutRequestID,
     });
   } catch (error) {
     console.error("Pay registration fee error:", error);
@@ -333,47 +351,7 @@ exports.showRegistrationFeePage = async (req, res) => {
   }
 };
 
-// Pay registration fee
-exports.payRegistrationFee = async (req, res) => {
-  try {
-    const userId = req.user.id;
 
-    if (req.user.registration_paid) {
-      return res.json({
-        success: false,
-        error: "Registration fee already paid",
-      });
-    }
-
-    const amount = 1000;
-    const transactionRef = `REG${Date.now()}${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
-
-    await Transaction.create({
-      user_id: userId,
-      amount,
-      type: "registration",
-      payment_method: "mpesa",
-      transaction_ref: transactionRef,
-      status: "completed",
-    });
-
-    await User.update(userId, {
-      registration_paid: true,
-      registration_payment_date: new Date(),
-    });
-
-    res.json({
-      success: true,
-      message: "Registration fee paid successfully!",
-      transaction_ref: transactionRef,
-    });
-  } catch (error) {
-    console.error("Pay registration fee error:", error);
-    res.status(500).json({ error: "Failed to process payment" });
-  }
-};
 
 // Show profile page
 exports.showProfilePage = async (req, res) => {
@@ -438,9 +416,8 @@ exports.uploadDocuments = async (req, res) => {
     });
 
     // Notify all admins
-    const message = `${
-      req.user.full_name
-    } uploaded a new ${documentType.replace("_", " ")} document`;
+    const message = `${req.user.full_name
+      } uploaded a new ${documentType.replace("_", " ")} document`;
     await NotificationService.notifyAllAdmins(
       "document_upload",
       document.id,

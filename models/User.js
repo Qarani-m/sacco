@@ -224,7 +224,6 @@ class User {
   // Generate email verification token
   static async generateVerificationToken(userId) {
     const jwt = require("jsonwebtoken");
-    const crypto = require("crypto");
 
     // Generate a unique token
     const token = jwt.sign(
@@ -233,13 +232,21 @@ class User {
       { expiresIn: "24h" }
     );
 
-    // Set expiry to 24 hours from now
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
+    // Set expiry to 24 hours from now in SQLite datetime format
+    const currentDb = db.getCurrentDb();
+    let expiresAt;
+
+    if (currentDb === 'sqlite') {
+      // SQLite datetime format
+      expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ');
+    } else {
+      // PostgreSQL/Neon can handle JS Date objects
+      expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    }
 
     // Store token in database
     const query = `
-            UPDATE users 
+            UPDATE users
             SET verification_token = $1, verification_token_expires = $2, updated_at = CURRENT_TIMESTAMP
             WHERE id = $3
             RETURNING id, email, full_name

@@ -1,204 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welfare Payments - SACCO</title>
     <link rel="stylesheet" href="/css/design-system.css">
 </head>
+
 <body>
     <%- include('../layouts/member-header') %>
-    
-    <div class="container-xl">
-        
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="accent-line"></div>
-            <h1 class="page-title">Welfare Payments</h1>
-            <p class="page-subtitle">Contribute to the SACCO welfare fund</p>
-        </div>
 
-        <!-- Welfare Overview -->
-        <div class="grid grid-cols-3 gap-6 mb-12">
-            <div class="stat-card">
-                <p class="stat-label">Total Payments</p>
-                <p class="stat-value"><%= totalPayments %></p>
-            </div>
-            <div class="stat-card">
-                <p class="stat-label">Total Contributed</p>
-                <p class="stat-value">KSh <%= totalContributed.toLocaleString() %></p>
-            </div>
-            <div class="stat-card">
-                <p class="stat-label">Last Payment</p>
-                <p class="stat-value"><%= lastPaymentDate || 'Never' %></p>
-            </div>
-        </div>
+        <div class="container-xl">
 
-        <!-- Make Payment Section -->
-        <div class="card mb-12">
-            <h2 class="section-title mb-6">Make Welfare Payment</h2>
-            
-            <div class="alert alert-info mb-6">
-                <p style="margin: 0;">
-                    <strong>Welfare Contribution:</strong> KSh 300 per payment. Welfare funds support members during emergencies and special occasions.
-                </p>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="accent-line"></div>
+                <h1 class="page-title">Welfare Payments</h1>
+                <p class="page-subtitle">Contribute to the SACCO welfare fund</p>
             </div>
 
-            <form id="welfarePaymentForm" class="space-y-6">
-                <div class="grid grid-cols-2 gap-6">
-                    <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
-                        <p class="text-meta" style="margin-bottom: 0.5rem;">Payment Amount</p>
-                        <p style="font-size: 2rem; font-weight: 300; color: #000000;">
-                            KSh 300
-                        </p>
-                        <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
-                            Fixed welfare contribution
-                        </p>
-                    </div>
-
-                    <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
-                        <p class="text-meta" style="margin-bottom: 0.5rem;">Payment Method</p>
-                        <p style="font-size: 1.25rem; font-weight: 600; color: #000000; margin-bottom: 0.5rem;">
-                            M-Pesa
-                        </p>
-                        <p class="text-secondary" style="font-size: 0.875rem;">
-                            You'll receive a prompt on your phone
-                        </p>
-                    </div>
+            <!-- Welfare Overview -->
+            <div class="grid grid-cols-3 gap-6 mb-12">
+                <div class="stat-card">
+                    <p class="stat-label">Total Payments</p>
+                    <p class="stat-value">
+                        <%= totalPayments %>
+                    </p>
                 </div>
+                <div class="stat-card">
+                    <p class="stat-label">Total Contributed</p>
+                    <p class="stat-value">KSh <%= totalContributed.toLocaleString() %>
+                    </p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Last Payment</p>
+                    <p class="stat-value">
+                        <%= lastPaymentDate || 'Never' %>
+                    </p>
+                </div>
+            </div>
 
-                <div style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000;">
-                    <p class="text-secondary" style="margin: 0; font-size: 0.875rem;">
-                        <strong>Note:</strong> Welfare payments help support fellow members during times of need. Your contribution makes a difference in our community.
+            <!-- Make Payment Section -->
+            <div class="card mb-12">
+                <h2 class="section-title mb-6">Make Welfare Payment</h2>
+
+                <div class="alert alert-info mb-6">
+                    <p style="margin: 0;">
+                        <strong>Welfare Contribution:</strong> KSh 3 per payment. Welfare funds support members during
+                        emergencies and special occasions.
                     </p>
                 </div>
 
-                <div style="display: flex; gap: 1rem;">
-                    <button type="submit" class="btn-primary">Pay KSh 300</button>
-                </div>
-            </form>
-        </div>
+                <form id="welfarePaymentForm" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
+                            <p class="text-meta" style="margin-bottom: 0.5rem;">Payment Amount</p>
+                            <p style="font-size: 2rem; font-weight: 300; color: #000000;">
+                                KSh 3
+                            </p>
+                            <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                                Fixed welfare contribution
+                            </p>
 
-        <!-- Payment History -->
-        <div class="mb-12">
-            <h2 class="section-title mb-6">Payment History</h2>
-            
-            <% if (paymentHistory.length === 0) { %>
-                <div class="card" style="text-align: center; padding: 3rem 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🏥</div>
-                    <h3 class="small-title" style="margin-bottom: 0.5rem;">No Payments Yet</h3>
-                    <p class="text-secondary">Make your first welfare contribution to support the SACCO community.</p>
-                </div>
-            <% } else { %>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Payment Method</th>
-                            <th>Transaction Ref</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% paymentHistory.forEach(payment => { %>
-                        <tr>
-                            <td><%= new Date(payment.payment_date).toLocaleDateString() %></td>
-                            <td>KSh <%= payment.amount.toLocaleString() %></td>
-                            <td style="text-transform: capitalize;"><%= payment.payment_method %></td>
-                            <td class="text-secondary" style="font-size: 0.75rem;"><%= payment.transaction_ref %></td>
-                            <td>
-                                <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; color: #000000;">
-                                    Completed
-                                </span>
-                            </td>
-                        </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            <% } %>
-        </div>
+                        </div>
 
-        <!-- Welfare Information -->
-        <div class="grid grid-cols-2 gap-6 mb-12">
-            <div class="card">
-                <h3 class="small-title" style="margin-bottom: 1rem;">About Welfare Fund</h3>
-                <p class="text-secondary" style="margin-bottom: 1rem; line-height: 1.6;">
-                    The SACCO welfare fund provides financial support to members during:
-                </p>
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
-                        <span style="font-weight: 600;">✓</span> Medical emergencies
-                    </li>
-                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
-                        <span style="font-weight: 600;">✓</span> Bereavement
-                    </li>
-                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
-                        <span style="font-weight: 600;">✓</span> Special occasions
-                    </li>
-                    <li style="padding: 0.5rem 0;">
-                        <span style="font-weight: 600;">✓</span> Community support
-                    </li>
-                </ul>
+                        <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
+                            <p class="text-meta" style="margin-bottom: 0.5rem;">Payment Method</p>
+                            <p style="font-size: 1.25rem; font-weight: 600; color: #000000; margin-bottom: 0.5rem;">
+                                M-Pesa
+                            </p>
+                            <p class="text-secondary" style="font-size: 0.875rem;">
+                                You'll receive a prompt on your phone
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000;">
+                        <p class="text-secondary" style="margin: 0; font-size: 0.875rem;">
+                            <strong>Note:</strong> Welfare payments help support fellow members during times of need.
+                            Your contribution makes a difference in our community.
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn-primary">Pay KSh 3</button>
+                    </div>
+                </form>
             </div>
 
-            <div class="card">
-                <h3 class="small-title" style="margin-bottom: 1rem;">Your Contribution Impact</h3>
-                <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1rem;">
-                    <p class="text-meta" style="margin-bottom: 0.5rem;">Total Contributed</p>
-                    <p style="font-size: 1.5rem; font-weight: 300; color: #000000;">
-                        KSh <%= totalContributed.toLocaleString() %>
+            <!-- Payment History -->
+            <div class="mb-12">
+                <h2 class="section-title mb-6">Payment History</h2>
+
+                <% if (paymentHistory.length===0) { %>
+                    <div class="card" style="text-align: center; padding: 3rem 2rem;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🏥</div>
+                        <h3 class="small-title" style="margin-bottom: 0.5rem;">No Payments Yet</h3>
+                        <p class="text-secondary">Make your first welfare contribution to support the SACCO community.
+                        </p>
+                    </div>
+                    <% } else { %>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Payment Method</th>
+                                    <th>Transaction Ref</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% paymentHistory.forEach(payment=> { %>
+                                    <tr>
+                                        <td>
+                                            <%= new Date(payment.payment_date).toLocaleDateString() %>
+                                        </td>
+                                        <td>KSh <%= payment.amount.toLocaleString() %>
+                                        </td>
+                                        <td style="text-transform: capitalize;">
+                                            <%= payment.payment_method %>
+                                        </td>
+                                        <td class="text-secondary" style="font-size: 0.75rem;">
+                                            <%= payment.transaction_ref %>
+                                        </td>
+                                        <td>
+                                            <span
+                                                style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; color: #000000;">
+                                                Completed
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                        <% } %>
+            </div>
+
+            <!-- Welfare Information -->
+            <div class="grid grid-cols-2 gap-6 mb-12">
+                <div class="card">
+                    <h3 class="small-title" style="margin-bottom: 1rem;">About Welfare Fund</h3>
+                    <p class="text-secondary" style="margin-bottom: 1rem; line-height: 1.6;">
+                        The SACCO welfare fund provides financial support to members during:
+                    </p>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
+                            <span style="font-weight: 600;">✓</span> Medical emergencies
+                        </li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
+                            <span style="font-weight: 600;">✓</span> Bereavement
+                        </li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
+                            <span style="font-weight: 600;">✓</span> Special occasions
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <span style="font-weight: 600;">✓</span> Community support
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3 class="small-title" style="margin-bottom: 1rem;">Your Contribution Impact</h3>
+                    <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1rem;">
+                        <p class="text-meta" style="margin-bottom: 0.5rem;">Total Contributed</p>
+                        <p style="font-size: 1.5rem; font-weight: 300; color: #000000;">
+                            KSh <%= totalContributed.toLocaleString() %>
+                        </p>
+                    </div>
+                    <p class="text-secondary" style="line-height: 1.6;">
+                        Your <%= totalPayments %> payment<%= totalPayments !==1 ? 's' : '' %> have helped build a
+                                stronger, more supportive SACCO community. Thank you for your contribution!
                     </p>
                 </div>
-                <p class="text-secondary" style="line-height: 1.6;">
-                    Your <%= totalPayments %> payment<%= totalPayments !== 1 ? 's' : '' %> have helped build a stronger, more supportive SACCO community. Thank you for your contribution!
-                </p>
             </div>
+
         </div>
 
-    </div>
+        <%- include('../layouts/footer') %>
 
-    <%- include('../layouts/footer') %>
+            <script>
+                document.getElementById('welfarePaymentForm').addEventListener('submit', async function (e) {
+                    e.preventDefault();
 
-    <script>
-        document.getElementById('welfarePaymentForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (!confirm('Proceed to pay KSh 300 welfare contribution via M-Pesa?')) {
-                return;
-            }
-
-            try {
-                const response = await fetch('/payments/initiate/welfare/<%= user.id %>', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': '<%= csrfToken %>' // Ensure CSRF token is available if needed, though header might be global
-                    },
-                    body: JSON.stringify({
-                        amount: 300,
-                        phone_number: '<%= user.phone_number %>',
-                        registered_number: true
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    alert(data.message || 'Payment initiated! Check your phone for M-Pesa prompt.');
-                    if (data.transaction_ref) {
-                        window.location.href = `/payments/status/${data.transaction_ref}`;
-                    } else {
-                        window.location.reload();
+                    if (!confirm('Proceed to pay KSh 3 welfare contribution via M-Pesa?')) {
+                        return;
                     }
-                } else {
-                    alert('Error: ' + (data.error || 'Failed to initiate payment'));
-                }
-            } catch (error) {
-                console.error('Errore:', error);
-                alert('Failedt to initiate payment. Please try again.');
-            }
-        });
-    </script>
+
+                    try {
+                        const response = await fetch('/payments/initiate/welfare/<%= user.id %>', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-Token': '<%= csrfToken %>' // Ensure CSRF token is available if needed, though header might be global
+                            },
+                            body: JSON.stringify({
+                                amount: 3,
+                                phone_number: '<%= user.phone_number %>',
+                                registered_number: true
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            alert(data.message || 'Payment initiated! Check your phone for M-Pesa prompt.');
+                            if (data.transaction_ref) {
+                                window.location.href = `/payments/status/${data.transaction_ref}`;
+                            } else {
+                                window.location.reload();
+                            }
+                        } else {
+                            alert('Error: ' + (data.error || 'Failed to initiate payment'));
+                        }
+                    } catch (error) {
+                        console.error('Errore:', error);
+                        alert('Failedt to initiate payment. Please try again.');
+                    }
+                });
+            </script>
 </body>
+
 </html>

@@ -247,6 +247,38 @@
     color: #000000;
 }
 
+/* Inline alerts (for modals and inline messages) */
+.alert-inline {
+    padding: 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    margin-top: 1rem;
+}
+
+.alert-inline.success {
+    background: #D1FAE5;
+    border: 1px solid #059669;
+    color: #065F46;
+}
+
+.alert-inline.error {
+    background: #FEE2E2;
+    border: 1px solid #DC2626;
+    color: #991B1B;
+}
+
+.alert-inline.warning {
+    background: #FEF3C7;
+    border: 1px solid #D97706;
+    color: #92400E;
+}
+
+.alert-inline.info {
+    background: #DBEAFE;
+    border: 1px solid #3B82F6;
+    color: #1E40AF;
+}
+
 /* ============================================
    CARDS & CONTAINERS
    ============================================ */

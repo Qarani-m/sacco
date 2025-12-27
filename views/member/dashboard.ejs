@@ -85,9 +85,9 @@
                     <p class="stat-label">Welfare Payments</p>
                     <p class="stat-value"><%= stats.welfare_payments || 0 %></p>
                     <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
-                        Total: KSh <%= ((stats.welfare_payments || 0) * 300).toLocaleString() %>
+                        Total: KSh <%= (stats.total_welfare || 0).toLocaleString() %>
                     </p>
-                    <p class="text-meta" style="margin-top: 0.5rem;">KSh 300 per payment</p>
+                    <p class="text-meta" style="margin-top: 0.5rem;">KSh 3 per payment <span style="font-size: 0.7rem; color: #DC2626;">(Testing: Prod is KSh 300)</span></p>
                     <a href="/welfare/pay" class="btn-small" style="margin-top: 1rem;">Pay Welfare</a>
                 </div>
             </div>

@@ -32,8 +32,8 @@ exports.showPaymentForm = async (req, res) => {
   try {
     res.json({
       success: true,
-      welfare_amount: 300,
-      message: "Welfare payment is KSh 300",
+      welfare_amount: 3, // Testing: 3 bob (change to 300 for production)
+      message: "Welfare payment is KSh 3",
     });
   } catch (error) {
     console.error("Show payment form error:", error);
@@ -56,7 +56,7 @@ exports.payWelfare = async (req, res) => {
 
     // POST request - process payment (kept for backward compatibility, but should use /payments/initiate)
     const userId = req.user.id;
-    const amount = 300;
+    const amount = 3; // Testing: 3 bob (change to 300 for production)
     const transactionRef = `WELFARE${Date.now()}${Math.random()
       .toString(36)
       .substr(2, 9)}`;

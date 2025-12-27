@@ -148,8 +148,9 @@ class PaymentModal {
     this.modal.classList.remove("active");
     document.body.style.overflow = "auto";
 
-    // Clear any polling interval
+    // Clear any polling interval/timeout
     if (this.pollInterval) {
+      clearTimeout(this.pollInterval);
       clearInterval(this.pollInterval);
       this.pollInterval = null;
     }
@@ -200,8 +201,7 @@ class PaymentModal {
       console.error("No payment data available");
       return;
     }
-console.log(this.currentPaymentData)
-console.log("phoneNumber")
+
     const selectedOption = document.querySelector(
       'input[name="payment_phone_option"]:checked'
     )?.value;
@@ -292,10 +292,21 @@ console.log("phoneNumber")
 
   startPolling(transactionRef) {
     let attempts = 0;
-    const maxAttempts = 24; // 2 minutes (5s interval)
+    const maxAttempts = 60; // 3 minutes total
 
-    this.pollInterval = setInterval(async () => {
+    const poll = async () => {
       attempts++;
+
+      // Dynamic interval: check more frequently at first, then slow down
+      let nextInterval;
+      if (attempts <= 6) {
+        nextInterval = 2000; // First 12 seconds: check every 2s
+      } else if (attempts <= 20) {
+        nextInterval = 3000; // Next 42 seconds: check every 3s
+      } else {
+        nextInterval = 5000; // After that: check every 5s
+      }
+
       try {
         const statusRes = await fetch(`/payments/status/${transactionRef}`);
         const statusData = await statusRes.json();
@@ -304,18 +315,39 @@ console.log("phoneNumber")
           clearInterval(this.pollInterval);
           this.showStatus(
             `
-                        <p style="margin: 0; font-weight: 600;">✓ Payment Successful!</p>
-                        <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">
-                            Redirecting...
-                        </p>
-                    `,
+              <div style="text-align: center;">
+                <p style="margin: 0; font-weight: 600; color: #059669; font-size: 1.1rem;">✓ Payment Successful!</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: #6B7280;">
+                  Your payment of KSh ${this.currentPaymentData.amount.toLocaleString()} has been received.
+                </p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: #6B7280;">
+                  Refreshing page...
+                </p>
+              </div>
+            `,
             "success"
           );
           setTimeout(() => location.reload(), 2000);
         } else if (statusData.status === "failed") {
           clearInterval(this.pollInterval);
           this.showStatus(
-            "Payment failed or cancelled. Please try again.",
+            `
+              <div style="text-align: center;">
+                <p style="margin: 0; font-weight: 600; color: #DC2626;">✗ Payment Failed</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: #6B7280;">
+                  The payment was cancelled or failed. This could be due to:
+                </p>
+                <ul style="margin: 0.5rem 0; padding-left: 1.5rem; font-size: 0.875rem; color: #6B7280; text-align: left;">
+                  <li>Cancelled PIN entry</li>
+                  <li>Insufficient M-Pesa balance</li>
+                  <li>Wrong PIN entered</li>
+                  <li>Transaction timeout</li>
+                </ul>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: #6B7280;">
+                  Please try again.
+                </p>
+              </div>
+            `,
             "error"
           );
           this.payButton.disabled = false;
@@ -323,15 +355,44 @@ console.log("phoneNumber")
         } else if (attempts >= maxAttempts) {
           clearInterval(this.pollInterval);
           this.showStatus(
-            "Payment is taking longer than expected. Please check your messages for confirmation."
+            `
+              <div style="text-align: center;">
+                <p style="margin: 0; font-weight: 600; color: #D97706;">⏱ Timeout</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: #6B7280;">
+                  Payment verification is taking longer than expected.
+                </p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: #6B7280;">
+                  Please check your M-Pesa messages or try again.
+                </p>
+              </div>
+            `,
+            "warning"
+          );
+          this.payButton.disabled = false;
+          this.payButton.textContent = "Send STK Push";
+        } else {
+          // Still pending, schedule next check
+          this.pollInterval = setTimeout(poll, nextInterval);
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+        attempts--;
+
+        if (attempts < maxAttempts) {
+          this.pollInterval = setTimeout(poll, nextInterval);
+        } else {
+          this.showStatus(
+            "Error checking payment status. Please refresh the page.",
+            "error"
           );
           this.payButton.disabled = false;
           this.payButton.textContent = "Send STK Push";
         }
-      } catch (err) {
-        console.error("Polling error:", err);
       }
-    }, 5000);
+    };
+
+    // Start first poll after 2 seconds
+    this.pollInterval = setTimeout(poll, 2000);
   }
 
   showStatus(message, type = "") {

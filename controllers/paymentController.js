@@ -65,7 +65,7 @@ exports.initiatePayment = async (req, res) => {
     res.json({
       success: true,
       message: "Payment initiated. Check your phone for M-Pesa prompt",
-      transaction_ref: transactionRef,
+      transaction_ref: mpesaResponse.CheckoutRequestID, // Return the actual ref stored in DB
       checkout_request_id: mpesaResponse.CheckoutRequestID,
     });
   } catch (error) {
@@ -202,11 +202,12 @@ async function allocatePayment(transaction) {
   }
 
   // 2. Allocate to welfare if specified or has remaining
-  if (transaction.type === "welfare" || remainingAmount >= 300) {
+  const WELFARE_AMOUNT = 3; // Testing: 3 bob (change to 300 for production)
+  if (transaction.type === "welfare" || remainingAmount >= WELFARE_AMOUNT) {
     const welfareAmount =
       transaction.type === "welfare"
         ? transaction.amount
-        : Math.min(remainingAmount, 300);
+        : Math.min(remainingAmount, WELFARE_AMOUNT);
 
     await WelfarePayment.create({
       user_id: userId,

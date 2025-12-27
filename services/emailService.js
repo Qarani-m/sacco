@@ -27,8 +27,6 @@ class EmailService {
       text: `Hello ${userName},\n\nWelcome to SACCO! Please verify your email address by clicking the link below:\n\n${verificationLink}\n\nThis link will expire in 24 hours.\n\nIf you didn't create this account, please ignore this email.\n\nBest regards,\nSACCO Team`,
     };
 
-console.log(emailContent);
-
     return await this.sendEmail(emailContent);
   }
 
@@ -136,8 +134,6 @@ console.log(emailContent);
 
   // Send email using Nodemailer
   async sendEmail(emailContent) {
-
-    console.log(emailContent)
     try {
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.warn("Email credentials not found in environment variables");

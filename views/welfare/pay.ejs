@@ -1,71 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pay Welfare - SACCO</title>
     <link rel="stylesheet" href="/css/design-system.css">
 </head>
+
 <body>
     <%- include('../layouts/member-header') %>
-    
-    <div class="container-2xl">
-        <div class="page-header">
-            <div class="accent-line"></div>
-            <h1 class="page-title">Welfare Payment</h1>
-            <p class="page-subtitle">Contribute to the welfare fund</p>
-        </div>
 
-        <div class="grid grid-cols-2 gap-6 mb-12">
-            <div class="card">
-                <h3 class="small-title" style="margin-bottom: 1.5rem;">🏥 Welfare Fund</h3>
-                <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1.5rem;">
-                    <p class="text-secondary" style="margin-bottom: 0.5rem;">Payment Amount</p>
-                    <p style="font-size: 2rem; font-weight: 300; color: #000;">KSh 300</p>
-                    <p class="text-meta" style="margin-top: 0.5rem;">Standard welfare contribution</p>
-                </div>
-                <div class="alert alert-info">
-                    <p style="margin: 0; font-size: 0.875rem;">Welfare payments support members during emergencies and special occasions.</p>
-                </div>
+        <div class="container-2xl">
+            <div class="page-header">
+                <div class="accent-line"></div>
+                <h1 class="page-title">Welfare Payment</h1>
+                <p class="page-subtitle">Contribute to the welfare fund</p>
             </div>
 
-            <div class="card">
-                <h3 class="small-title" style="margin-bottom: 1.5rem;">💳 Make Payment</h3>
-                <form id="payWelfareForm">
-                    <div style="padding: 1.5rem; background: #F0FDF4; border: 1px solid #D1FAE5; margin-bottom: 1.5rem;">
-                        <p style="font-weight: 600; color: #000; margin-bottom: 0.5rem;">Amount to Pay</p>
-                        <p style="font-size: 1.75rem; font-weight: 300; color: #000;">KSh 300</p>
+            <div class="grid grid-cols-2 gap-6 mb-12">
+                <div class="card">
+                    <h3 class="small-title" style="margin-bottom: 1.5rem;">🏥 Welfare Fund</h3>
+                    <div
+                        style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1.5rem;">
+                        <p class="text-secondary" style="margin-bottom: 0.5rem;">Payment Amount</p>
+                        <p style="font-size: 2rem; font-weight: 300; color: #000;">KSh 3</p>
+                        <p class="text-meta" style="margin-top: 0.5rem;">Standard welfare contribution</p>
                     </div>
-
-                    <div class="alert alert-info" style="margin-bottom: 1.5rem;">
-                        <p style="margin: 0; font-size: 0.875rem;">You will receive an M-Pesa STK Push prompt on your phone.</p>
+                    <div class="alert alert-info">
+                        <p style="margin: 0; font-size: 0.875rem;">Welfare payments support members during emergencies
+                            and special occasions.</p>
                     </div>
+                </div>
 
-                    <button type="submit" class="btn-primary w-full">Pay Welfare</button>
-                </form>
+                <div class="card">
+                    <h3 class="small-title" style="margin-bottom: 1.5rem;">💳 Make Payment</h3>
+                    <form id="payWelfareForm">
+                        <div
+                            style="padding: 1.5rem; background: #F0FDF4; border: 1px solid #D1FAE5; margin-bottom: 1.5rem;">
+                            <p style="font-weight: 600; color: #000; margin-bottom: 0.5rem;">Amount to Pay</p>
+                            <p style="font-size: 1.75rem; font-weight: 300; color: #000;">KSh 3</p>
+                        </div>
+
+                        <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                            <p style="margin: 0; font-size: 0.875rem;">You will receive an M-Pesa STK Push prompt on
+                                your phone.</p>
+                        </div>
+
+                        <button type="submit" class="btn-primary w-full">Pay Welfare</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <%- include('../partials/payment-modal') %>
-    <%- include('../layouts/footer') %>
-    <script src="/js/payment-modal.js"></script>
-    <script>
-        const form = document.getElementById('payWelfareForm');
+        <%- include('../partials/payment-modal') %>
+            <%- include('../layouts/footer') %>
+                <script src="/js/payment-modal.js"></script>
+                <script>
+                    const form = document.getElementById('payWelfareForm');
 
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
+                    form.addEventListener('submit', (e) => {
+                        e.preventDefault();
 
-            // Open payment modal
-            paymentModal.open({
-                title: 'Pay Welfare',
-                amount: 300,
-                category: 'welfare',
-                userId: '<%= user.id %>',
-                userPhone: '<%= user.phone_number %>',
-                csrfToken: '<%= csrfToken %>'
-            });
-        });
-    </script>
+                        // Open payment modal
+                        paymentModal.open({
+                            title: 'Pay Welfare',
+                            amount: 3,
+                            category: 'welfare',
+                            userId: '<%= user.id %>',
+                            userPhone: '<%= user.phone_number %>',
+                            csrfToken: '<%= csrfToken %>'
+                        });
+                    });
+                </script>
 </body>
+
 </html>

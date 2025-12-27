@@ -83,8 +83,8 @@ class PaymentAllocationService {
         }
       }
 
-      // 2. PRIORITY: Welfare (KSh 300 per payment)
-      const welfareAmount = 300;
+      // 2. PRIORITY: Welfare (KSh 3 per payment for testing, 300 for production)
+      const welfareAmount = 3; // Testing: 3 bob (change to 300 for production)
       if (allocation.remaining >= welfareAmount) {
         allocation.welfare = welfareAmount;
         allocation.remaining -= welfareAmount;

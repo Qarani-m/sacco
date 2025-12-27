@@ -59,31 +59,79 @@ function query(text, params = []) {
     if (hasReturning) {
       // Remove RETURNING clause for SQLite execution
       const cleanText = sqliteText.replace(/RETURNING\s+.*/i, "");
+      const returningColumns = returningMatch[1].trim();
 
       db.run(cleanText, params, function (err) {
         if (err) return reject(err);
 
-        if (isInsert && this.lastID) {
-          // For auto-increment ID, fetch the row
-          // BUT our schema uses UUIDs mostly, which are generated in app or DB defaults?
-          // The schema.js doesn't show default UUIDs in SQLite, so models MUST generate them.
+        const lastID = this.lastID;
+        const changes = this.changes;
 
-          // If the model provided a UUID, we can't easily fetch back without knowing it.
-          // Assumption: Models provide IDs or we rely on 'changes'.
+        if ((isInsert || isUpdate) && changes > 0) {
+          // Extract table name from the query
+          let tableName;
+          let idValue = null;
 
-          resolve({
-            rows: [{ id: this.lastID, ...params }], // Mock return
-            rowCount: this.changes,
-          });
+          if (isInsert) {
+            const insertMatch = text.match(/INSERT\s+INTO\s+(\w+)/i);
+            tableName = insertMatch ? insertMatch[1] : null;
+
+            // For INSERT with explicit id column (UUID), extract id from params
+            // Check if the query includes 'id' in the column list
+            const columnsMatch = text.match(/INSERT\s+INTO\s+\w+\s*\((.*?)\)/i);
+            if (columnsMatch) {
+              const columns = columnsMatch[1].split(',').map(c => c.trim());
+              const idIndex = columns.indexOf('id');
+              if (idIndex !== -1 && params[idIndex]) {
+                idValue = params[idIndex]; // Use the UUID from params
+              }
+            }
+
+            // Fallback to lastID for INTEGER PRIMARY KEY tables
+            if (!idValue && lastID) {
+              idValue = lastID;
+            }
+          } else if (isUpdate) {
+            const updateMatch = text.match(/UPDATE\s+(\w+)/i);
+            tableName = updateMatch ? updateMatch[1] : null;
+
+            // For UPDATE, try to extract id from WHERE clause
+            const whereMatch = text.match(/WHERE\s+id\s*=\s*\$(\d+)/i);
+            if (whereMatch) {
+              const paramIndex = parseInt(whereMatch[1]) - 1;
+              if (params[paramIndex]) {
+                idValue = params[paramIndex];
+              }
+            }
+          }
+
+          if (tableName && idValue) {
+            // Fetch the inserted/updated row using the id
+            const selectQuery = `SELECT ${returningColumns} FROM ${tableName} WHERE id = ?`;
+            db.get(selectQuery, [idValue], (err, row) => {
+              if (err) {
+                console.error("Error fetching RETURNING data:", err);
+                return resolve({
+                  rows: [{}],
+                  rowCount: changes,
+                });
+              }
+              resolve({
+                rows: row ? [row] : [{}],
+                rowCount: changes,
+              });
+            });
+          } else {
+            // No table name or id value, return empty object
+            resolve({
+              rows: [{}],
+              rowCount: changes,
+            });
+          }
         } else {
-          // Start of complex RETURNING handling
-          // For now, return what we can.
-          // Ideally models should be updated to not rely on RETURNING if possible,
-          // or we do a subsequent SELECT if we have the ID.
-
           resolve({
-            rows: [{}], // Empty object as fallback checking
-            rowCount: this.changes,
+            rows: [{}],
+            rowCount: changes,
           });
         }
       });

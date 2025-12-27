@@ -1,5 +1,6 @@
 const db = require("./db");
 const bcrypt = require("bcrypt");
+const { v4: uuidv4 } = require("uuid");
 
 class User {
   // Create new user
@@ -12,14 +13,16 @@ class User {
       role = "member",
     } = userData;
     const password_hash = await bcrypt.hash(password, 10);
+    const id = uuidv4();
 
     const query = `
-            INSERT INTO users (email, password_hash, full_name, phone_number, role)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO users (id, email, password_hash, full_name, phone_number, role)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id, email, full_name, phone_number, role, is_active, registration_paid, created_at
         `;
 
     const result = await db.query(query, [
+      id,
       email,
       password_hash,
       full_name,

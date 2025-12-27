@@ -424,7 +424,7 @@ exports.seedDatabase = async (req, res) => {
     } catch (error) {
       results.errors.push(`Member creation failed: ${error.message}`);
     }
-  
+
     // Return HTML response with results
     const html = `
 <!DOCTYPE html>
@@ -535,9 +535,8 @@ exports.seedDatabase = async (req, res) => {
         <h1>🌱 Database Seeded Successfully</h1>
         <p class="subtitle">Test users have been created for the SACCO system</p>
 
-        ${
-          results.errors.length > 0
-            ? `
+        ${results.errors.length > 0
+        ? `
         <div class="error">
             <strong>Errors:</strong>
             <ul>
@@ -545,88 +544,78 @@ exports.seedDatabase = async (req, res) => {
             </ul>
         </div>
         `
-            : ""
-        }
+        : ""
+      }
 
-        ${
-          results.admin
-            ? `
-        <div class="user-card ${
-          results.admin.status === "already_exists" ? "existing" : ""
+        ${results.admin
+        ? `
+        <div class="user-card ${results.admin.status === "already_exists" ? "existing" : ""
         }">
             <h2>👤 Admin User</h2>
-            <span class="status ${
-              results.admin.status === "created" ? "created" : "existing"
-            }">
-                ${
-                  results.admin.status === "created"
-                    ? "✓ Created"
-                    : "⚠ Already Exists"
-                }
+            <span class="status ${results.admin.status === "created" ? "created" : "existing"
+        }">
+                ${results.admin.status === "created"
+          ? "✓ Created"
+          : "⚠ Already Exists"
+        }
             </span>
             <p>${results.admin.message}</p>
             <div class="credential">
                 <span class="credential-label">Email:</span>
                 <span class="credential-value">${results.admin.email}</span>
             </div>
-            ${
-              results.admin.password
-                ? `
+            ${results.admin.password
+          ? `
             <div class="credential">
                 <span class="credential-label">Password:</span>
                 <span class="credential-value">${results.admin.password}</span>
             </div>
             `
-                : ""
-            }
+          : ""
+        }
             <div class="credential">
                 <span class="credential-label">Role:</span>
                 <span class="credential-value">admin</span>
             </div>
         </div>
         `
-            : ""
-        }
+        : ""
+      }
 
-        ${
-          results.member
-            ? `
-        <div class="user-card ${
-          results.member.status === "already_exists" ? "existing" : ""
+        ${results.member
+        ? `
+        <div class="user-card ${results.member.status === "already_exists" ? "existing" : ""
         }">
             <h2>👤 Member User</h2>
-            <span class="status ${
-              results.member.status === "created" ? "created" : "existing"
-            }">
-                ${
-                  results.member.status === "created"
-                    ? "✓ Created"
-                    : "⚠ Already Exists"
-                }
+            <span class="status ${results.member.status === "created" ? "created" : "existing"
+        }">
+                ${results.member.status === "created"
+          ? "✓ Created"
+          : "⚠ Already Exists"
+        }
             </span>
             <p>${results.member.message}</p>
             <div class="credential">
                 <span class="credential-label">Email:</span>
                 <span class="credential-value">${results.member.email}</span>
             </div>
-            ${
-              results.member.password
-                ? `
+            ${results.member.password
+          ? `
             <div class="credential">
                 <span class="credential-label">Password:</span>
                 <span class="credential-value">${results.member.password}</span>
             </div>
             `
-                : ""
-            }
+          : ""
+        }
             <div class="credential">
                 <span class="credential-label">Role:</span>
                 <span class="credential-value">member</span>
             </div>
         </div>
         `
-            : ""
-        }
+        : ""
+      }
 
         <div class="actions">
             <a href="/auth/login" class="btn">Go to Login</a>

@@ -80,7 +80,7 @@
                                         style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
                                         <div>
                                             <h3 class="small-title" style="margin-bottom: 0.5rem;">
-                                                Loan #<%= loan.id.substring(0, 8) %>
+                                                Loan #<%= loan.id ? loan.id.substring(0, 8) : 'N/A' %>
                                             </h3>
                                             <p class="text-meta">Approved <%= new
                                                     Date(loan.approved_at).toLocaleDateString() %>
@@ -174,7 +174,7 @@
                                             <tbody>
                                                 <% loanHistory.forEach(loan=> { %>
                                                     <tr>
-                                                        <td>#<%= loan.id.substring(0, 8) %>
+                                                        <td>#<%= loan.id ? loan.id.substring(0, 8) : 'N/A' %>
                                                         </td>
                                                         <td>KSh <%= (loan.approved_amount || loan.requested_amount ||
                                                                 0).toLocaleString() %>

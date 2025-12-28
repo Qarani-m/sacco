@@ -244,8 +244,8 @@
                                         <div class="card-hover"
                                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 1.5rem;">
                                             <div style="flex: 1;">
-                                                <h4 class="small-title" style="margin-bottom: 0.5rem;">Loan #<%=
-                                                        loan.id.substring(0, 8) %>
+                                                <h4 class="small-title" style="margin-bottom: 0.5rem;">Loan #<%= loan.id
+                                                        ? loan.id.substring(0, 8) : 'N/A' %>
                                                 </h4>
                                                 <div
                                                     style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">

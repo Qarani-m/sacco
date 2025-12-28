@@ -54,25 +54,25 @@
         </div>
 
         <%- include('../partials/payment-modal') %>
-            <%- include('../layouts/footer') %>
-                <script src="/js/payment-modal.js"></script>
-                <script>
-                    const form = document.getElementById('payWelfareForm');
 
-                    form.addEventListener('submit', (e) => {
-                        e.preventDefault();
+            <script src="/js/payment-modal.js"></script>
+            <script>
+                const form = document.getElementById('payWelfareForm');
 
-                        // Open payment modal
-                        paymentModal.open({
-                            title: 'Pay Welfare',
-                            amount: 3,
-                            category: 'welfare',
-                            userId: '<%= user.id %>',
-                            userPhone: '<%= user.phone_number %>',
-                            csrfToken: '<%= csrfToken %>'
-                        });
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    // Open payment modal
+                    paymentModal.open({
+                        title: 'Pay Welfare',
+                        amount: 3,
+                        category: 'welfare',
+                        userId: '<%= user.id %>',
+                        userPhone: '<%= user.phone_number %>',
+                        csrfToken: '<%= csrfToken %>'
                     });
-                </script>
+                });
+            </script>
 </body>
 
 </html>

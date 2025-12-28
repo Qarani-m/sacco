@@ -78,17 +78,22 @@ exports.showRequestForm = async (req, res) => {
   try {
     const userId = req.user.id;
     const totalShares = await Share.getTotalByUser(userId);
-    const availableShares = await Share.getAvailableByUser(userId);
     const shareValue = totalShares * 1000;
+    const Document = require("../models/Document");
+    const hasDocuments = await Document.hasUploadedBothDocuments(userId);
+
+    // Calculate max loan amount based on shares (model handles own loan deduction)
+    const availableShares = await Share.getAvailableByUser(userId);
     const maxLoan = availableShares * 1000;
 
     res.render("loans/request", {
       title: "Request Loan",
       user: req.user,
       totalShares,
-      availableShares,
+      availableShares, // Model now handles deduction
       shareValue,
       maxLoan,
+      hasDocuments,
       unreadNotifications: 0,
       unreadMessages: 0,
       csrfToken: req.csrfToken(),
@@ -118,9 +123,11 @@ exports.requestLoan = async (req, res) => {
 
     const userId = req.user.id;
 
-    // Check for file uploads
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: "Supporting documents (Payslip/ID) are required" });
+    // Check for profile documents
+    const Document = require("../models/Document");
+    const hasDocuments = await Document.hasUploadedBothDocuments(userId);
+    if (!hasDocuments) {
+      return res.status(400).json({ error: "Identity documents are missing. Please upload them in your profile." });
     }
 
     // Validation
@@ -130,20 +137,23 @@ exports.requestLoan = async (req, res) => {
         .json({ error: "Maximum repayment period is 6 months" });
     }
 
-    // Check for existing unpaid loans
-    const hasUnpaidLoan = await User.hasUnpaidLoan(userId);
-    if (hasUnpaidLoan) {
-      return res
-        .status(400)
-        .json({ error: "You have an existing unpaid loan" });
-    }
+    // Check for existing unpaid loans (if strictly one active loan allowed)
+    // User requested: "if they try to borrow again they dont have supporting shares so they must find the guarantor"
+    // This implies multiple loans ARE allowed, but collateral is key.
+    // The previous check "hasUnpaidLoan" might be too strict if it blocks ANY second loan. 
+    // Assuming we RELY on collateral check below instead.
+    // However, if the requirement is "only borrowing 1000 once", let's stick to the collateral logic.
+    // Let's REMOVE strict "hasUnpaidLoan" blockage if we want to allow borrowing against remaining shares.
+    // BUT the prompt says: "even after the member has a loan they can boroow a loan again even after their supporting shares are used , this should not be case"
+    // So if I have 1 share, I borrow 1000. Now I have 0 available. If I try to borrow again, I need guarantor.
 
-    // Check share value
+    // Check share value and availability
     const totalShares = await Share.getTotalByUser(userId);
-    const shareValue = totalShares * 1000;
+    const availableShares = await Share.getAvailableByUser(userId);
 
-    // Calculate total coverage
-    let totalCoverage = shareValue;
+    // Calculate total coverage (own shares + guarantors)
+    const selfCoverage = availableShares * 1000;
+    let totalCoverage = selfCoverage;
     if (guarantors && guarantors.length > 0) {
       const guarantorCoverage = guarantors.reduce(
         (sum, g) => sum + g.shares_requested * 1000,
@@ -155,8 +165,8 @@ exports.requestLoan = async (req, res) => {
     if (requested_amount > totalCoverage) {
       return res.status(400).json({
         error: "Insufficient coverage",
-        message: "You need more guarantor shares",
-        share_value: shareValue,
+        message: "You need more guarantors or shares",
+        share_value: selfCoverage,
         requested_amount: requested_amount,
         shortfall: requested_amount - totalCoverage,
       });
@@ -400,7 +410,7 @@ exports.calculateMaxLoan = async (req, res) => {
       success: true,
       total_shares: totalShares,
       available_shares: availableShares,
-      max_loan: totalShares * 1000,
+      max_loan: availableShares * 1000,
     });
   } catch (error) {
     console.error("Calculate max loan error:", error);
@@ -414,7 +424,8 @@ exports.calculateGuarantorsNeeded = async (req, res) => {
     const userId = req.user.id;
 
     const totalShares = await Share.getTotalByUser(userId);
-    const shareValue = totalShares * 1000;
+    const availableShares = await Share.getAvailableByUser(userId); // Accounts for own loans now
+    const shareValue = availableShares * 1000;
 
     if (requested_amount <= shareValue) {
       return res.json({

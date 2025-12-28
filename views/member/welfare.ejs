@@ -178,48 +178,48 @@
 
         </div>
 
-        <%- include('../layouts/footer') %>
 
-            <script>
-                document.getElementById('welfarePaymentForm').addEventListener('submit', async function (e) {
-                    e.preventDefault();
 
-                    if (!confirm('Proceed to pay KSh 3 welfare contribution via M-Pesa?')) {
-                        return;
-                    }
+        <script>
+            document.getElementById('welfarePaymentForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
 
-                    try {
-                        const response = await fetch('/payments/initiate/welfare/<%= user.id %>', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-Token': '<%= csrfToken %>' // Ensure CSRF token is available if needed, though header might be global
-                            },
-                            body: JSON.stringify({
-                                amount: 3,
-                                phone_number: '<%= user.phone_number %>',
-                                registered_number: true
-                            })
-                        });
+                if (!confirm('Proceed to pay KSh 3 welfare contribution via M-Pesa?')) {
+                    return;
+                }
 
-                        const data = await response.json();
+                try {
+                    const response = await fetch('/payments/initiate/welfare/<%= user.id %>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '<%= csrfToken %>' // Ensure CSRF token is available if needed, though header might be global
+                        },
+                        body: JSON.stringify({
+                            amount: 3,
+                            phone_number: '<%= user.phone_number %>',
+                            registered_number: true
+                        })
+                    });
 
-                        if (data.success) {
-                            alert(data.message || 'Payment initiated! Check your phone for M-Pesa prompt.');
-                            if (data.transaction_ref) {
-                                window.location.href = `/payments/status/${data.transaction_ref}`;
-                            } else {
-                                window.location.reload();
-                            }
+                    const data = await response.json();
+
+                    if (data.success) {
+                        alert(data.message || 'Payment initiated! Check your phone for M-Pesa prompt.');
+                        if (data.transaction_ref) {
+                            window.location.href = `/payments/status/${data.transaction_ref}`;
                         } else {
-                            alert('Error: ' + (data.error || 'Failed to initiate payment'));
+                            window.location.reload();
                         }
-                    } catch (error) {
-                        console.error('Errore:', error);
-                        alert('Failedt to initiate payment. Please try again.');
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to initiate payment'));
                     }
-                });
-            </script>
+                } catch (error) {
+                    console.error('Errore:', error);
+                    alert('Failedt to initiate payment. Please try again.');
+                }
+            });
+        </script>
 </body>
 
 </html>

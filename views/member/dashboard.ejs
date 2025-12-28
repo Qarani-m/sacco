@@ -58,7 +58,7 @@
                                             <%= stats.total_shares || 0 %>
                                         </p>
                                         <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
-                                            Worth KSh <%= ((stats.total_shares || 0) * 1000).toLocaleString() %>
+                                            Worth KSh <%= ((stats.total_shares || 0) * 1).toLocaleString() %>
                                         </p>
                                         <p class="text-meta" style="margin-top: 0.5rem;">Max: KSh 50,000</p>
                                         <% if (user.registration_paid) { %>
@@ -272,7 +272,8 @@
                                                     <div
                                                         style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #E5E5E5;">
                                                         <p class="text-meta" style="margin-bottom: 0.5rem;">Guarantors (
-                                                            <%= loan.guarantors.length %>):</p>
+                                                            <%= loan.guarantors.length %>):
+                                                        </p>
                                                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                                             <% loan.guarantors.forEach(g=> { %>
                                                                 <span
@@ -444,7 +445,7 @@
                             openBtn.addEventListener('click', function () {
                                 paymentModal.open({
                                     title: 'Pay Registration Fee',
-                                    amount: 1000,
+                                    amount: 4,
                                     category: 'registration',
                                     userId: '<%= user.id %>',
                                     userPhone: '<%= user.phone_number %>',

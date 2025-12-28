@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid');
 const db = require("./db");
 
 class Loan {
@@ -5,14 +6,16 @@ class Loan {
   static async create(loanData) {
     const { borrower_id, requested_amount, repayment_months } = loanData;
     const interest_rate = process.env.LOAN_INTEREST_RATE || 3;
+    const id = uuidv4();
 
     const query = `
-            INSERT INTO loans (borrower_id, requested_amount, interest_rate, repayment_months)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO loans (id, borrower_id, requested_amount, interest_rate, repayment_months)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *
         `;
 
     const result = await db.query(query, [
+      id,
       borrower_id,
       requested_amount,
       interest_rate,

@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid');
 const db = require("./db");
 
 class Transaction {
@@ -11,14 +12,16 @@ class Transaction {
       transaction_ref,
       status = "pending",
     } = transactionData;
+    const id = uuidv4();
 
     const query = `
-            INSERT INTO payment_transactions (user_id, amount, type, payment_method, transaction_ref, status)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO payment_transactions (id, user_id, amount, type, payment_method, transaction_ref, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *
         `;
 
     const result = await db.query(query, [
+      id,
       user_id,
       amount,
       type,

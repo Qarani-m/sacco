@@ -6,173 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Fee - SACCO</title>
     <link rel="stylesheet" href="/css/design-system.css">
-    ">
-    <style>
-        /* Modal Overlay Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            overflow-y: auto;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 8px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            margin: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #E5E5E5;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #6B7280;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-close:hover {
-            color: #000;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .modal-footer {
-            padding: 1.5rem;
-            border-top: 1px solid #E5E5E5;
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-
-        .phone-option {
-            border: 2px solid #E5E5E5;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .phone-option:hover {
-            border-color: #D1D5DB;
-        }
-
-        .phone-option.selected {
-            border-color: #000;
-            background-color: #FAFAFA;
-        }
-
-        .phone-option input[type="radio"] {
-            display: none;
-        }
-
-        .phone-option-label {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-        }
-
-        .radio-custom {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #D1D5DB;
-            border-radius: 50%;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .phone-option.selected .radio-custom {
-            border-color: #000;
-        }
-
-        .phone-option.selected .radio-custom::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 10px;
-            height: 10px;
-            background-color: #000;
-            border-radius: 50%;
-        }
-
-        .custom-phone-input {
-            display: none;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #E5E5E5;
-        }
-
-        .form-group {
-            margin-bottom: 0.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.875rem;
-        }UPDATE users
-SET registration_paid = 1
-WHERE email = 'emqarani@gmail.com';
-
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #D1D5DB;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #000;
-        }
-
-        .alert-inline {
-            padding: 1rem;
-            background-color: #F3F4F6;
-            border-radius: 6px;
-        }
-    </style>
-
 </head>
 
 <body>
@@ -204,7 +37,6 @@ WHERE email = 'emqarani@gmail.com';
                         <p style="font-size: 3rem; font-weight: 300; color: #000000; margin: 0;">
                             KSh 4
                         </p>
-
                     </div>
 
                     <div class="alert alert-info" style="text-align: left; margin-bottom: 2rem;">
@@ -241,197 +73,29 @@ WHERE email = 'emqarani@gmail.com';
 
         </div>
 
-        <!-- Registration Payment Modal -->
-        <div id="registrationModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Pay Registration Fee</h3>
-                    <button class="modal-close" id="modalCloseBtn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert-inline" style="margin-bottom: 1.5rem;">
-                        <p style="margin: 0; font-weight: 600;">Amount: KSh 4</p>
+        <!-- Unified Payment Modal Partial -->
+        <%- include('../partials/payment-modal') %>
 
-                    </div>
+            <%- include('../layouts/footer') %>
 
-                    <p style="margin-bottom: 1.5rem; color: #4B5563; font-size: 0.875rem;">
-                        Choose a phone number to receive the M-PESA STK push prompt:
-                    </p>
-
-                    <!-- Registered Phone Option -->
-                    <div class="phone-option selected" data-option="registered" id="registeredOption">
-                        <input type="radio" name="phone_option" value="registered" checked>
-                        <label class="phone-option-label">
-                            <div class="radio-custom"></div>
-                            <div style="flex: 1;">
-                                <p style="font-weight: 600; color: #000; margin-bottom: 0.25rem;">Use Registered Number
-                                </p>
-                                <p style="font-size: 0.875rem; color: #6B7280;">
-                                    <%= user.phone_number %>
-                                </p>
-                            </div>
-                        </label>
-                    </div>
-
-                    <!-- Different Phone Option -->
-                    <div class="phone-option" data-option="different" id="differentOption">
-                        <input type="radio" name="phone_option" value="different">
-                        <label class="phone-option-label">
-                            <div class="radio-custom"></div>
-                            <div style="flex: 1;">
-                                <p style="font-weight: 600; color: #000; margin-bottom: 0.25rem;">Use Different Number
-                                </p>
-                                <p style="font-size: 0.875rem; color: #6B7280;">Enter a different M-PESA number</p>
-                            </div>
-                        </label>
-
-                        <!-- Custom Phone Input (hidden by default) -->
-                        <div class="custom-phone-input" id="customPhoneInput">
-                            <div class="form-group">
-                                <label for="custom_phone">Phone Number</label>
-                                <input type="tel" id="custom_phone" name="custom_phone" placeholder="254XXXXXXXXX"
-                                    class="w-full px-4 py-4 bg-white text-black" pattern="254[0-9]{9}" maxlength="12">
-                            </div>
-                            <p style="font-size: 0.75rem; color: #9CA3AF; margin-top: 0.5rem;">
-                                Format: 254XXXXXXXXX (12 digits starting with 254)
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Status Messages -->
-                    <div id="modalStatus" style="margin-top: 1.5rem;"></div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-secondary" id="cancelBtn">Cancel</button>
-                    <button class="btn-primary" id="payButton">
-                        Send STK Push
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <%- include('../layouts/footer') %>
-
-            <script>
-                const modal = document.getElementById('registrationModal');
-                const payRegistrationBtn = document.getElementById('payRegistrationBtn');
-                const modalCloseBtn = document.getElementById('modalCloseBtn');
-                const cancelBtn = document.getElementById('cancelBtn');
-                const payButton = document.getElementById('payButton');
-                const registeredOption = document.getElementById('registeredOption');
-                const differentOption = document.getElementById('differentOption');
-                const customPhoneInput = document.getElementById('customPhoneInput');
-                const modalStatus = document.getElementById('modalStatus');
-
-                // Open modal when clicking pay button
-                payRegistrationBtn.addEventListener('click', function () {
-                    console.log("something")
-                    modal.style.display = 'flex';
-                });
-
-                // Close modal handlers
-                modalCloseBtn.addEventListener('click', () => {
-                    modal.style.display = 'none';
-                });
-
-                cancelBtn.addEventListener('click', () => {
-                    modal.style.display = 'none';
-                });
-
-                // Close modal when clicking outside
-                window.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.style.display = 'none';
-                    }
-                });
-
-                // Handle phone option selection
-                registeredOption.addEventListener('click', function () {
-                    registeredOption.classList.add('selected');
-                    differentOption.classList.remove('selected');
-                    registeredOption.querySelector('input[type="radio"]').checked = true;
-                    customPhoneInput.style.display = 'none';
-                });
-
-                differentOption.addEventListener('click', function (e) {
-                    if (e.target.tagName !== 'INPUT' && e.target.id !== 'custom_phone') {
-                        differentOption.classList.add('selected');
-                        registeredOption.classList.remove('selected');
-                        differentOption.querySelector('input[type="radio"]').checked = true;
-                        customPhoneInput.style.display = 'block';
-                    }
-                });
-
-                // Handle payment submission
-                payButton.addEventListener('click', async function () {
-                    const btn = this;
-                    const selectedOption = document.querySelector('input[name="phone_option"]:checked').value;
-                    let phoneNumber = null;
-
-                    // Validate and get phone number
-                    if (selectedOption === 'different') {
-                        phoneNumber = document.getElementById('custom_phone').value.trim();
-
-                        if (!phoneNumber) {
-                            modalStatus.innerHTML = '<div class="alert alert-error">Please enter a phone number</div>';
-                            return;
+                <script src="/js/payment-modal.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const payBtn = document.getElementById('payRegistrationBtn');
+                        if (payBtn) {
+                            payBtn.addEventListener('click', function () {
+                                paymentModal.open({
+                                    title: 'Pay Registration Fee',
+                                    amount: 4,
+                                    category: 'registration',
+                                    userId: '<%= user.id %>',
+                                    userPhone: '<%= user.phone_number %>',
+                                    csrfToken: '<%= csrfToken %>'
+                                });
+                            });
                         }
-
-                        if (!/^254[0-9]{9}$/.test(phoneNumber)) {
-                            modalStatus.innerHTML = '<div class="alert alert-error">Invalid phone number format. Use 254XXXXXXXXX</div>';
-                            return;
-                        }
-                    }
-
-                    btn.disabled = true;
-                    btn.textContent = 'Processing...';
-                    modalStatus.innerHTML = '';
-
-                    try {
-                        const response = await fetch('/members/registration/pay', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'CSRF-Token': '<%= csrfToken %>'
-                            },
-                            body: JSON.stringify({
-                                phone_number: phoneNumber
-                            })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            modalStatus.innerHTML = '<div class="alert alert-success">' +
-                                (data.message || 'Payment initiated! Check your phone for M-Pesa prompt.') +
-                                '</div>';
-
-                            setTimeout(() => {
-                                if (data.transaction_ref) {
-                                    window.location.href = `/payments/status/${data.transaction_ref}`;
-                                } else {
-                                    window.location.href = '/members/dashboard';
-                                }
-                            }, 2000);
-                        } else {
-                            modalStatus.innerHTML = '<div class="alert alert-error">Error: ' +
-                                (data.error || 'Failedtk to initiate payment') +
-                                '</div>';
-                            btn.disabled = false;
-                            btn.textContent = 'Send STK Push';
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        modalStatus.innerHTML = '<div class="alert alert-error">Failed to process payment. Please try again.</div>';
-                        btn.disabled = false;
-                        btn.textContent = 'Send STK Push';
-                    }
-                });
-
-
-
-
-            </script>
+                    });
+                </script>
 </body>
 
 </html>

@@ -61,7 +61,7 @@ const buyShares = async (req, res) => {
       return res.status(400).json({ error: "Invalid quantity" });
     }
 
-    const amount = quantity * 1000; // KSh 1,000 per share
+    const amount = quantity * 1; // KSh 1 per share
 
     // Check 50k limit
     const currentValue = await Share.getValueByUser(userId);
@@ -71,7 +71,7 @@ const buyShares = async (req, res) => {
         current_value: currentValue,
         requested: amount,
         max_allowed: 50000,
-        available_to_buy: Math.floor((50000 - currentValue) / 1000),
+        available_to_buy: Math.floor((50000 - currentValue) / 1),
       });
     }
 

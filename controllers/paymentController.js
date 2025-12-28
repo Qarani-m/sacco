@@ -111,7 +111,7 @@ exports.mpesaCallback = async (req, res) => {
       // Payment successful
       const callbackMetadata = callbackData.CallbackMetadata;
       let mpesaReceiptNumber = "";
-      
+
       if (callbackMetadata && callbackMetadata.Item) {
         const receiptItem = callbackMetadata.Item.find(
           (item) => item.Name === "MpesaReceiptNumber"
@@ -221,7 +221,7 @@ async function allocatePayment(transaction) {
 
   // 3. Allocate to shares if specified
   if (transaction.type === "shares") {
-    const shareQuantity = Math.floor(transaction.amount / 1000);
+    const shareQuantity = Math.floor(transaction.amount / 1);
 
     await Share.create({
       user_id: userId,

@@ -1,17 +1,19 @@
+const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
 
 class Share {
     // Purchase shares
     static async create(shareData) {
         const { user_id, quantity, amount_paid } = shareData;
-        
+        const id = uuidv4();
+
         const query = `
-            INSERT INTO shares (user_id, quantity, amount_paid, purchase_date)
-            VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+            INSERT INTO shares (id, user_id, quantity, amount_paid, purchase_date)
+            VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
             RETURNING *
         `;
-        
-        const result = await db.query(query, [user_id, quantity, amount_paid]);
+
+        const result = await db.query(query, [id, user_id, quantity, amount_paid]);
         return result.rows[0];
     }
 

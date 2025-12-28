@@ -1,210 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Shares - SACCO</title>
     <link rel="stylesheet" href="/css/design-system.css">
 </head>
+
 <body>
     <%- include('../layouts/member-header') %>
-    
-    <div class="container-xl">
-        
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="accent-line"></div>
-            <h1 class="page-title">My Shares</h1>
-            <p class="page-subtitle">Manage your SACCO shares and investments</p>
-        </div>
 
-        <!-- Shares Overview -->
-        <div class="grid grid-cols-4 gap-6 mb-12">
-            <div class="stat-card">
-                <p class="stat-label">Total Shares</p>
-                <p class="stat-value"><%= totalShares %></p>
-                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
-                    Worth KSh <%= (totalShares * 1000).toLocaleString() %>
-                </p>
-            </div>
-            <div class="stat-card">
-                <p class="stat-label">Active Shares</p>
-                <p class="stat-value"><%= activeShares %></p>
-                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
-                    Available for use
-                </p>
-            </div>
-            <div class="stat-card">
-                <p class="stat-label">Pledged Shares</p>
-                <p class="stat-value"><%= pledgedShares %></p>
-                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
-                    As guarantor
-                </p>
-            </div>
-            <div class="stat-card">
-                <p class="stat-label">Can Purchase</p>
-                <p class="stat-value"><%= maxPurchasable %></p>
-                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
-                    Max: 50 shares
-                </p>
-            </div>
-        </div>
+        <div class="container-xl">
 
-        <!-- Purchase Shares Section -->
-        <div class="card mb-12">
-            <h2 class="section-title mb-6">Purchase Shares</h2>
-            
-            <div class="alert alert-info mb-6">
-                <p style="margin: 0;">
-                    <strong>Share Price:</strong> KSh 1,000 per share | <strong>Maximum:</strong> 50 shares (KSh 50,000)
-                </p>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="accent-line"></div>
+                <h1 class="page-title">My Shares</h1>
+                <p class="page-subtitle">Manage your SACCO shares and investments</p>
             </div>
 
-            <form id="purchaseSharesForm" class="space-y-6">
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="form-group">
-                        <label for="quantity">Number of Shares</label>
-                        <input type="number" id="quantity" name="quantity" required min="1" max="<%= maxPurchasable %>" value="1">
-                    </div>
-                    <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; display: flex; flex-direction: column; justify-content: center;">
-                        <p class="text-meta" style="margin-bottom: 0.5rem;">Total Amount</p>
-                        <p style="font-size: 1.5rem; font-weight: 300; color: #000000;" id="totalAmount">
-                            KSh 1,000
-                        </p>
-                    </div>
+            <!-- Shares Overview -->
+            <div class="grid grid-cols-4 gap-6 mb-12">
+                <div class="stat-card">
+                    <p class="stat-label">Total Shares</p>
+                    <p class="stat-value">
+                        <%= totalShares %>
+                    </p>
+                    <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                        Worth KSh <%= (totalShares * 1).toLocaleString() %>
+                    </p>
                 </div>
+                <div class="stat-card">
+                    <p class="stat-label">Active Shares</p>
+                    <p class="stat-value">
+                        <%= activeShares %>
+                    </p>
+                    <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                        Available for use
+                    </p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Pledged Shares</p>
+                    <p class="stat-value">
+                        <%= pledgedShares %>
+                    </p>
+                    <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                        As guarantor
+                    </p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Can Purchase</p>
+                    <p class="stat-value">
+                        <%= maxPurchasable %>
+                    </p>
+                    <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                        Max: 50 shares
+                    </p>
+                </div>
+            </div>
 
-                <div class="alert alert-info">
+            <!-- Purchase Shares Section -->
+            <div class="card mb-12">
+                <h2 class="section-title mb-6">Purchase Shares</h2>
+
+                <div class="alert alert-info mb-6">
                     <p style="margin: 0;">
-                        <strong>Payment Method:</strong> M-Pesa. You will receive a prompt on your phone to complete the payment.
+                        <strong>Share Price:</strong> KSh 1 per share | <strong>Maximum:</strong> 50 shares (KSh 50)
                     </p>
                 </div>
 
-                <div style="display: flex; gap: 1rem;">
-                    <button type="submit" class="btn-primary">Buy Shares</button>
-                    <button type="button" onclick="document.getElementById('quantity').value = 1; updateTotal();" class="btn-secondary">Reset</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Share Purchase History -->
-        <div class="mb-12">
-            <h2 class="section-title mb-6">Purchase History</h2>
-            
-            <% if (shareHistory.length === 0) { %>
-                <div class="card" style="text-align: center; padding: 3rem 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
-                    <h3 class="small-title" style="margin-bottom: 0.5rem;">No Shares Yet</h3>
-                    <p class="text-secondary">Purchase your first shares to start building your investment.</p>
-                </div>
-            <% } else { %>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Quantity</th>
-                            <th>Amount Paid</th>
-                            <th>Status</th>
-                            <th>Transaction Ref</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% shareHistory.forEach(share => { %>
-                        <tr>
-                            <td><%= new Date(share.purchase_date).toLocaleDateString() %></td>
-                            <td><%= share.quantity %> shares</td>
-                            <td>KSh <%= share.amount_paid.toLocaleString() %></td>
-                            <td>
-                                <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-                                    <%= share.status %>
-                                </span>
-                            </td>
-                            <td class="text-secondary" style="font-size: 0.75rem;"><%= share.transaction_ref || 'N/A' %></td>
-                        </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            <% } %>
-        </div>
-
-        <!-- Share Status Breakdown -->
-        <div class="grid grid-cols-2 gap-6 mb-12">
-            <div class="card">
-                <h3 class="small-title" style="margin-bottom: 1rem;">Share Status</h3>
-                <div style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span class="text-secondary">Active Shares:</span>
-                        <span style="font-weight: 600;"><%= activeShares %> shares</span>
+                <form id="purchaseSharesForm" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label for="quantity">Number of Shares</label>
+                            <input type="number" id="quantity" name="quantity" required min="1"
+                                max="<%= maxPurchasable %>" value="1">
+                        </div>
+                        <div
+                            style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; display: flex; flex-direction: column; justify-content: center;">
+                            <p class="text-meta" style="margin-bottom: 0.5rem;">Total Amount</p>
+                            <p style="font-size: 1.5rem; font-weight: 300; color: #000000;" id="totalAmount">
+                                KSh 1
+                            </p>
+                        </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span class="text-secondary">Pledged as Guarantor:</span>
-                        <span style="font-weight: 600;"><%= pledgedShares %> shares</span>
+
+                    <div class="alert alert-info">
+                        <p style="margin: 0;">
+                            <strong>Payment Method:</strong> M-Pesa. You will receive a prompt on your phone to complete
+                            the payment.
+                        </p>
                     </div>
-                </div>
-                <p class="text-secondary" style="font-size: 0.875rem;">
-                    Pledged shares are temporarily locked while guaranteeing loans. They will be released once the loans are repaid.
-                </p>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn-primary">Buy Shares</button>
+                        <button type="button" onclick="document.getElementById('quantity').value = 1; updateTotal();"
+                            class="btn-secondary">Reset</button>
+                    </div>
+                </form>
             </div>
 
-            <div class="card">
-                <h3 class="small-title" style="margin-bottom: 1rem;">Investment Value</h3>
-                <div style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span class="text-secondary">Total Investment:</span>
-                        <span style="font-weight: 600;">KSh <%= (totalShares * 1000).toLocaleString() %></span>
+            <!-- Share Purchase History -->
+            <div class="mb-12">
+                <h2 class="section-title mb-6">Purchase History</h2>
+
+                <% if (shareHistory.length===0) { %>
+                    <div class="card" style="text-align: center; padding: 3rem 2rem;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                        <h3 class="small-title" style="margin-bottom: 0.5rem;">No Shares Yet</h3>
+                        <p class="text-secondary">Purchase your first shares to start building your investment.</p>
                     </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span class="text-secondary">Available Value:</span>
-                        <span style="font-weight: 600;">KSh <%= (activeShares * 1000).toLocaleString() %></span>
-                    </div>
-                </div>
-                <p class="text-secondary" style="font-size: 0.875rem;">
-                    Your shares represent your ownership stake in the SACCO and determine your maximum loan amount.
-                </p>
+                    <% } else { %>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Quantity</th>
+                                    <th>Amount Paid</th>
+                                    <th>Status</th>
+                                    <th>Transaction Ref</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% shareHistory.forEach(share=> { %>
+                                    <tr>
+                                        <td>
+                                            <%= new Date(share.purchase_date).toLocaleDateString() %>
+                                        </td>
+                                        <td>
+                                            <%= share.quantity %> shares
+                                        </td>
+                                        <td>KSh <%= share.amount_paid.toLocaleString() %>
+                                        </td>
+                                        <td>
+                                            <span
+                                                style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                                                <%= share.status %>
+                                            </span>
+                                        </td>
+                                        <td class="text-secondary" style="font-size: 0.75rem;">
+                                            <%= share.transaction_ref || 'N/A' %>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                        <% } %>
             </div>
+
+            <!-- Share Status Breakdown -->
+            <div class="grid grid-cols-2 gap-6 mb-12">
+                <div class="card">
+                    <h3 class="small-title" style="margin-bottom: 1rem;">Share Status</h3>
+                    <div
+                        style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span class="text-secondary">Active Shares:</span>
+                            <span style="font-weight: 600;">
+                                <%= activeShares %> shares
+                            </span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="text-secondary">Pledged as Guarantor:</span>
+                            <span style="font-weight: 600;">
+                                <%= pledgedShares %> shares
+                            </span>
+                        </div>
+                    </div>
+                    <p class="text-secondary" style="font-size: 0.875rem;">
+                        Pledged shares are temporarily locked while guaranteeing loans. They will be released once the
+                        loans are repaid.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3 class="small-title" style="margin-bottom: 1rem;">Investment Value</h3>
+                    <div
+                        style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span class="text-secondary">Total Investment:</span>
+                            <span style="font-weight: 600;">KSh <%= (totalShares * 1).toLocaleString() %></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="text-secondary">Available Value:</span>
+                            <span style="font-weight: 600;">KSh <%= (activeShares * 1).toLocaleString() %></span>
+                        </div>
+                    </div>
+                    <p class="text-secondary" style="font-size: 0.875rem;">
+                        Your shares represent your ownership stake in the SACCO and determine your maximum loan amount.
+                    </p>
+                </div>
+            </div>
+
         </div>
 
-    </div>
+        <%- include('../partials/payment-modal') %>
+            <%- include('../layouts/footer') %>
+                <script src="/js/payment-modal.js"></script>
 
-    <%- include('../partials/payment-modal') %>
-    <%- include('../layouts/footer') %>
-    <script src="/js/payment-modal.js"></script>
+                <script>
+                    function updateTotal() {
+                        const quantity = parseInt(document.getElementById('quantity').value) || 0;
+                        const total = quantity * 1;
+                        document.getElementById('totalAmount').textContent = `KSh ${total.toLocaleString()}`;
+                    }
 
-    <script>
-        function updateTotal() {
-            const quantity = parseInt(document.getElementById('quantity').value) || 0;
-            const total = quantity * 1000;
-            document.getElementById('totalAmount').textContent = `KSh ${total.toLocaleString()}`;
-        }
+                    document.getElementById('quantity').addEventListener('input', updateTotal);
 
-        document.getElementById('quantity').addEventListener('input', updateTotal);
+                    document.getElementById('purchaseSharesForm').addEventListener('submit', function (e) {
+                        e.preventDefault();
 
-        document.getElementById('purchaseSharesForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const quantity = parseInt(document.getElementById('quantity').value);
-            const maxPurchasable = <%= maxPurchasable %>;
+                        const quantity = parseInt(document.getElementById('quantity').value);
+                        const maxPurchasable = <%= maxPurchasable %>;
 
-            if (quantity > maxPurchasable) {
-                alert(`You can only purchase up to ${maxPurchasable} more shares.`);
-                return;
-            }
+                        if (quantity > maxPurchasable) {
+                            alert(`You can only purchase up to ${maxPurchasable} more shares.`);
+                            return;
+                        }
 
-            const amount = quantity * 1000;
+                        const amount = quantity * 1;
 
-            // Open payment modal
-            paymentModal.open({
-                title: 'Purchase Shares',
-                amount: amount,
-                category: 'shares',
-                userId: '<%= user.id %>',
-                userPhone: '<%= user.phone_number %>',
-                csrfToken: '<%= csrfToken %>',
-                metadata: {
-                    quantity: quantity
-                }
-            });
-        });
-    </script>
+                        // Open payment modal
+                        paymentModal.open({
+                            title: 'Purchase Shares',
+                            amount: amount,
+                            category: 'shares',
+                            userId: '<%= user.id %>',
+                            userPhone: '<%= user.phone_number %>',
+                            csrfToken: '<%= csrfToken %>',
+                            metadata: {
+                                quantity: quantity
+                            }
+                        });
+                    });
+                </script>
 </body>
+
 </html>

@@ -1,22 +1,25 @@
+const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
 
 class AdminAction {
     // Create admin action (requires 2/3 approval)
     static async create(actionData) {
         const { initiated_by, action_type, entity_type, entity_id, reason, action_data } = actionData;
-        
+        const id = uuidv4();
+
         const query = `
-            INSERT INTO admin_actions (initiated_by, action_type, entity_type, entity_id, reason, action_data)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO admin_actions (id, initiated_by, action_type, entity_type, entity_id, reason, action_data)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *
         `;
-        
+
         const result = await db.query(query, [
-            initiated_by, 
-            action_type, 
-            entity_type, 
-            entity_id, 
-            reason, 
+            id,
+            initiated_by,
+            action_type,
+            entity_type,
+            entity_id,
+            reason,
             JSON.stringify(action_data)
         ]);
         return result.rows[0];
@@ -104,14 +107,15 @@ class AdminAction {
     // Create verification record
     static async addVerification(verificationData) {
         const { action_id, verifier_id, decision, comment } = verificationData;
-        
+        const id = uuidv4();
+
         const query = `
-            INSERT INTO admin_verifications (action_id, verifier_id, decision, comment)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO admin_verifications (id, action_id, verifier_id, decision, comment)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *
         `;
-        
-        const result = await db.query(query, [action_id, verifier_id, decision, comment]);
+
+        const result = await db.query(query, [id, action_id, verifier_id, decision, comment]);
         return result.rows[0];
     }
 

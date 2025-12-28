@@ -1,89 +1,92 @@
-<% title = "Verify Email" %>
+<% title="Verify Email" %>
 
-<div class="container-sm">
-    
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="accent-line"></div>
-        <h1 class="page-title">Check Your Email</h1>
-        <p class="page-subtitle">Verification link sent</p>
-    </div>
+    <div class="container-sm">
 
-    <% if (typeof error !== 'undefined') { %>
-        <div class="alert alert-error">
-            <%= error %>
-        </div>
-    <% } %>
-
-    <div class="card" style="text-align: center; padding: 2rem;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin: 0 auto 1.5rem;">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-
-        <h2 class="section-title" style="margin-bottom: 1rem;">Verification Email Sent</h2>
-        
-        <p class="text-secondary" style="margin-bottom: 1.5rem;">
-            We've sent a verification link to your email address. Please click the link in the email to verify your account.
-        </p>
-
-        <div class="alert alert-info" style="text-align: left;">
-            <p style="margin-bottom: 0.5rem;"><strong>Didn't receive the email?</strong></p>
-            <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
-                <li>Check your spam or junk folder</li>
-                <li>Make sure you entered the correct email address</li>
-                <li>Wait a few minutes and check again</li>
-            </ul>
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">Check Your Email</h1>
+            <p class="page-subtitle">Verification link sent</p>
         </div>
 
-        <div style="margin-top: 2rem;">
-            <button id="resendBtn" class="btn-secondary" style="margin-bottom: 1rem;">
-                Resend Verification Email
-            </button>
-            <br>
-            <a href="/auth/logout" class="link-secondary">Logout</a>
-        </div>
+        <% if (typeof error !=='undefined' ) { %>
+            <div class="alert alert-error">
+                <%= error %>
+            </div>
+            <% } %>
+
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" style="margin: 0 auto 1.5rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+
+                    <h2 class="section-title" style="margin-bottom: 1rem;">Verification Email Sent</h2>
+
+                    <p class="text-secondary" style="margin-bottom: 1.5rem;">
+                        We've sent a verification link to your email address. Please click the link in the email to
+                        verify your account.
+                    </p>
+
+                    <div class="alert alert-info" style="text-align: left;">
+                        <p style="margin-bottom: 0.5rem;"><strong>Didn't receive the email?</strong></p>
+                        <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+                            <li>Check your spam or junk folder</li>
+                            <li>Make sure you entered the correct email address</li>
+                            <li>Wait a few minutes and check again</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <button id="resendBtn" class="btn-secondary" style="margin-bottom: 1rem;">
+                            Resend Verification Email
+                        </button>
+                        <br>
+                        <a href="/auth/logout" class="link-secondary">Logout</a>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="page-footer">
+                    <p>SACCO Member Portal • 2026</p>
+                </div>
+
     </div>
 
-    <!-- Footer -->
-    <div class="page-footer">
-        <p>SACCO Member Portal • 2024</p>
-    </div>
+    <script>
+        document.getElementById('resendBtn').addEventListener('click', async function () {
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
 
-</div>
+            try {
+                // Get user email from JWT cookie (we're already logged in)
+                const response = await fetch('/auth/resend-verification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'CSRF-Token': '<%= csrfToken %>'
+                    },
+                    body: JSON.stringify({
+                        email: '<%= (typeof user !== "undefined" && user) ? user.email : "" %>'
+                    })
+                });
 
-<script>
-document.getElementById('resendBtn').addEventListener('click', async function() {
-    const btn = this;
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
-    
-    try {
-        // Get user email from JWT cookie (we're already logged in)
-        const response = await fetch('/auth/resend-verification', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'CSRF-Token': '<%= csrfToken %>'
-            },
-            body: JSON.stringify({
-                email: '<%= (typeof user !== "undefined" && user) ? user.email : "" %>'
-            })
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Verification email sent! Please check your inbox.');
+                    btn.textContent = 'Email Sent';
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to send email'));
+                    btn.disabled = false;
+                    btn.textContent = 'Resend Verification Email';
+                }
+            } catch (error) {
+                alert(`Failed to resend email. Please try again.${error}`);
+                btn.disabled = false;
+                btn.textContent = 'Resend Verification Email';
+            }
         });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            alert('Verification email sent! Please check your inbox.');
-            btn.textContent = 'Email Sent';
-        } else {
-            alert('Error: ' + (data.error || 'Failed to send email'));
-            btn.disabled = false;
-            btn.textContent = 'Resend Verification Email';
-        }
-    } catch (error) {
-        alert(`Failed to resend email. Please try again.${error}` );
-        btn.disabled = false;
-        btn.textContent = 'Resend Verification Email';
-    }
-});
-</script>
+    </script>

@@ -150,7 +150,7 @@ INSERT INTO sacco_savings (year, total_interest_collected)
 SELECT 
     year,
     (RANDOM() * 500000 + 100000)::numeric(10,2)
-FROM generate_series(1975, 2024) as year
+FROM generate_series(1975, 2026) as year
 LIMIT 50;
 
 -- ============================================
@@ -159,7 +159,7 @@ LIMIT 50;
 INSERT INTO savings (user_id, year, amount, type)
 SELECT 
     id,
-    2024 - (RANDOM() * 5)::integer,
+    2026 - (RANDOM() * 5)::integer,
     (RANDOM() * 50000 + 5000)::numeric(10,2),
     CASE WHEN RANDOM() < 0.5 THEN 'surplus' ELSE 'transfer' END
 FROM users

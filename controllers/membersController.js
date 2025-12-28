@@ -75,7 +75,7 @@ exports.showRegistrationPage = async (req, res) => {
 exports.payRegistrationFee = async (req, res) => {
   try {
     const userId = req.user.id;
-    const amount = 2; // Testing: 2 bob (change to 1000 for production)
+    const amount = 4; // Testing: 4 bob (change to 1000 for production)
     const { phone_number } = req.body;
 
     const user = await User.findById(userId);

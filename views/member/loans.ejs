@@ -1,215 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Loans - SACCO</title>
     <link rel="stylesheet" href="/css/design-system.css">
 </head>
+
 <body>
     <%- include('../layouts/member-header') %>
-    
-    <div class="container-xl">
-        
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="accent-line"></div>
-            <h1 class="page-title">My Loans</h1>
-            <p class="page-subtitle">Manage your loans and repayments</p>
-        </div>
 
-        <!-- Loan Overview -->
-        <div class="grid grid-cols-4 gap-6 mb-12">
-            <div class="stat-card">
-                <p class="stat-label">Active Loans</p>
-                <p class="stat-value"><%= activeLoans.length %></p>
-            </div>
-            <div class="stat-card">
-                <p class="stat-label">Total Borrowed</p>
-                <p class="stat-value">KSh <%= totalBorrowed.toLocaleString() %></p>
-            </div>
-            <div class="stat-card">
-                <p class="stat-label">Total Repaid</p>
-                <p class="stat-value">KSh <%= totalRepaid.toLocaleString() %></p>
-            </div>
-            <div class="stat-card">
-                <p class="stat-label">Balance Remaining</p>
-                <p class="stat-value">KSh <%= balanceRemaining.toLocaleString() %></p>
-                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
-                    + 3% interest
-                </p>
-            </div>
-        </div>
+        <div class="container-xl">
 
-        <!-- Request New Loan -->
-        <% if (activeLoans.length === 0 && user.registration_paid) { %>
-        <div class="card mb-12">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h2 class="section-title" style="margin-bottom: 0.5rem;">Request a New Loan</h2>
-                    <p class="text-secondary">You can borrow up to KSh <%= (maxLoanAmount).toLocaleString() %> based on your shares.</p>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="accent-line"></div>
+                <h1 class="page-title">My Loans</h1>
+                <p class="page-subtitle">Manage your loans and repayments</p>
+            </div>
+
+            <!-- Loan Overview -->
+            <div class="grid grid-cols-4 gap-6 mb-12">
+                <div class="stat-card">
+                    <p class="stat-label">Active Loans</p>
+                    <p class="stat-value">
+                        <%= activeLoans.length %>
+                    </p>
                 </div>
-                <a href="/loans/request" class="btn-primary">Request Loan</a>
-            </div>
-        </div>
-        <% } %>
-
-        <!-- Active Loans -->
-        <% if (activeLoans.length > 0) { %>
-        <div class="mb-12">
-            <h2 class="section-title mb-6">Active Loans</h2>
-            
-            <div class="alert alert-info mb-6">
-                <p style="margin: 0;">
-                    <strong>Payment Priority:</strong> Loan repayment → Welfare → Shares. Interest (3%) goes to SACCO savings.
-                </p>
-            </div>
-
-            <% activeLoans.forEach(loan => { %>
-            <div class="card-hover" style="margin-bottom: 1.5rem; padding: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
-                    <div>
-                        <h3 class="small-title" style="margin-bottom: 0.5rem;">
-                            Loan #<%= loan.id.substring(0, 8) %>
-                        </h3>
-                        <p class="text-meta">Approved <%= new Date(loan.approved_at).toLocaleDateString() %></p>
-                    </div>
-                    <span style="padding: 0.5rem 1rem; background: #000000; color: #FFFFFF; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-                        Active
-                    </span>
+                <div class="stat-card">
+                    <p class="stat-label">Total Borrowed</p>
+                    <p class="stat-value">KSh <%= totalBorrowed.toLocaleString() %>
+                    </p>
                 </div>
-
-                <div class="grid grid-cols-4 gap-6 mb-6" style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
-                    <div>
-                        <p class="text-meta">Approved Amount</p>
-                        <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
-                            KSh <%= loan.approved_amount.toLocaleString() %>
-                        </p>
-                    </div>
-                    <div>
-                        <p class="text-meta">Interest (3%)</p>
-                        <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
-                            KSh <%= (loan.approved_amount * 0.01).toLocaleString() %>
-                        </p>
-                    </div>
-                    <div>
-                        <p class="text-meta">Balance Remaining</p>
-                        <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
-                            KSh <%= loan.balance_remaining.toLocaleString() %>
-                        </p>
-                    </div>
-                    <div>
-                        <p class="text-meta">Due Date</p>
-                        <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
-                            <%= new Date(loan.due_date).toLocaleDateString() %>
-                        </p>
-                    </div>
+                <div class="stat-card">
+                    <p class="stat-label">Total Repaid</p>
+                    <p class="stat-value">KSh <%= totalRepaid.toLocaleString() %>
+                    </p>
                 </div>
+                <div class="stat-card">
+                    <p class="stat-label">Balance Remaining</p>
+                    <p class="stat-value">KSh <%= balanceRemaining.toLocaleString() %>
+                    </p>
+                    <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                        + 3% interest
+                    </p>
+                </div>
+            </div>
 
-                <% if (loan.guarantors && loan.guarantors.length > 0) { %>
-                <div style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000; margin-bottom: 1.5rem;">
-                    <p class="text-meta" style="margin-bottom: 0.5rem;">Guarantors (<%= loan.guarantors.length %>):</p>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <% loan.guarantors.forEach(g => { %>
-                        <span style="padding: 0.25rem 0.75rem; background: #FFFFFF; border: 1px solid #E5E5E5; font-size: 0.75rem; color: #000000;">
-                            <%= g.guarantor_name %> (<%= g.shares_pledged %> shares)
-                        </span>
-                        <% }) %>
+            <!-- Request New Loan -->
+            <% if (activeLoans.length===0 && user.registration_paid) { %>
+                <div class="card mb-12">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h2 class="section-title" style="margin-bottom: 0.5rem;">Request a New Loan</h2>
+                            <p class="text-secondary">You can borrow up to KSh <%= (maxLoanAmount).toLocaleString() %>
+                                    based on your shares.</p>
+                        </div>
+                        <a href="/loans/request" class="btn-primary">Request Loan</a>
                     </div>
                 </div>
                 <% } %>
 
-                <div style="display: flex; gap: 1rem;">
-                    <a href="/loans/<%= loan.id %>" class="btn-secondary">View Details</a>
-                    <a href="/loans/<%= loan.id %>/repay" class="btn-primary">Make Payment</a>
-                </div>
-            </div>
-            <% }) %>
+                    <!-- Active Loans -->
+                    <% if (activeLoans.length> 0) { %>
+                        <div class="mb-12">
+                            <h2 class="section-title mb-6">Active Loans</h2>
+
+                            <div class="alert alert-info mb-6">
+                                <p style="margin: 0;">
+                                    <strong>Payment Priority:</strong> Loan repayment → Welfare → Shares. Interest (3%)
+                                    goes to SACCO savings.
+                                </p>
+                            </div>
+
+                            <% activeLoans.forEach(loan=> { %>
+                                <div class="card-hover" style="margin-bottom: 1.5rem; padding: 2rem;">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
+                                        <div>
+                                            <h3 class="small-title" style="margin-bottom: 0.5rem;">
+                                                Loan #<%= loan.id.substring(0, 8) %>
+                                            </h3>
+                                            <p class="text-meta">Approved <%= new
+                                                    Date(loan.approved_at).toLocaleDateString() %>
+                                            </p>
+                                        </div>
+                                        <span
+                                            style="padding: 0.5rem 1rem; background: #000000; color: #FFFFFF; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                                            Active
+                                        </span>
+                                    </div>
+
+                                    <div class="grid grid-cols-4 gap-6 mb-6"
+                                        style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
+                                        <div>
+                                            <p class="text-meta">Approved Amount</p>
+                                            <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
+                                                KSh <%= (loan.approved_amount || 0).toLocaleString() %>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p class="text-meta">Interest (3%)</p>
+                                            <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
+                                                KSh <%= ((loan.approved_amount || 0) * 0.01).toLocaleString() %>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p class="text-meta">Balance Remaining</p>
+                                            <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
+                                                KSh <%= (loan.balance_remaining || 0).toLocaleString() %>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p class="text-meta">Due Date</p>
+                                            <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
+                                            <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
+                                                <%= loan.due_date ? new Date(loan.due_date).toLocaleDateString() : 'N/A'
+                                                    %>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <% if (loan.guarantors && loan.guarantors.length> 0) { %>
+                                        <div
+                                            style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000; margin-bottom: 1.5rem;">
+                                            <p class="text-meta" style="margin-bottom: 0.5rem;">Guarantors (<%=
+                                                    loan.guarantors.length %>):</p>
+                                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                                <% loan.guarantors.forEach(g=> { %>
+                                                    <span
+                                                        style="padding: 0.25rem 0.75rem; background: #FFFFFF; border: 1px solid #E5E5E5; font-size: 0.75rem; color: #000000;">
+                                                        <%= g.guarantor_name %> (<%= g.shares_pledged %> shares)
+                                                    </span>
+                                                    <% }) %>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <div style="display: flex; gap: 1rem;">
+                                                <a href="/loans/<%= loan.id %>" class="btn-secondary">View Details</a>
+                                                <a href="/loans/<%= loan.id %>/repay" class="btn-primary">Make
+                                                    Payment</a>
+                                            </div>
+                                </div>
+                                <% }) %>
+                        </div>
+                        <% } %>
+
+                            <!-- Loan History -->
+                            <div class="mb-12">
+                                <h2 class="section-title mb-6">Loan History</h2>
+
+                                <% if (loanHistory.length===0) { %>
+                                    <div class="card" style="text-align: center; padding: 3rem 2rem;">
+                                        <div style="font-size: 3rem; margin-bottom: 1rem;">💵</div>
+                                        <h3 class="small-title" style="margin-bottom: 0.5rem;">No Loan History</h3>
+                                        <p class="text-secondary">You haven't taken any loans yet.</p>
+                                    </div>
+                                    <% } else { %>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Loan ID</th>
+                                                    <th>Amount</th>
+                                                    <th>Interest</th>
+                                                    <th>Repayment Period</th>
+                                                    <th>Status</th>
+                                                    <th>Approved Date</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% loanHistory.forEach(loan=> { %>
+                                                    <tr>
+                                                        <td>#<%= loan.id.substring(0, 8) %>
+                                                        </td>
+                                                        <td>KSh <%= (loan.approved_amount || loan.requested_amount ||
+                                                                0).toLocaleString() %>
+                                                        </td>
+                                                        <td>KSh <%= ((loan.approved_amount || loan.requested_amount ||
+                                                                0) * 0.01).toLocaleString() %>
+                                                        </td>
+                                                        <td>
+                                                            <%= loan.repayment_months %> months
+                                                        </td>
+                                                        <td>
+                                                            <span
+                                                                style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                                                                <%= loan.status %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <%= loan.approved_at ? new
+                                                                Date(loan.approved_at).toLocaleDateString() : 'Pending'
+                                                                %>
+                                                        </td>
+                                                        <td>
+                                                            <a href="/loans/<%= loan.id %>" class="btn-small">View</a>
+                                                        </td>
+                                                    </tr>
+                                                    <% }) %>
+                                            </tbody>
+                                        </table>
+                                        <% } %>
+                            </div>
+
+                            <!-- Loan Policy Reminder -->
+                            <div class="grid grid-cols-2 gap-6 mb-12">
+                                <div class="card">
+                                    <h3 class="small-title" style="margin-bottom: 1rem;">Loan Policy</h3>
+                                    <ul style="list-style: none; padding: 0; margin: 0;">
+                                        <li style="padding: 0.75rem 0; border-bottom: 1px solid #E5E5E5;">
+                                            <span style="font-weight: 600;">✓</span> Maximum loan = Your shares value
+                                        </li>
+                                        <li style="padding: 0.75rem 0; border-bottom: 1px solid #E5E5E5;">
+                                            <span style="font-weight: 600;">✓</span> 3% interest on all loans
+                                        </li>
+                                        <li style="padding: 0.75rem 0; border-bottom: 1px solid #E5E5E5;">
+                                            <span style="font-weight: 600;">✓</span> Repayment period: Up to 6 months
+                                        </li>
+                                        <li style="padding: 0.75rem 0;">
+                                            <span style="font-weight: 600;">✓</span> Need more? Request guarantors
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="card">
+                                    <h3 class="small-title" style="margin-bottom: 1rem;">Payment Information</h3>
+                                    <div style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000;">
+                                        <p style="margin-bottom: 0.5rem; font-weight: 600; color: #000000;">Payment
+                                            Priority:</p>
+                                        <ol style="margin: 0; padding-left: 1.5rem;">
+                                            <li style="margin: 0.5rem 0;">Loan repayment (frees guarantors)</li>
+                                            <li style="margin: 0.5rem 0;">Welfare contributions</li>
+                                            <li style="margin: 0.5rem 0;">Share purchases</li>
+                                            <li style="margin: 0.5rem 0;">Surplus → Personal savings</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+
         </div>
-        <% } %>
 
-        <!-- Loan History -->
-        <div class="mb-12">
-            <h2 class="section-title mb-6">Loan History</h2>
-            
-            <% if (loanHistory.length === 0) { %>
-                <div class="card" style="text-align: center; padding: 3rem 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">💵</div>
-                    <h3 class="small-title" style="margin-bottom: 0.5rem;">No Loan History</h3>
-                    <p class="text-secondary">You haven't taken any loans yet.</p>
-                </div>
-            <% } else { %>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Loan ID</th>
-                            <th>Amount</th>
-                            <th>Interest</th>
-                            <th>Repayment Period</th>
-                            <th>Status</th>
-                            <th>Approved Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% loanHistory.forEach(loan => { %>
-                        <tr>
-                            <td>#<%= loan.id.substring(0, 8) %></td>
-                            <td>KSh <%= (loan.approved_amount || loan.requested_amount || 0).toLocaleString() %></td>
-                            <td>KSh <%= ((loan.approved_amount || loan.requested_amount || 0) * 0.01).toLocaleString() %></td>
-                            <td><%= loan.repayment_months %> months</td>
-                            <td>
-                                <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-                                    <%= loan.status %>
-                                </span>
-                            </td>
-                            <td><%= loan.approved_at ? new Date(loan.approved_at).toLocaleDateString() : 'Pending' %></td>
-                            <td>
-                                <a href="/loans/<%= loan.id %>" class="btn-small">View</a>
-                            </td>
-                        </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            <% } %>
-        </div>
 
-        <!-- Loan Policy Reminder -->
-        <div class="grid grid-cols-2 gap-6 mb-12">
-            <div class="card">
-                <h3 class="small-title" style="margin-bottom: 1rem;">Loan Policy</h3>
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                    <li style="padding: 0.75rem 0; border-bottom: 1px solid #E5E5E5;">
-                        <span style="font-weight: 600;">✓</span> Maximum loan = Your shares value
-                    </li>
-                    <li style="padding: 0.75rem 0; border-bottom: 1px solid #E5E5E5;">
-                        <span style="font-weight: 600;">✓</span> 3% interest on all loans
-                    </li>
-                    <li style="padding: 0.75rem 0; border-bottom: 1px solid #E5E5E5;">
-                        <span style="font-weight: 600;">✓</span> Repayment period: Up to 6 months
-                    </li>
-                    <li style="padding: 0.75rem 0;">
-                        <span style="font-weight: 600;">✓</span> Need more? Request guarantors
-                    </li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <h3 class="small-title" style="margin-bottom: 1rem;">Payment Information</h3>
-                <div style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000;">
-                    <p style="margin-bottom: 0.5rem; font-weight: 600; color: #000000;">Payment Priority:</p>
-                    <ol style="margin: 0; padding-left: 1.5rem;">
-                        <li style="margin: 0.5rem 0;">Loan repayment (frees guarantors)</li>
-                        <li style="margin: 0.5rem 0;">Welfare contributions</li>
-                        <li style="margin: 0.5rem 0;">Share purchases</li>
-                        <li style="margin: 0.5rem 0;">Surplus → Personal savings</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <%- include('../layouts/footer') %>
 </body>
+
 </html>

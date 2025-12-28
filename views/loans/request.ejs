@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,130 +47,161 @@
         }
     </style>
 </head>
+
 <body>
     <%- include('../layouts/member-header') %>
-    
-    <div class="container-2xl">
-        <div class="page-header">
-            <div class="accent-line"></div>
-            <h1 class="page-title">Request Loan</h1>
-            <p class="page-subtitle">Apply for a loan based on your shares</p>
+
+        <div class="container-2xl">
+            <div class="page-header">
+                <div class="accent-line"></div>
+                <h1 class="page-title">Request Loan</h1>
+                <p class="page-subtitle">Apply for a loan based on your shares</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6 mb-12">
+                <!-- Left Column: Eligibility Info -->
+                <div class="card">
+                    <h3 class="small-title" style="margin-bottom: 1.5rem;">📊 Your Eligibility</h3>
+                    <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1rem;">
+                        <p class="text-secondary" style="margin-bottom: 0.5rem;">Total Shares</p>
+                        <p class="stat-value" style="font-size: 1.5rem; font-weight: 600; color: #000;">
+                            <%= totalShares || 0 %> shares
+                        </p>
+                        <p class="text-meta" style="margin-top: 0.5rem;">Worth KSh <%= ((totalShares || 0) *
+                                1000).toLocaleString() %>
+                        </p>
+                    </div>
+                    <div style="padding: 1.5rem; background: #F0FDF4; border: 1px solid #D1FAE5; margin-bottom: 1rem;">
+                        <p class="text-secondary" style="margin-bottom: 0.5rem;">Available Shares</p>
+                        <p style="font-size: 1.5rem; font-weight: 600; color: #000;">
+                            <%= availableShares || 0 %> shares
+                        </p>
+                        <p class="text-meta" style="margin-top: 0.5rem;">Not pledged as guarantor</p>
+                    </div>
+                    <div style="padding: 1.5rem; background: #FEF2F2; border: 1px solid #FECACA;">
+                        <p class="text-secondary" style="margin-bottom: 0.5rem;">Maximum Loan (Without Guarantors)</p>
+                        <p style="font-size: 1.75rem; font-weight: 600; color: #000;">KSh <%= maxLoan.toLocaleString()
+                                %>
+                        </p>
+                        <p class="text-meta" style="margin-top: 0.5rem;">Based on available shares</p>
+                    </div>
+
+                    <div class="alert alert-info" style="margin-top: 1.5rem;">
+                        <p style="margin: 0; font-size: 0.875rem;"><strong>Interest Rate:</strong> 3% per month</p>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;"><strong>Repayment:</strong> Up to 6 months
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right Column: Loan Request Form -->
+                <div class="card">
+                    <h3 class="small-title" style="margin-bottom: 1.5rem;">💰 Loan Request</h3>
+                    <% if (maxLoan===0) { %>
+                        <div class="alert alert-warning">
+                            <p style="margin: 0;">You need to purchase shares before you can request a loan.</p>
+                        </div>
+                        <a href="/shares/buy" class="btn-primary w-full" style="margin-top: 1.5rem;">Buy Shares</a>
+                        <% } else { %>
+                            <form id="loanRequestForm">
+                                <div class="form-group">
+                                    <label for="loanAmount">Loan Amount (KSh)</label>
+                                    <input type="number" id="loanAmount" name="loanAmount" min="1000" step="100"
+                                        required class="w-full px-4 py-4 bg-white text-black">
+                                    <p id="amountHelp" class="text-meta" style="margin-top: 0.5rem;">Your shares cover
+                                        up to KSh <%= maxLoan.toLocaleString() %>
+                                    </p>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="repaymentMonths">Repayment Period</label>
+                                    <select id="repaymentMonths" name="repaymentMonths" required
+                                        class="w-full px-4 py-4 bg-white text-black">
+                                        <option value="">Select period</option>
+                                        <option value="1">1 month</option>
+                                        <option value="2">2 months</option>
+                                        <option value="3">3 months</option>
+                                        <option value="4">4 months</option>
+                                        <option value="5">5 months</option>
+                                        <option value="6">6 months</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" style="margin-top: 1.5rem;">
+                                    <label for="loanDocuments">Supporting Documents (Payslip/ID)</label>
+                                    <input type="file" id="loanDocuments" name="loanDocuments" required multiple
+                                        class="w-full px-4 py-4 bg-white text-black" accept=".pdf,.jpg,.jpeg,.png">
+                                    <p class="text-meta" style="margin-top: 0.5rem;">Upload proof of income or ID.
+                                        Required for approval.</p>
+                                </div>
+
+                                <!-- Loan Summary -->
+                                <div
+                                    style="padding: 1rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin: 1.5rem 0;">
+                                    <p class="text-meta" style="margin-bottom: 0.5rem;">Loan Summary</p>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                        <span class="text-secondary">Amount:</span>
+                                        <span id="summaryAmount" style="font-weight: 600;">KSh 0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                        <span class="text-secondary">Interest (3%):</span>
+                                        <span id="summaryInterest" style="font-weight: 600;">KSh 0</span>
+                                    </div>
+                                    <div
+                                        style="display: flex; justify-content: space-between; padding-top: 0.5rem; border-top: 1px solid #E5E5E5;">
+                                        <span style="font-weight: 600;">Total to Repay:</span>
+                                        <span id="summaryTotal" style="font-weight: 600; color: #000;">KSh 0</span>
+                                    </div>
+                                </div>
+
+                                <!-- Guarantor Section (shown when amount > maxLoan) -->
+                                <div id="guarantorSection"
+                                    style="display: none; margin: 1.5rem 0; padding: 1.5rem; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px;">
+                                    <h4 style="margin-bottom: 1rem; font-weight: 600;">⚠️ Guarantors Required</h4>
+                                    <p class="text-secondary" style="margin-bottom: 0.5rem;">You need additional
+                                        coverage:</p>
+                                    <p style="font-weight: 600; margin-bottom: 0.5rem;">Shortfall: KSh <span
+                                            id="shortfallAmount">0</span></p>
+                                    <p style="font-size: 0.875rem; margin-bottom: 1rem;">Shares needed: <span
+                                            id="sharesNeeded">0</span></p>
+                                    <button type="button" id="searchGuarantorsBtn" class="btn-secondary w-full">
+                                        Select Guarantors
+                                    </button>
+                                    <div id="selectedGuarantors" style="margin-top: 1rem;">
+                                        <p class="text-secondary">No guarantors selected</p>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn-primary w-full">Submit Loan Request</button>
+                            </form>
+                            <% } %>
+                </div>
+            </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-6 mb-12">
-            <!-- Left Column: Eligibility Info -->
-            <div class="card">
-                <h3 class="small-title" style="margin-bottom: 1.5rem;">📊 Your Eligibility</h3>
-                <div style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1rem;">
-                    <p class="text-secondary" style="margin-bottom: 0.5rem;">Total Shares</p>
-                    <p class="stat-value" style="font-size: 1.5rem; font-weight: 600; color: #000;"><%= totalShares || 0 %> shares</p>
-                    <p class="text-meta" style="margin-top: 0.5rem;">Worth KSh <%= ((totalShares || 0) * 1000).toLocaleString() %></p>
+        <!-- Guarantor Selection Modal -->
+        <div id="guarantorModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Select Guarantors</h3>
+                    <button id="closeGuarantorModal"
+                        style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
                 </div>
-                <div style="padding: 1.5rem; background: #F0FDF4; border: 1px solid #D1FAE5; margin-bottom: 1rem;">
-                    <p class="text-secondary" style="margin-bottom: 0.5rem;">Available Shares</p>
-                    <p style="font-size: 1.5rem; font-weight: 600; color: #000;"><%= availableShares || 0 %> shares</p>
-                    <p class="text-meta" style="margin-top: 0.5rem;">Not pledged as guarantor</p>
+                <div class="modal-body">
+                    <p class="text-secondary" style="margin-bottom: 1rem;">Choose members to guarantee your loan by
+                        pledging their shares:</p>
+                    <div id="guarantorList"></div>
                 </div>
-                <div style="padding: 1.5rem; background: #FEF2F2; border: 1px solid #FECACA;">
-                    <p class="text-secondary" style="margin-bottom: 0.5rem;">Maximum Loan (Without Guarantors)</p>
-                    <p style="font-size: 1.75rem; font-weight: 600; color: #000;">KSh <%= maxLoan.toLocaleString() %></p>
-                    <p class="text-meta" style="margin-top: 0.5rem;">Based on available shares</p>
-                </div>
-
-                <div class="alert alert-info" style="margin-top: 1.5rem;">
-                    <p style="margin: 0; font-size: 0.875rem;"><strong>Interest Rate:</strong> 3% per month</p>
-                    <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;"><strong>Repayment:</strong> Up to 6 months</p>
-                </div>
-            </div>
-
-            <!-- Right Column: Loan Request Form -->
-            <div class="card">
-                <h3 class="small-title" style="margin-bottom: 1.5rem;">💰 Loan Request</h3>
-                <% if (maxLoan === 0) { %>
-                    <div class="alert alert-warning">
-                        <p style="margin: 0;">You need to purchase shares before you can request a loan.</p>
-                    </div>
-                    <a href="/shares/buy" class="btn-primary w-full" style="margin-top: 1.5rem;">Buy Shares</a>
-                <% } else { %>
-                <form id="loanRequestForm">
-                    <div class="form-group">
-                        <label for="loanAmount">Loan Amount (KSh)</label>
-                        <input type="number" id="loanAmount" name="loanAmount" min="1000" step="100" required class="w-full px-4 py-4 bg-white text-black">
-                        <p id="amountHelp" class="text-meta" style="margin-top: 0.5rem;">Your shares cover up to KSh <%= maxLoan.toLocaleString() %></p>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="repaymentMonths">Repayment Period</label>
-                        <select id="repaymentMonths" name="repaymentMonths" required class="w-full px-4 py-4 bg-white text-black">
-                            <option value="">Select period</option>
-                            <option value="1">1 month</option>
-                            <option value="2">2 months</option>
-                            <option value="3">3 months</option>
-                            <option value="4">4 months</option>
-                            <option value="5">5 months</option>
-                            <option value="6">6 months</option>
-                        </select>
-                    </div>
-
-                    <!-- Loan Summary -->
-                    <div style="padding: 1rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin: 1.5rem 0;">
-                        <p class="text-meta" style="margin-bottom: 0.5rem;">Loan Summary</p>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                            <span class="text-secondary">Amount:</span>
-                            <span id="summaryAmount" style="font-weight: 600;">KSh 0</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                            <span class="text-secondary">Interest (3%):</span>
-                            <span id="summaryInterest" style="font-weight: 600;">KSh 0</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding-top: 0.5rem; border-top: 1px solid #E5E5E5;">
-                            <span style="font-weight: 600;">Total to Repay:</span>
-                            <span id="summaryTotal" style="font-weight: 600; color: #000;">KSh 0</span>
-                        </div>
-                    </div>
-
-                    <!-- Guarantor Section (shown when amount > maxLoan) -->
-                    <div id="guarantorSection" style="display: none; margin: 1.5rem 0; padding: 1.5rem; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px;">
-                        <h4 style="margin-bottom: 1rem; font-weight: 600;">⚠️ Guarantors Required</h4>
-                        <p class="text-secondary" style="margin-bottom: 0.5rem;">You need additional coverage:</p>
-                        <p style="font-weight: 600; margin-bottom: 0.5rem;">Shortfall: KSh <span id="shortfallAmount">0</span></p>
-                        <p style="font-size: 0.875rem; margin-bottom: 1rem;">Shares needed: <span id="sharesNeeded">0</span></p>
-                        <button type="button" id="searchGuarantorsBtn" class="btn-secondary w-full">
-                            Select Guarantors
-                        </button>
-                        <div id="selectedGuarantors" style="margin-top: 1rem;">
-                            <p class="text-secondary">No guarantors selected</p>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-primary w-full">Submit Loan Request</button>
-                </form>
-                <% } %>
             </div>
         </div>
-    </div>
 
-    <!-- Guarantor Selection Modal -->
-    <div id="guarantorModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Select Guarantors</h3>
-                <button id="closeGuarantorModal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="text-secondary" style="margin-bottom: 1rem;">Choose members to guarantee your loan by pledging their shares:</p>
-                <div id="guarantorList"></div>
-            </div>
-        </div>
-    </div>
 
-    <%- include('../layouts/footer') %>
-    <script>
-        // Inject server data
-        window.totalShares = <%= totalShares || 0 %>;
-        window.maxLoan = <%= maxLoan || 0 %>;
-        window.csrfToken = '<%= csrfToken %>';
-    </script>
-    <script src="/js/loan-request.js"></script>
+        <script>
+            // Inject server data
+            window.totalShares = <%= totalShares || 0 %>;
+            window.maxLoan = <%= maxLoan || 0 %>;
+            window.csrfToken = '<%= csrfToken %>';
+        </script>
+        <script src="/js/loan-request.js"></script>
 </body>
+
 </html>

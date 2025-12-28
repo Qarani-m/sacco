@@ -64,44 +64,44 @@
         </div>
 
         <%- include('../partials/payment-modal') %>
-            <%- include('../layouts/footer') %>
-                <script src="/js/payment-modal.js"></script>
-                <script>
-                    const quantityInput = document.getElementById('quantity');
-                    const totalAmountEl = document.getElementById('totalAmount');
-                    const form = document.getElementById('buySharesForm');
 
-                    quantityInput.addEventListener('input', () => {
-                        const quantity = parseInt(quantityInput.value) || 0;
-                        const total = quantity * 1;
-                        totalAmountEl.textContent = `KSh ${total.toLocaleString()}`;
-                    });
+            <script src="/js/payment-modal.js"></script>
+            <script>
+                const quantityInput = document.getElementById('quantity');
+                const totalAmountEl = document.getElementById('totalAmount');
+                const form = document.getElementById('buySharesForm');
 
-                    document.getElementById('purchaseBtn').addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const quantity = parseInt(quantityInput.value);
+                quantityInput.addEventListener('input', () => {
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    const total = quantity * 1;
+                    totalAmountEl.textContent = `KSh ${total.toLocaleString()}`;
+                });
 
-                        if (!quantity || quantity < 1) {
-                            alert('Please enter a valid quantity');
-                            return;
+                document.getElementById('purchaseBtn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const quantity = parseInt(quantityInput.value);
+
+                    if (!quantity || quantity < 1) {
+                        alert('Please enter a valid quantity');
+                        return;
+                    }
+
+                    const amount = quantity * 1;
+
+                    // Open payment modal
+                    paymentModal.open({
+                        title: 'Purchase Shares',
+                        amount: amount,
+                        category: 'shares',
+                        userId: '<%= user.id %>',
+                        userPhone: '<%= user.phone_number %>',
+                        csrfToken: '<%= csrfToken %>',
+                        metadata: {
+                            quantity: quantity
                         }
-
-                        const amount = quantity * 1;
-
-                        // Open payment modal
-                        paymentModal.open({
-                            title: 'Purchase Shares',
-                            amount: amount,
-                            category: 'shares',
-                            userId: '<%= user.id %>',
-                            userPhone: '<%= user.phone_number %>',
-                            csrfToken: '<%= csrfToken %>',
-                            metadata: {
-                                quantity: quantity
-                            }
-                        });
                     });
-                </script>
+                });
+            </script>
 </body>
 
 </html>

@@ -3,6 +3,21 @@ const router = express.Router();
 const authMiddleware = require("../middleware/auth");
 const registrationCheck = require("../middleware/registrationCheck");
 const loanController = require("../controllers/loanController");
+const multer = require('multer');
+const path = require('path');
+
+// Configure upload storage
+const storage = multer.diskStorage({
+   destination: function (req, file, cb) {
+      cb(null, 'uploads/loan_docs/')
+   },
+   filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+   }
+});
+
+const upload = multer({ storage: storage });
 
 // All routes require authentication and registration fee paid
 router.use(authMiddleware);
@@ -35,7 +50,7 @@ router.get("/calculate/max", loanController.calculateMaxLoan);
    ============================ */
 
 // Submit new loan request
-router.post("/request", loanController.requestLoan);
+router.post("/request", upload.array('loanDocuments', 5), loanController.requestLoan);
 
 // Repay a loan
 router.post("/:loanId/repay", loanController.repayLoan);

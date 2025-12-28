@@ -243,14 +243,22 @@ document
       }
     }
 
-    const requestData = {
-      requested_amount: amount,
-      repayment_months: months,
-      guarantors: selectedGuarantors.map((g) => ({
-        guarantor_id: g.id,
-        shares_requested: g.shares,
-      })),
-    };
+    const formData = new FormData();
+    formData.append('requested_amount', amount);
+    formData.append('repayment_months', months);
+    
+    // Append documents
+    const fileInput = document.getElementById('loanDocuments');
+    for (let i = 0; i < fileInput.files.length; i++) {
+        formData.append('loanDocuments', fileInput.files[i]);
+    }
+
+    if (selectedGuarantors.length > 0) {
+        formData.append('guarantors', JSON.stringify(selectedGuarantors.map(g => ({
+            guarantor_id: g.id,
+            shares_requested: g.shares
+        }))));
+    }
 
     const button = this.querySelector('button[type="submit"]');
     button.disabled = true;
@@ -260,10 +268,9 @@ document
       const response = await fetch("/loans/request", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "X-CSRF-Token": window.csrfToken,
         },
-        body: JSON.stringify(requestData),
+        body: formData,
       });
 
       const data = await response.json();

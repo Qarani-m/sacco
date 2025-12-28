@@ -104,8 +104,24 @@ exports.showRequestForm = async (req, res) => {
 
 exports.requestLoan = async (req, res) => {
   try {
-    const { requested_amount, repayment_months, guarantors } = req.body;
+    const { requested_amount, repayment_months } = req.body;
+    let { guarantors } = req.body;
+
+    // Parse guarantors JSON if it's a string (FormData adjustment)
+    if (typeof guarantors === 'string') {
+      try {
+        guarantors = JSON.parse(guarantors);
+      } catch (e) {
+        guarantors = [];
+      }
+    }
+
     const userId = req.user.id;
+
+    // Check for file uploads
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: "Supporting documents (Payslip/ID) are required" });
+    }
 
     // Validation
     if (repayment_months > 6) {

@@ -1,147 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Savings - SACCO</title>
     <link rel="stylesheet" href="/css/design-system.css">
 </head>
+
 <body>
     <%- include('../layouts/member-header') %>
 
-    <div class="container-xl">
+        <div class="container-xl">
 
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="accent-line"></div>
-            <h1 class="page-title">My Savings</h1>
-            <p class="page-subtitle">Track your personal savings account</p>
-        </div>
-
-        <!-- Savings Summary Cards -->
-        <div class="grid grid-cols-3 gap-6 mb-12">
-            <div class="card">
-                <p class="text-meta">Previous Years Savings</p>
-                <h2 style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0; color: #000000;">
-                    KSh <%= parseFloat(savings.previous_years || 0).toLocaleString() %>
-                </h2>
-                <p class="text-meta">Accumulated from previous years</p>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="accent-line"></div>
+                <h1 class="page-title">My Savings</h1>
+                <p class="page-subtitle">Track your personal savings account</p>
             </div>
 
-            <div class="card" style="background: #000000; color: #FFFFFF;">
-                <p style="font-size: 0.75rem; color: #D1D5DB; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
-                    Current Year (<%= currentYear %>)
-                </p>
-                <h2 style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0; color: #FFFFFF;">
-                    KSh <%= parseFloat(savings.current_year || 0).toLocaleString() %>
-                </h2>
-                <p style="font-size: 0.75rem; color: #D1D5DB;">
-                    Savings for this year
-                </p>
-            </div>
+            <!-- Savings Summary Cards -->
+            <div class="grid grid-cols-3 gap-6 mb-12">
+                <div class="card">
+                    <p class="text-meta">Previous Years Savings</p>
+                    <h2 style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0; color: #000000;">
+                        KSh <%= parseFloat(savings.previous_years || 0).toLocaleString() %>
+                    </h2>
+                    <p class="text-meta">Accumulated from previous years</p>
+                </div>
 
-            <div class="card">
-                <p class="text-meta">Total Savings</p>
-                <h2 style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0; color: #10B981;">
-                    KSh <%= parseFloat(savings.total || 0).toLocaleString() %>
-                </h2>
-                <p class="text-meta">All-time total</p>
-            </div>
-        </div>
-
-        <!-- Savings Information -->
-        <div class="card mb-12">
-            <h2 class="section-title mb-6">How Savings Work</h2>
-
-            <div style="background: #FAFAFA; padding: 2rem; border: 1px solid #E5E5E5; margin-bottom: 2rem;">
-                <h3 style="font-weight: 600; margin-bottom: 1rem; color: #000000;">Priority-Based Allocation</h3>
-                <p style="color: #374151; line-height: 1.6; margin-bottom: 1rem;">
-                    When you make payments, funds are automatically allocated according to this priority:
-                </p>
-
-                <ol style="color: #374151; line-height: 1.8; padding-left: 1.5rem;">
-                    <li><strong>Priority 1:</strong> Active loan repayment (if you have loans)</li>
-                    <li><strong>Priority 2:</strong> Welfare contribution (KSh 300)</li>
-                    <li><strong>Priority 3:</strong> Share purchases (KSh 1,000 per share, max 50 shares)</li>
-                    <li><strong>Priority 4:</strong> Personal savings (remaining balance)</li>
-                </ol>
-
-                <div style="margin-top: 1.5rem; padding: 1rem; background: #E0F2FE; border-left: 4px solid #0284C7;">
-                    <p style="color: #075985; margin: 0;">
-                        <strong>Note:</strong> Your personal savings are the funds allocated after all other priorities are met.
-                        This ensures your financial obligations are covered first.
+                <div class="card" style="background: #000000; color: #FFFFFF;">
+                    <p
+                        style="font-size: 0.75rem; color: #D1D5DB; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                        Current Year (<%= currentYear %>)
                     </p>
+                    <h2 style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0; color: #FFFFFF;">
+                        KSh <%= parseFloat(savings.current_year || 0).toLocaleString() %>
+                    </h2>
+                    <p style="font-size: 0.75rem; color: #D1D5DB;">
+                        Savings for this year
+                    </p>
+                </div>
+
+                <div class="card">
+                    <p class="text-meta">Total Savings</p>
+                    <h2 style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0; color: #10B981;">
+                        KSh <%= parseFloat(savings.total || 0).toLocaleString() %>
+                    </h2>
+                    <p class="text-meta">All-time total</p>
                 </div>
             </div>
 
-            <!-- Savings Breakdown by Year -->
-            <h3 style="font-weight: 600; margin-bottom: 1rem; color: #000000;">Savings Breakdown</h3>
+            <!-- Savings Information -->
+            <div class="card mb-12">
+                <h2 class="section-title mb-6">How Savings Work</h2>
 
-            <div style="overflow-x: auto;">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th style="text-align: right;">Amount (KSh)</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (parseFloat(savings.previous_years) > 0) { %>
-                        <tr>
-                            <td style="font-weight: 600;">Previous Years</td>
-                            <td style="text-align: right; font-weight: 600;">
-                                <%= parseFloat(savings.previous_years).toLocaleString() %>
-                            </td>
-                            <td>
-                                <span style="background: #D1FAE5; color: #059669; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">
-                                    Carried Forward
-                                </span>
-                            </td>
-                        </tr>
-                        <% } %>
+                <div style="background: #FAFAFA; padding: 2rem; border: 1px solid #E5E5E5; margin-bottom: 2rem;">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem; color: #000000;">Priority-Based Allocation</h3>
+                    <p style="color: #374151; line-height: 1.6; margin-bottom: 1rem;">
+                        When you make payments, funds are automatically allocated according to this priority:
+                    </p>
 
-                        <tr>
-                            <td style="font-weight: 600;"><%= currentYear %></td>
-                            <td style="text-align: right; font-weight: 600;">
-                                <%= parseFloat(savings.current_year || 0).toLocaleString() %>
-                            </td>
-                            <td>
-                                <span style="background: #E0E7FF; color: #4338CA; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">
-                                    Current Year
-                                </span>
-                            </td>
-                        </tr>
+                    <ol style="color: #374151; line-height: 1.8; padding-left: 1.5rem;">
+                        <li><strong>Priority 1:</strong> Active loan repayment (if you have loans)</li>
+                        <li><strong>Priority 2:</strong> Welfare contribution (KSh 300)</li>
+                        <li><strong>Priority 3:</strong> Share purchases (KSh 1,000 per share, max 50 shares)</li>
+                        <li><strong>Priority 4:</strong> Personal savings (remaining balance)</li>
+                    </ol>
 
-                        <tr style="border-top: 2px solid #000000; background: #FAFAFA;">
-                            <td style="font-weight: 700; color: #000000;">Total Savings</td>
-                            <td style="text-align: right; font-weight: 700; color: #000000; font-size: 1.125rem;">
-                                <%= parseFloat(savings.total || 0).toLocaleString() %>
-                            </td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <div
+                        style="margin-top: 1.5rem; padding: 1rem; background: #E0F2FE; border-left: 4px solid #0284C7;">
+                        <p style="color: #075985; margin: 0;">
+                            <strong>Note:</strong> Your personal savings are the funds allocated after all other
+                            priorities are met.
+                            This ensures your financial obligations are covered first.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Savings Breakdown by Year -->
+                <h3 style="font-weight: 600; margin-bottom: 1rem; color: #000000;">Savings Breakdown</h3>
+
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th style="text-align: right;">Amount (KSh)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (parseFloat(savings.previous_years)> 0) { %>
+                                <tr>
+                                    <td style="font-weight: 600;">Previous Years</td>
+                                    <td style="text-align: right; font-weight: 600;">
+                                        <%= parseFloat(savings.previous_years).toLocaleString() %>
+                                    </td>
+                                    <td>
+                                        <span
+                                            style="background: #D1FAE5; color: #059669; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">
+                                            Carried Forward
+                                        </span>
+                                    </td>
+                                </tr>
+                                <% } %>
+
+                                    <tr>
+                                        <td style="font-weight: 600;">
+                                            <%= currentYear %>
+                                        </td>
+                                        <td style="text-align: right; font-weight: 600;">
+                                            <%= parseFloat(savings.current_year || 0).toLocaleString() %>
+                                        </td>
+                                        <td>
+                                            <span
+                                                style="background: #E0E7FF; color: #4338CA; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">
+                                                Current Year
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                    <tr style="border-top: 2px solid #000000; background: #FAFAFA;">
+                                        <td style="font-weight: 700; color: #000000;">Total Savings</td>
+                                        <td
+                                            style="text-align: right; font-weight: 700; color: #000000; font-size: 1.125rem;">
+                                            <%= parseFloat(savings.total || 0).toLocaleString() %>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <h2 class="section-title mb-6">Quick Actions</h2>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <a href="/payments" class="btn-primary"
+                        style="text-align: center; display: block; text-decoration: none;">
+                        Make a Payment
+                    </a>
+
+                    <a href="/members/dashboard" class="btn-secondary"
+                        style="text-align: center; display: block; text-decoration: none;">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Quick Actions -->
-        <div class="card">
-            <h2 class="section-title mb-6">Quick Actions</h2>
 
-            <div class="grid grid-cols-2 gap-6">
-                <a href="/payments" class="btn-primary" style="text-align: center; display: block; text-decoration: none;">
-                    Make a Payment
-                </a>
-
-                <a href="/members/dashboard" class="btn-secondary" style="text-align: center; display: block; text-decoration: none;">
-                    Back to Dashboard
-                </a>
-            </div>
-        </div>
-
-    </div>
-
-    <%- include('../layouts/footer') %>
 </body>
+
 </html>

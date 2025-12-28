@@ -80,13 +80,12 @@ function showGuarantorModal(guarantors) {
         (g) => `
             <div class="card-hover" style="padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <p style="font-weight: 600; margin-bottom: 0.25rem;">${
-                      g.full_name
-                    }</p>
+                    <p style="font-weight: 600; margin-bottom: 0.25rem;">${g.full_name
+          }</p>
                     <p class="text-secondary" style="font-size: 0.875rem;">
                         Available shares: ${g.available_shares} (KSh ${(
-          g.available_shares * 1000
-        ).toLocaleString()})
+            g.available_shares * 1000
+          ).toLocaleString()})
                     </p>
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -96,9 +95,8 @@ function showGuarantorModal(guarantors) {
                            max="${g.available_shares}" 
                            placeholder="Shares" 
                            style="width: 100px; padding: 0.5rem; border: 1px solid #E5E5E5; border-radius: 4px;">
-                    <button onclick="selectGuarantor('${g.id}', '${
-          g.full_name
-        }', ${g.available_shares})" 
+                    <button onclick="selectGuarantor('${g.id}', '${g.full_name
+          }', ${g.available_shares})" 
                             class="btn-small">
                         Select
                     </button>
@@ -153,38 +151,36 @@ function updateSelectedGuarantors() {
   );
 
   container.innerHTML = `
-        <h4 class="small-title" style="margin-bottom: 1rem;">Selected Guarantors (${
-          selectedGuarantors.length
-        })</h4>
+        <h4 class="small-title" style="margin-bottom: 1rem;">Selected Guarantors (${selectedGuarantors.length
+    })</h4>
         <div style="margin-bottom: 1rem;">
             ${selectedGuarantors
-              .map(
-                (g) => `
+      .map(
+        (g) => `
                 <div class="card" style="padding: 1rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <p style="font-weight: 600;">${g.name}</p>
                         <p class="text-secondary" style="font-size: 0.875rem;">
                             ${g.shares} shares (KSh ${(
-                  g.shares * 1000
-                ).toLocaleString()})
+            g.shares * 1000
+          ).toLocaleString()})
                         </p>
                     </div>
-                    <button onclick="removeGuarantor('${
-                      g.id
-                    }')" class="btn-small" style="background: #EF4444;">
+                    <button onclick="removeGuarantor('${g.id
+          }')" class="btn-small" style="background: #EF4444;">
                         Remove
                     </button>
                 </div>
             `
-              )
-              .join("")}
+      )
+      .join("")}
         </div>
         <div style="padding: 1rem; background: #F0FDF4; border: 1px solid #D1FAE5; border-radius: 4px;">
             <p class="text-meta">Total Guarantor Coverage</p>
             <p style="font-weight: 600; font-size: 1.125rem;">
                 ${totalGuarantorShares} shares (KSh ${(
-    totalGuarantorShares * 1000
-  ).toLocaleString()})
+      totalGuarantorShares * 1000
+    ).toLocaleString()})
             </p>
         </div>
     `;
@@ -243,14 +239,18 @@ document
       }
     }
 
-    const requestData = {
-      requested_amount: amount,
-      repayment_months: months,
-      guarantors: selectedGuarantors.map((g) => ({
+    const formData = new FormData();
+    formData.append('requested_amount', amount);
+    formData.append('repayment_months', months);
+
+    // Documents handled via profile now
+
+    if (selectedGuarantors.length > 0) {
+      formData.append('guarantors', JSON.stringify(selectedGuarantors.map(g => ({
         guarantor_id: g.id,
-        shares_requested: g.shares,
-      })),
-    };
+        shares_requested: g.shares
+      }))));
+    }
 
     const button = this.querySelector('button[type="submit"]');
     button.disabled = true;
@@ -260,10 +260,9 @@ document
       const response = await fetch("/loans/request", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "X-CSRF-Token": window.csrfToken,
         },
-        body: JSON.stringify(requestData),
+        body: formData,
       });
 
       const data = await response.json();

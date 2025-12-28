@@ -76,26 +76,26 @@
         <!-- Unified Payment Modal Partial -->
         <%- include('../partials/payment-modal') %>
 
-            <%- include('../layouts/footer') %>
 
-                <script src="/js/payment-modal.js"></script>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const payBtn = document.getElementById('payRegistrationBtn');
-                        if (payBtn) {
-                            payBtn.addEventListener('click', function () {
-                                paymentModal.open({
-                                    title: 'Pay Registration Fee',
-                                    amount: 4,
-                                    category: 'registration',
-                                    userId: '<%= user.id %>',
-                                    userPhone: '<%= user.phone_number %>',
-                                    csrfToken: '<%= csrfToken %>'
-                                });
+
+            <script src="/js/payment-modal.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const payBtn = document.getElementById('payRegistrationBtn');
+                    if (payBtn) {
+                        payBtn.addEventListener('click', function () {
+                            paymentModal.open({
+                                title: 'Pay Registration Fee',
+                                amount: 4,
+                                category: 'registration',
+                                userId: '<%= user.id %>',
+                                userPhone: '<%= user.phone_number %>',
+                                csrfToken: '<%= csrfToken %>'
                             });
-                        }
-                    });
-                </script>
+                        });
+                    }
+                });
+            </script>
 </body>
 
 </html>

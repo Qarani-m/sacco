@@ -196,45 +196,45 @@
         </div>
 
         <%- include('../partials/payment-modal') %>
-            <%- include('../layouts/footer') %>
-                <script src="/js/payment-modal.js"></script>
 
-                <script>
-                    function updateTotal() {
-                        const quantity = parseInt(document.getElementById('quantity').value) || 0;
-                        const total = quantity * 1;
-                        document.getElementById('totalAmount').textContent = `KSh ${total.toLocaleString()}`;
+            <script src="/js/payment-modal.js"></script>
+
+            <script>
+                function updateTotal() {
+                    const quantity = parseInt(document.getElementById('quantity').value) || 0;
+                    const total = quantity * 1;
+                    document.getElementById('totalAmount').textContent = `KSh ${total.toLocaleString()}`;
+                }
+
+                document.getElementById('quantity').addEventListener('input', updateTotal);
+
+                document.getElementById('purchaseSharesForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const quantity = parseInt(document.getElementById('quantity').value);
+                    const maxPurchasable = <%= maxPurchasable %>;
+
+                    if (quantity > maxPurchasable) {
+                        alert(`You can only purchase up to ${maxPurchasable} more shares.`);
+                        return;
                     }
 
-                    document.getElementById('quantity').addEventListener('input', updateTotal);
+                    const amount = quantity * 1;
 
-                    document.getElementById('purchaseSharesForm').addEventListener('submit', function (e) {
-                        e.preventDefault();
-
-                        const quantity = parseInt(document.getElementById('quantity').value);
-                        const maxPurchasable = <%= maxPurchasable %>;
-
-                        if (quantity > maxPurchasable) {
-                            alert(`You can only purchase up to ${maxPurchasable} more shares.`);
-                            return;
+                    // Open payment modal
+                    paymentModal.open({
+                        title: 'Purchase Shares',
+                        amount: amount,
+                        category: 'shares',
+                        userId: '<%= user.id %>',
+                        userPhone: '<%= user.phone_number %>',
+                        csrfToken: '<%= csrfToken %>',
+                        metadata: {
+                            quantity: quantity
                         }
-
-                        const amount = quantity * 1;
-
-                        // Open payment modal
-                        paymentModal.open({
-                            title: 'Purchase Shares',
-                            amount: amount,
-                            category: 'shares',
-                            userId: '<%= user.id %>',
-                            userPhone: '<%= user.phone_number %>',
-                            csrfToken: '<%= csrfToken %>',
-                            metadata: {
-                                quantity: quantity
-                            }
-                        });
                     });
-                </script>
+                });
+            </script>
 </body>
 
 </html>

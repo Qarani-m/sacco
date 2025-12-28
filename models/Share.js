@@ -28,15 +28,38 @@ class Share {
         return parseInt(result.rows[0].total_shares);
     }
 
-    // Get user's available shares (not pledged)
+    // Get user's available shares (not pledged AND not covering own loans)
     static async getAvailableByUser(userId) {
-        const query = `
-            SELECT COALESCE(SUM(quantity), 0) as available_shares
+        // 1. Get total non-pledged shares
+        const sharesQuery = `
+            SELECT COALESCE(SUM(quantity), 0) as active_shares
             FROM shares
             WHERE user_id = $1 AND status = 'active'
         `;
-        const result = await db.query(query, [userId]);
-        return parseInt(result.rows[0].available_shares);
+        const sharesResult = await db.query(sharesQuery, [userId]);
+        const activeShares = parseInt(sharesResult.rows[0].active_shares);
+
+        // 2. Get active loan liability (locked shares)
+        // For 'active' loans: use balance_remaining
+        // For 'approved' loans: use approved_amount (funds reserved)
+        const loansQuery = `
+            SELECT 
+                COALESCE(SUM(
+                    CASE 
+                        WHEN status = 'active' THEN balance_remaining 
+                        ELSE approved_amount 
+                    END
+                ), 0) as total_liability
+            FROM loans
+            WHERE borrower_id = $1 AND status IN ('active', 'approved')
+        `;
+        const loansResult = await db.query(loansQuery, [userId]);
+        const totalLiability = parseFloat(loansResult.rows[0].total_liability);
+
+        const sharesLockedBySelf = Math.ceil(totalLiability / 1000);
+
+        const available = activeShares - sharesLockedBySelf;
+        return available > 0 ? available : 0;
     }
 
     // Get user's pledged shares

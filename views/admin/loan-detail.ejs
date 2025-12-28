@@ -16,44 +16,51 @@
             </tr>
             <tr>
                 <th>Amount Requested:</th>
-                <td>KSh <%= parseFloat(loan.requested_amount).toLocaleString() %></td>
+                <td>KSh <%= parseFloat(loan.requested_amount).toLocaleString() %>
+                </td>
             </tr>
             <tr>
                 <th>Amount Approved:</th>
                 <td>
                     <% if (loan.approved_amount) { %>
                         KSh <%= parseFloat(loan.approved_amount).toLocaleString() %>
-                    <% } else { %>
-                        -
-                    <% } %>
+                            <% } else { %>
+                                -
+                                <% } %>
                 </td>
             </tr>
             <tr>
                 <th>Interest Rate:</th>
-                <td><%= loan.interest_rate %>%</td>
+                <td>
+                    <%= loan.interest_rate %>%
+                </td>
             </tr>
             <tr>
                 <th>Repayment Period:</th>
-                <td><%= loan.repayment_months %> months</td>
+                <td>
+                    <%= loan.repayment_months %> months
+                </td>
             </tr>
             <tr>
                 <th>Status:</th>
                 <td>
-                    <span class="badge badge-<%= loan.status === 'active' ? 'success' : (loan.status === 'pending' ? 'warning' : 'secondary') %>">
-                        <%= loan.status === 'pending' && loan.approval_count !== undefined 
-                            ? `Pending ${loan.approval_count}/3` 
-                            : loan.status %>
+                    <span
+                        class="badge badge-<%= loan.status === 'active' ? 'success' : (loan.status === 'pending' ? 'warning' : 'secondary') %>">
+                        <%= loan.status==='pending' && loan.approval_count !==undefined ? `Pending
+                            ${loan.approval_count}/3` : loan.status %>
                     </span>
                 </td>
             </tr>
             <tr>
                 <th>Date Requested:</th>
-                <td><%= new Date(loan.created_at).toLocaleDateString() %></td>
+                <td>
+                    <%= new Date(loan.created_at).toLocaleDateString() %>
+                </td>
             </tr>
         </table>
 
         <!-- Actions -->
-        <% if (loan.status === 'pending') { %>
+        <% if (loan.status==='pending' ) { %>
             <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
                 <h3>Admin Actions</h3>
                 <div style="display: flex; gap: 1rem;">
@@ -61,7 +68,8 @@
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <div class="form-group">
                             <label>Approved Amount</label>
-                            <input type="number" name="approved_amount" value="<%= loan.requested_amount %>" class="form-control" required>
+                            <input type="number" name="approved_amount" value="<%= loan.requested_amount %>"
+                                class="form-control" required>
                         </div>
                         <button type="button" class="btn btn-success" id="approveBtn">Approve Loan</button>
                     </form>
@@ -71,29 +79,45 @@
                     </form>
                 </div>
             </div>
-        <% } %>
+            <% } %>
+
+                <% if (loan.status==='approved' ) { %>
+                    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
+                        <h3>Funds Disbursement</h3>
+                        <div class="alert alert-info" style="margin-bottom: 1rem;">
+                            <strong>Status: Approved</strong><br>
+                            This loan has been fully approved. You can now disburse the funds to the member.
+                        </div>
+                        <button type="button" class="btn btn-primary" id="disburseBtn" style="width: 100%;">
+                            Disburse Funds (KSh <%= parseFloat(loan.approved_amount).toLocaleString() %>)
+                        </button>
+                    </div>
+                    <% } %>
     </div>
 
     <!-- Guarantors -->
     <div class="card">
         <h3>Guarantors</h3>
-        <% if (guarantors && guarantors.length > 0) { %>
+        <% if (guarantors && guarantors.length> 0) { %>
             <ul class="list-group">
-                <% guarantors.forEach(g => { %>
+                <% guarantors.forEach(g=> { %>
                     <li class="list-group-item">
                         <div>
-                            <strong><%= g.guarantor_name %></strong>
+                            <strong>
+                                <%= g.guarantor_name %>
+                            </strong>
                             <div class="text-sm text-muted">Pledged: <%= g.shares_pledged %> shares</div>
                         </div>
-                        <span class="badge badge-<%= g.status === 'accepted' ? 'success' : (g.status === 'pending' ? 'warning' : 'danger') %>">
+                        <span
+                            class="badge badge-<%= g.status === 'accepted' ? 'success' : (g.status === 'pending' ? 'warning' : 'danger') %>">
                             <%= g.status %>
                         </span>
                     </li>
-                <% }); %>
+                    <% }); %>
             </ul>
-        <% } else { %>
-            <p>No guarantors listed.</p>
-        <% } %>
+            <% } else { %>
+                <p>No guarantors listed.</p>
+                <% } %>
     </div>
 </div>
 
@@ -121,19 +145,24 @@
                 </tr>
             </thead>
             <tbody>
-                <% schedule.schedule.forEach(item => { %>
+                <% schedule.schedule.forEach(item=> { %>
                     <tr>
-                        <td><%= item.month %></td>
-                        <td>KSh <%= item.principal %></td>
-                        <td>KSh <%= item.interest %></td>
-                        <td>KSh <%= item.payment %></td>
+                        <td>
+                            <%= item.month %>
+                        </td>
+                        <td>KSh <%= item.principal %>
+                        </td>
+                        <td>KSh <%= item.interest %>
+                        </td>
+                        <td>KSh <%= item.payment %>
+                        </td>
                     </tr>
-                <% }); %>
+                    <% }); %>
             </tbody>
         </table>
-    <% } else { %>
-        <p>Repayment schedule will be available once the loan is approved.</p>
-    <% } %>
+        <% } else { %>
+            <p>Repayment schedule will be available once the loan is approved.</p>
+            <% } %>
 </div>
 
 <!-- Reason Modal -->
@@ -146,7 +175,8 @@
         <div class="modal-body">
             <div class="form-group">
                 <label for="reasonInput">Reason/Comment</label>
-                <textarea id="reasonInput" rows="4" class="form-control" placeholder="Enter your reason or comment..." required></textarea>
+                <textarea id="reasonInput" rows="4" class="form-control" placeholder="Enter your reason or comment..."
+                    required></textarea>
             </div>
         </div>
         <div class="modal-footer">
@@ -167,7 +197,8 @@
             <div style="text-align: center; padding: 2rem 0;">
                 <div style="font-size: 4rem; margin-bottom: 1rem;">✓</div>
                 <p id="successMessage" style="font-size: 1.125rem; margin-bottom: 1rem;"></p>
-                <div id="actionDetails" style="padding: 1rem; background: #F9FAFB; border-radius: 4px; text-align: left;"></div>
+                <div id="actionDetails"
+                    style="padding: 1rem; background: #F9FAFB; border-radius: 4px; text-align: left;"></div>
             </div>
         </div>
         <div class="modal-footer">
@@ -177,132 +208,175 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const approveBtn = document.getElementById('approveBtn');
-    const rejectBtn = document.getElementById('rejectBtn');
-    const reasonModal = document.getElementById('reasonModal');
-    const successModal = document.getElementById('successModal');
-    const reasonInput = document.getElementById('reasonInput');
-    const reasonModalTitle = document.getElementById('reasonModalTitle');
-    
-    let currentAction = null;
-    let approvedAmount = null;
+    document.addEventListener('DOMContentLoaded', function () {
+        const approveBtn = document.getElementById('approveBtn');
+        const rejectBtn = document.getElementById('rejectBtn');
+        const reasonModal = document.getElementById('reasonModal');
+        const successModal = document.getElementById('successModal');
+        const reasonInput = document.getElementById('reasonInput');
+        const reasonModalTitle = document.getElementById('reasonModalTitle');
 
-    // Open reason modal for approve
-    if (approveBtn) {
-        approveBtn.addEventListener('click', function() {
-            const amountInput = document.querySelector('input[name="approved_amount"]');
-            approvedAmount = amountInput ? amountInput.value : '<%= loan.requested_amount %>';
-            currentAction = 'approve';
-            reasonModalTitle.textContent = 'Approve Loan - Enter Reason';
-            reasonInput.value = '';
-            reasonModal.style.display = 'flex';
-        });
-    }
+        let currentAction = null;
+        let approvedAmount = null;
 
-    // Open reason modal for reject
-    if (rejectBtn) {
-        rejectBtn.addEventListener('click', function() {
-            currentAction = 'reject';
-            reasonModalTitle.textContent = 'Reject Loan - Enter Reason';
-            reasonInput.value = '';
-            reasonModal.style.display = 'flex';
-        });
-    }
-
-    // Close reason modal
-    document.getElementById('closeReasonModal').addEventListener('click', closeReasonModal);
-    document.getElementById('cancelReason').addEventListener('click', closeReasonModal);
-
-    function closeReasonModal() {
-        reasonModal.style.display = 'none';
-        reasonInput.value = '';
-        currentAction = null;
-    }
-
-    // Submit reason and perform action
-    document.getElementById('submitReason').addEventListener('click', async function() {
-        const reason = reasonInput.value.trim();
-        if (!reason) {
-            alert('Please enter a reason');
-            return;
+        // Open reason modal for approve
+        if (approveBtn) {
+            approveBtn.addEventListener('click', function () {
+                const amountInput = document.querySelector('input[name="approved_amount"]');
+                approvedAmount = amountInput ? amountInput.value : '<%= loan.requested_amount %>';
+                currentAction = 'approve';
+                reasonModalTitle.textContent = 'Approve Loan - Enter Reason';
+                reasonInput.value = '';
+                reasonModal.style.display = 'flex';
+            });
         }
 
-        const submitBtn = this;
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting...';
+        // Open reason modal for reject
+        if (rejectBtn) {
+            rejectBtn.addEventListener('click', function () {
+                currentAction = 'reject';
+                reasonModalTitle.textContent = 'Reject Loan - Enter Reason';
+                reasonInput.value = '';
+                reasonModal.style.display = 'flex';
+            });
+        }
 
-        // Store the action type before any async operations
-        const actionType = currentAction;
+        // Disburse handler
+        const disburseBtn = document.getElementById('disburseBtn');
+        if (disburseBtn) {
+            disburseBtn.addEventListener('click', async function () {
+                if (!confirm('Are you sure you want to disburse these funds? This action cannot be undone.')) {
+                    return;
+                }
 
-        try {
-            const url = `/admin/loans/<%= loan.id %>/${actionType}`;
-            const body = { reason };
-            
-            if (actionType === 'approve') {
-                body.approved_amount = approvedAmount;
+                const btn = this;
+                btn.disabled = true;
+                btn.textContent = 'Processing...';
+
+                try {
+                    const response = await fetch('/admin/loans/<%= loan.id %>/disburse', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '<%= csrfToken %>'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showSuccessModal({
+                            message: data.message,
+                            executed: true,
+                            action: { id: 'DISB-' + Date.now() } // Mock ID for display
+                        }, 'disburse');
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to disburse funds'));
+                        btn.disabled = false;
+                        btn.textContent = 'Disburse Funds';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                    btn.disabled = false;
+                    btn.textContent = 'Disburse Funds';
+                }
+            });
+        }
+
+        // Close reason modal
+        document.getElementById('closeReasonModal').addEventListener('click', closeReasonModal);
+        document.getElementById('cancelReason').addEventListener('click', closeReasonModal);
+
+        function closeReasonModal() {
+            reasonModal.style.display = 'none';
+            reasonInput.value = '';
+            currentAction = null;
+        }
+
+        // Submit reason and perform action
+        document.getElementById('submitReason').addEventListener('click', async function () {
+            const reason = reasonInput.value.trim();
+            if (!reason) {
+                alert('Please enter a reason');
+                return;
             }
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-Token': '<%= csrfToken %>'
-                },
-                body: JSON.stringify(body)
-            });
+            const submitBtn = this;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
 
-            const data = await response.json();
+            // Store the action type before any async operations
+            const actionType = currentAction;
 
-            if (data.success) {
-                closeReasonModal();
-                showSuccessModal(data, actionType);
-            } else {
-                alert('Error: ' + (data.error || 'Failed to process action'));
+            try {
+                const url = `/admin/loans/<%= loan.id %>/${actionType}`;
+                const body = { reason };
+
+                if (actionType === 'approve') {
+                    body.approved_amount = approvedAmount;
+                }
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': '<%= csrfToken %>'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeReasonModal();
+                    showSuccessModal(data, actionType);
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to process action'));
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Submit';
             }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again.');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit';
-        }
-    });
+        });
 
-    function showSuccessModal(data, actionType) {
-        document.getElementById('successMessage').textContent = data.message;
-        
-        const actionLabel = actionType === 'approve' ? 'Approval' : 'Rejection';
-        const detailsHtml = `
+        function showSuccessModal(data, actionType) {
+            document.getElementById('successMessage').textContent = data.message;
+
+            const actionLabel = actionType === 'approve' ? 'Approval' : 'Rejection';
+            const detailsHtml = `
             <p style="margin-bottom: 0.5rem;"><strong>Action Type:</strong> ${actionLabel}</p>
             <p style="margin-bottom: 0.5rem;"><strong>Status:</strong> ${data.executed ? 'Executed' : 'Pending (Requires 2/3 admin approval)'}</p>
             <p style="margin-bottom: 0.5rem;"><strong>Action ID:</strong> ${data.action.id.substring(0, 8)}...</p>
             <p style="margin: 0;"><strong>Note:</strong> ${data.executed ? 'The action has been executed.' : 'Other admins will be notified to review this action.'}</p>
         `;
-        
-        document.getElementById('actionDetails').innerHTML = detailsHtml;
-        successModal.style.display = 'flex';
-    }
 
-    // Close success modal
-    document.getElementById('closeSuccessModal').addEventListener('click', closeSuccessModal);
-    document.getElementById('closeSuccess').addEventListener('click', closeSuccessModal);
+            document.getElementById('actionDetails').innerHTML = detailsHtml;
+            successModal.style.display = 'flex';
+        }
 
-    function closeSuccessModal() {
-        successModal.style.display = 'none';
-        window.location.href = '/admin/loans';
-    }
+        // Close success modal
+        document.getElementById('closeSuccessModal').addEventListener('click', closeSuccessModal);
+        document.getElementById('closeSuccess').addEventListener('click', closeSuccessModal);
 
-    // Close modals on outside click
-    reasonModal.addEventListener('click', function(e) {
-        if (e.target === this) closeReasonModal();
+        function closeSuccessModal() {
+            successModal.style.display = 'none';
+            window.location.href = '/admin/loans';
+        }
+
+        // Close modals on outside click
+        reasonModal.addEventListener('click', function (e) {
+            if (e.target === this) closeReasonModal();
+        });
+
+        successModal.addEventListener('click', function (e) {
+            if (e.target === this) closeSuccessModal();
+        });
     });
-    
-    successModal.addEventListener('click', function(e) {
-        if (e.target === this) closeSuccessModal();
-    });
-});
 </script>
 
 <style>
@@ -311,10 +385,12 @@ document.addEventListener('DOMContentLoaded', function() {
         padding: 0.5rem;
         width: 180px;
     }
+
     .list-group {
         list-style: none;
         padding: 0;
     }
+
     .list-group-item {
         display: flex;
         justify-content: space-between;
@@ -322,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
         padding: 0.75rem 0;
         border-bottom: 1px solid #F3F4F6;
     }
-    
+
     /* Modal Styles */
     .modal-overlay {
         position: fixed;
@@ -337,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
         justify-content: center;
         z-index: 1000;
     }
-    
+
     .modal-container {
         background: white;
         border-radius: 12px;
@@ -347,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
         overflow-y: auto;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
-    
+
     .modal-header {
         padding: 1.5rem 2rem;
         border-bottom: 1px solid #F3F4F6;
@@ -355,13 +431,13 @@ document.addEventListener('DOMContentLoaded', function() {
         justify-content: space-between;
         align-items: center;
     }
-    
+
     .modal-header h3 {
         margin: 0;
         font-size: 1.25rem;
         font-weight: 600;
     }
-    
+
     .modal-close {
         background: none;
         border: none;
@@ -376,15 +452,15 @@ document.addEventListener('DOMContentLoaded', function() {
         justify-content: center;
         border-radius: 4px;
     }
-    
+
     .modal-close:hover {
         background: #F3F4F6;
     }
-    
+
     .modal-body {
         padding: 2rem;
     }
-    
+
     .modal-footer {
         padding: 1.5rem 2rem;
         border-top: 1px solid #F3F4F6;

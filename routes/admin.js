@@ -127,9 +127,12 @@ router.get("/loans/:loanId", adminController.viewLoan);
 // If admin is borrower, the OTHER 2 admins must approve
 router.post("/loans/:loanId/approve", adminController.approveLoan);
 
-// POST /admin/loans/:loanId/reject
 // Reject loan request (requires 2/3 admin approval)
 router.post("/loans/:loanId/reject", adminController.rejectLoan);
+
+// POST /admin/loans/:loanId/disburse
+// Disburse funds for approved loan
+router.post("/loans/:loanId/disburse", adminController.disburseLoan);
 
 // GET /admin/shares
 // View all share purchases across members

@@ -81,43 +81,50 @@ class Loan {
     return result.rows;
   }
 
-  // Approve loan
+  // Approve loan (admin approval step)
   static async approve(loanId, approvedAmount) {
-    const client = await db.pool.connect();
-    try {
-      await client.query("BEGIN");
+    const query = `
+            UPDATE loans
+            SET status = 'approved', 
+                approved_amount = $1,
+                approved_at = CURRENT_TIMESTAMP
+            WHERE id = $2
+            RETURNING *
+        `;
 
-      // Calculate due date (max 6 months)
-      const loan = await this.findById(loanId);
-      const totalWithInterest =
-        approvedAmount *
-        (1 + (loan.interest_rate / 100) * loan.repayment_months);
+    const result = await db.query(query, [
+      approvedAmount,
+      loanId,
+    ]);
 
-      const query = `
-                UPDATE loans
-                SET status = 'active', 
-                    approved_amount = $1,
-                    balance_remaining = $2,
-                    approved_at = CURRENT_TIMESTAMP,
-                    due_date = CURRENT_TIMESTAMP + INTERVAL '${loan.repayment_months} months'
-                WHERE id = $3
-                RETURNING *
-            `;
+    return result.rows[0];
+  }
 
-      const result = await client.query(query, [
-        approvedAmount,
-        totalWithInterest,
-        loanId,
-      ]);
+  // Disburse loan (funds transfer step)
+  static async disburse(loanId) {
+    // Calculate due date (max 6 months)
+    const loan = await this.findById(loanId);
 
-      await client.query("COMMIT");
-      return result.rows[0];
-    } catch (error) {
-      await client.query("ROLLBACK");
-      throw error;
-    } finally {
-      client.release();
-    }
+    // Calculate total with interest
+    const totalWithInterest =
+      loan.approved_amount *
+      (1 + (loan.interest_rate / 100) * loan.repayment_months);
+
+    const query = `
+            UPDATE loans
+            SET status = 'active', 
+                balance_remaining = $1,
+                due_date = CURRENT_TIMESTAMP + INTERVAL '${loan.repayment_months} months'
+            WHERE id = $2
+            RETURNING *
+        `;
+
+    const result = await db.query(query, [
+      totalWithInterest,
+      loanId,
+    ]);
+
+    return result.rows[0];
   }
 
   // Reject loan

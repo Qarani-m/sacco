@@ -746,9 +746,50 @@ exports.approveLoan = async (req, res) => {
       message: "Loan approval initiated. Requires 2/3 admin approval",
       action,
     });
+
   } catch (error) {
     console.error("Approve loan error:", error);
     res.status(500).json({ error: "Failed to approve loan" });
+  }
+};
+
+exports.disburseLoan = async (req, res) => {
+  try {
+    const { loanId } = req.params;
+
+    // In a real system you might want admin verification for disbursement too,
+    // but the user asked "after they have approved then what", implying the next step
+    // is simply to pay out. We'll treat this as an executive action by any admin.
+
+    const loan = await Loan.findById(loanId);
+    if (!loan) {
+      return res.status(404).json({ error: "Loan not found" });
+    }
+
+    if (loan.status !== 'approved') {
+      return res.status(400).json({ error: "Loan must be approved before disbursement" });
+    }
+
+    // Perform disbursement (update loan status to active)
+    const updatedLoan = await Loan.disburse(loanId);
+
+    // Notify borrower
+    const NotificationService = require("../services/notificationService");
+    await NotificationService.createNotification(
+      loan.borrower_id,
+      "loan_disbursed",
+      loan.id,
+      `Your loan of KSh ${parseFloat(loan.approved_amount).toLocaleString()} has been disbursed to your account.`
+    );
+
+    res.json({
+      success: true,
+      message: "Funds disbursed successfully. Loan is now active.",
+      loan: updatedLoan
+    });
+  } catch (error) {
+    console.error("Disburse loan error:", error);
+    res.status(500).json({ error: "Failed to disburse funds" });
   }
 };
 

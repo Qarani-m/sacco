@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "tailwindcss -i ./public/css/tailwind.css -o ./public/css/output.css --watch",
     "build": "tailwindcss -i ./public/css/tailwind.css -o ./public/css/output.css --minify",
-    "start": "nodemon app.js",
+    "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed-sqlite": "node scripts/init-sqlite.js"
+    "seed-sqlite": "node scripts/seed_sqlite.js"
   },
   "keywords": [],
   "author": "",

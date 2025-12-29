@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - SACCO</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+
+</head>
+
+<body>
+    <%- include('../layouts/member-header') %>
+
+        <div class="container-2xl">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="accent-line"></div>
+                <h1 class="page-title">Welcome, <%= user.full_name%>
+                </h1>
+                <p class="page-subtitle">Member Dashboard</p>
+            </div>
+
+            <!-- Registration Fee Alert (if not paid) -->
+            <% if (!user.registration_paid) { %>
+                <div class="alert alert-warning"
+                    style="border-left-width: 4px; border-left-color: #000000; margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; color: #000000;">⚠️
+                        Registration Fee Required</h3>
+                    <p style="margin-bottom: 1rem; color: #000000;">To access loans and shares features, please pay the
+                        KSh 1,000 registration fee.</p>
+                    <button id="openRegistrationBtn" class="btn-small">Pay Registration Fee Now</button>
+                </div>
+                <% } %>
+
+                    <!-- Email Verification Alert (if not verified) -->
+                    <% if (!user.email_verified) { %>
+                        <div class="alert alert-info" style="margin-bottom: 2rem;">
+                            <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">📧 Email Not Verified
+                            </h3>
+                            <p style="margin-bottom: 0.5rem;">Please verify your email address: <strong>
+                                    <%= user.email %>
+                                </strong></p>
+                            <p style="margin-bottom: 0.5rem;">Check your inbox for a verification link.</p>
+                            <a href="/auth/resend-verification" class="link-primary">Resend Verification Email</a>
+                        </div>
+                        <% } %>
+
+                            <!-- Financial Overview Stats -->
+                            <div class="mb-12">
+                                <h2 class="section-title mb-6">Financial Overview</h2>
+                                <div class="grid grid-cols-4 gap-6">
+                                    <!-- Total Shares -->
+                                    <div class="stat-card">
+                                        <p class="stat-label">My Shares</p>
+                                        <p class="stat-value">
+                                            <%= stats.total_shares || 0 %>
+                                        </p>
+                                        <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                                            Worth KSh <%= ((stats.total_shares || 0) * 1).toLocaleString() %>
+                                        </p>
+                                        <p class="text-meta" style="margin-top: 0.5rem;">Max: KSh 50,000</p>
+                                        <% if (user.registration_paid) { %>
+                                            <a href="/shares/buy" class="btn-small" style="margin-top: 1rem;">Buy
+                                                Shares</a>
+                                            <% } %>
+                                    </div>
+
+                                    <!-- Personal Savings -->
+                                    <div class="stat-card">
+                                        <p class="stat-label">Personal Savings</p>
+                                        <p class="stat-value">KSh <%= (stats.total_savings || 0).toLocaleString() %>
+                                        </p>
+                                        <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                                            Surplus from payments
+                                        </p>
+                                        <a href="/members/savings" class="btn-small" style="margin-top: 1.5rem;">View
+                                            Details</a>
+                                    </div>
+
+                                    <!-- Active Loans -->
+                                    <div class="stat-card">
+                                        <p class="stat-label">Active Loans</p>
+                                        <p class="stat-value">
+                                            <%= stats.active_loans || 0 %>
+                                        </p>
+                                        <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                                            Balance: KSh <%= (stats.loan_balance || 0).toLocaleString() %>
+                                        </p>
+                                        <p class="text-meta" style="margin-top: 0.5rem;">3% Interest</p>
+                                        <% if (user.registration_paid && stats.active_loans===0) { %>
+                                            <a href="/loans/request" class="btn-small" style="margin-top: 1rem;">Request
+                                                Loan</a>
+                                            <% } else if (stats.active_loans> 0) { %>
+                                                <a href="/loans" class="btn-small-outline"
+                                                    style="margin-top: 1rem;">View Loans</a>
+                                                <% } %>
+                                    </div>
+
+                                    <!-- Welfare Status -->
+                                    <div class="stat-card">
+                                        <p class="stat-label">Welfare Payments</p>
+                                        <p class="stat-value">
+                                            <%= stats.welfare_payments || 0 %>
+                                        </p>
+                                        <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                                            Total: KSh <%= (stats.total_welfare || 0).toLocaleString() %>
+                                        </p>
+                                        <p class="text-meta" style="margin-top: 0.5rem;">KSh 3 per payment <span
+                                                style="font-size: 0.7rem; color: #DC2626;">(Testing: Prod is KSh
+                                                300)</span></p>
+                                        <a href="/welfare/pay" class="btn-small" style="margin-top: 1rem;">Pay
+                                            Welfare</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Loan Eligibility & Guarantor Status -->
+                            <div class="grid grid-cols-2 gap-6 mb-12">
+                                <!-- Loan Eligibility Card -->
+                                <div class="card">
+                                    <h3 class="small-title" style="margin-bottom: 1rem;">💰 Loan Eligibility</h3>
+                                    <div
+                                        style="padding: 1rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1rem;">
+                                        <p class="text-secondary" style="margin-bottom: 0.5rem;">Maximum Loan Amount:
+                                        </p>
+                                        <p style="font-size: 1.5rem; font-weight: 300; color: #000000;">
+                                            KSh <%= ((stats.total_shares || 0) * 1000).toLocaleString() %>
+                                        </p>
+                                        <p class="text-meta" style="margin-top: 0.5rem;">Based on your shares</p>
+                                    </div>
+                                    <% if (stats.active_loans> 0) { %>
+                                        <div class="alert alert-info">
+                                            <p style="margin: 0; font-size: 0.875rem;">You have an active loan. Pay it
+                                                off before requesting a new one.</p>
+                                        </div>
+                                        <% } else if (!user.registration_paid) { %>
+                                            <div class="alert alert-info">
+                                                <p style="margin: 0; font-size: 0.875rem;">Pay registration fee to
+                                                    access loans.</p>
+                                            </div>
+                                            <% } else { %>
+                                                <p class="text-secondary" style="margin-bottom: 1rem;">
+                                                    You can request a loan up to the value of your shares. Need more?
+                                                    Request guarantors!
+                                                </p>
+                                                <a href="/loans/request" class="btn-primary">Request Loan</a>
+                                                <% } %>
+                                </div>
+
+                                <!-- Guarantor Requests Card -->
+                                <div class="card">
+                                    <h3 class="small-title" style="margin-bottom: 1rem;">🤝 Guarantor Requests</h3>
+                                    <div
+                                        style="padding: 1rem; background: #FAFAFA; border: 1px solid #E5E5E5; margin-bottom: 1rem;">
+                                        <p class="text-secondary" style="margin-bottom: 0.5rem;">Pending Requests:</p>
+                                        <p style="font-size: 1.5rem; font-weight: 300; color: #000000;">
+                                            <%= stats.pending_guarantor_requests || 0 %>
+                                        </p>
+                                    </div>
+                                    <% if (stats.active_loans> 0) { %>
+                                        <div class="alert alert-info">
+                                            <p style="margin: 0; font-size: 0.875rem;">⚠️ You cannot guarantee others
+                                                while you have an active loan.</p>
+                                        </div>
+                                        <% } else { %>
+                                            <p class="text-secondary" style="margin-bottom: 1rem;">
+                                                Members are requesting you to guarantee their loans by pledging your
+                                                shares.
+                                            </p>
+                                            <a href="/guarantors/requests" class="btn-secondary">View Requests</a>
+                                            <% } %>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="mb-12">
+                                <h2 class="section-title mb-6">Quick Actions</h2>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                                    <% if (user.registration_paid) { %>
+                                        <a href="/shares/buy" class="card-hover"
+                                            style="padding: 1.5rem; text-align: center; text-decoration: none;">
+                                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                                            <p style="font-weight: 600; color: #000000; margin-bottom: 0.25rem;">Buy
+                                                Shares</p>
+                                            <p class="text-secondary" style="font-size: 0.75rem;">Up to KSh 50,000</p>
+                                        </a>
+                                        <a href="/loans/request" class="card-hover"
+                                            style="padding: 1.5rem; text-align: center; text-decoration: none;">
+                                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">💵</div>
+                                            <p style="font-weight: 600; color: #000000; margin-bottom: 0.25rem;">Request
+                                                Loan</p>
+                                            <p class="text-secondary" style="font-size: 0.75rem;">3% interest rate</p>
+                                        </a>
+                                        <% } %>
+                                            <a href="/welfare/pay" class="card-hover"
+                                                style="padding: 1.5rem; text-align: center; text-decoration: none;">
+                                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏥</div>
+                                                <p style="font-weight: 600; color: #000000; margin-bottom: 0.25rem;">Pay
+                                                    Welfare</p>
+                                                <p class="text-secondary" style="font-size: 0.75rem;">KSh 300 per
+                                                    payment</p>
+                                            </a>
+                                            <a href="/guarantors/requests" class="card-hover"
+                                                style="padding: 1.5rem; text-align: center; text-decoration: none;">
+                                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🤝</div>
+                                                <p style="font-weight: 600; color: #000000; margin-bottom: 0.25rem;">
+                                                    Guarantor Requests</p>
+                                                <p class="text-secondary" style="font-size: 0.75rem;">
+                                                    <%= stats.pending_guarantor_requests || 0 %> pending
+                                                </p>
+                                            </a>
+                                            <a href="/messages" class="card-hover"
+                                                style="padding: 1.5rem; text-align: center; text-decoration: none;">
+                                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💬</div>
+                                                <p style="font-weight: 600; color: #000000; margin-bottom: 0.25rem;">
+                                                    Messages</p>
+                                                <p class="text-secondary" style="font-size: 0.75rem;">
+                                                    <%= unreadMessages || 0 %> unread
+                                                </p>
+                                            </a>
+                                            <a href="/members/profile" class="card-hover"
+                                                style="padding: 1.5rem; text-align: center; text-decoration: none;">
+                                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">👤</div>
+                                                <p style="font-weight: 600; color: #000000; margin-bottom: 0.25rem;">My
+                                                    Profile</p>
+                                                <p class="text-secondary" style="font-size: 0.75rem;">View & edit</p>
+                                            </a>
+                                </div>
+                            </div>
+
+                            <!-- Active Loans Section -->
+                            <% if (active_loans && active_loans.length> 0) { %>
+                                <div class="mb-12">
+                                    <h2 class="section-title mb-6">⚠️ Active Loans - Payment Priority</h2>
+                                    <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                                        <p style="margin: 0; font-size: 0.875rem;">
+                                            <strong>Payment Priority:</strong> Loan Repayment → Welfare → Shares.
+                                            Interest (3%) goes to SACCO savings.
+                                        </p>
+                                    </div>
+                                    <% active_loans.forEach(loan=> { %>
+                                        <div class="card-hover"
+                                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 1.5rem;">
+                                            <div style="flex: 1;">
+                                                <h4 class="small-title" style="margin-bottom: 0.5rem;">Loan #<%= loan.id
+                                                        ? loan.id.substring(0, 8) : 'N/A' %>
+                                                </h4>
+                                                <div
+                                                    style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                                                    <div>
+                                                        <p class="text-meta">Approved Amount</p>
+                                                        <p style="font-weight: 600; color: #000000;">KSh <%=
+                                                                loan.approved_amount.toLocaleString() %>
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-meta">Balance Remaining</p>
+                                                        <p style="font-weight: 600; color: #000000;">KSh <%=
+                                                                loan.balance_remaining.toLocaleString() %>
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-meta">Due Date</p>
+                                                        <p style="font-weight: 600; color: #000000;">
+                                                            <%= new Date(loan.due_date).toLocaleDateString() %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <% if (loan.guarantors && loan.guarantors.length> 0) { %>
+                                                    <div
+                                                        style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #E5E5E5;">
+                                                        <p class="text-meta" style="margin-bottom: 0.5rem;">Guarantors (
+                                                            <%= loan.guarantors.length %>):
+                                                        </p>
+                                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                                            <% loan.guarantors.forEach(g=> { %>
+                                                                <span
+                                                                    style="padding: 0.25rem 0.75rem; background: #F5F5F5; font-size: 0.75rem; color: #000000;">
+                                                                    <%= g.guarantor_name %> (<%= g.shares_pledged %>
+                                                                            shares)
+                                                                </span>
+                                                                <% }) %>
+                                                        </div>
+                                                    </div>
+                                                    <% } %>
+                                            </div>
+                                            <div
+                                                style="display: flex; gap: 0.5rem; flex-direction: column; margin-left: 2rem;">
+                                                <a href="/loans/<%= loan.id %>" class="btn-small">View Details</a>
+                                                <a href="/loans/<%= loan.id %>/repay" class="btn-primary">Make
+                                                    Payment</a>
+                                            </div>
+                                        </div>
+                                        <% }) %>
+                                </div>
+                                <% } %>
+
+                                    <!-- Recent Transactions -->
+                                    <div class="mb-12">
+                                        <h2 class="section-title mb-6">Recent Transactions</h2>
+                                        <% if (recent_transactions && recent_transactions.length> 0) { %>
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Type</th>
+                                                        <th>Amount</th>
+                                                        <th>Status</th>
+                                                        <th>Reference</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% recent_transactions.forEach(t=> { %>
+                                                        <tr>
+                                                            <td>
+                                                                <%= new Date(t.created_at).toLocaleDateString() %>
+                                                            </td>
+                                                            <td style="text-transform: capitalize;">
+                                                                <%= t.type.replace('_', ' ' ) %>
+                                                            </td>
+                                                            <td>KSh <%= t.amount.toLocaleString() %>
+                                                            </td>
+                                                            <td>
+                                                                <span
+                                                                    style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                                                                    <%= t.status %>
+                                                                </span>
+                                                            </td>
+                                                            <td class="text-secondary" style="font-size: 0.75rem;">
+                                                                <%= t.transaction_ref %>
+                                                            </td>
+                                                        </tr>
+                                                        <% }) %>
+                                                </tbody>
+                                            </table>
+                                            <% } else { %>
+                                                <div class="card" style="text-align: center; padding: 3rem;">
+                                                    <p class="text-secondary">No transactions yet. Start by purchasing
+                                                        shares or paying welfare!</p>
+                                                </div>
+                                                <% } %>
+                                    </div>
+
+                                    <!-- Important Reminders -->
+                                    <div class="mb-12">
+                                        <h2 class="section-title mb-6">📌 Important Reminders</h2>
+                                        <div class="grid grid-cols-2 gap-6">
+                                            <div class="card">
+                                                <h4 class="small-title" style="margin-bottom: 1rem;">Loan Policy</h4>
+                                                <ul style="list-style: none; padding: 0; margin: 0;">
+                                                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
+                                                        <span style="font-weight: 600;">✓</span> Maximum loan = Your
+                                                        shares value
+                                                    </li>
+                                                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
+                                                        <span style="font-weight: 600;">✓</span> 3% interest on all
+                                                        loans
+                                                    </li>
+                                                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #E5E5E5;">
+                                                        <span style="font-weight: 600;">✓</span> Repayment period: Up to
+                                                        6 months
+                                                    </li>
+                                                    <li style="padding: 0.5rem 0;">
+                                                        <span style="font-weight: 600;">✓</span> Cannot guarantee if you
+                                                        have a loan
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="card">
+                                                <h4 class="small-title" style="margin-bottom: 1rem;">Payment Priority
+                                                </h4>
+                                                <div
+                                                    style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000;">
+                                                    <p style="margin-bottom: 0.5rem; font-weight: 600; color: #000000;">
+                                                        When you make payments:</p>
+                                                    <ol style="margin: 0; padding-left: 1.5rem;">
+                                                        <li style="margin: 0.5rem 0;">Loan repayment (frees guarantors)
+                                                        </li>
+                                                        <li style="margin: 0.5rem 0;">Welfare contributions</li>
+                                                        <li style="margin: 0.5rem 0;">Share purchases</li>
+                                                        <li style="margin: 0.5rem 0;">Surplus → Personal savings</li>
+                                                    </ol>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Notifications & Messages Preview -->
+                                    <!-- <div class="grid grid-cols-2 gap-6 mb-12">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 class="small-title" style="margin: 0;">🔔 Recent Notifications</h3>
+                    <a href="/members/notifications" class="link-secondary">View All</a>
+                </div>
+                <% if (notifications && notifications.length > 0) { %>
+                    <% notifications.slice(0, 3).forEach(n => { %>
+                    <div class="list-item" style="padding: 0.75rem 0;">
+                        <p class="list-item-title"><%= n.title %></p>
+                        <p class="list-item-description"><%= n.message.substring(0, 60) %>...</p>
+                        <p class="list-item-meta"><%= new Date(n.created_at).toLocaleDateString() %></p>
+                    </div>
+                    <% }) %>
+                <% } else { %>
+                    <p class="text-secondary" style="text-align: center; padding: 2rem 0;">No notifications</p>
+                <% } %>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 class="small-title" style="margin: 0;">💬 Recent Messages</h3>
+                    <a href="/messages" class="link-secondary">View All</a>
+                </div>
+                <% if (messages && messages.length > 0) { %>
+                    <% messages.slice(0, 3).forEach(m => { %>
+                    <div class="list-item" style="padding: 0.75rem 0;">
+                        <p class="list-item-title">From: <%= m.sender_name %></p>
+                        <p class="list-item-description"><%= m.subject || m.body.substring(0, 50) %>...</p>
+                        <p class="list-item-meta"><%= new Date(m.created_at).toLocaleDateString() %></p>
+                    </div>
+                    <% }) %>
+                <% } else { %>
+                    <p class="text-secondary" style="text-align: center; padding: 2rem 0;">No messages</p>
+                <% } %>
+            </div>
+        </div> -->
+
+                                    <!-- Footer -->
+                                    <div class="page-footer">
+                                        <p>SACCO Member Portal • 2026</p>
+                                    </div>
+
+        </div>
+
+        <%- include('../partials/payment-modal') %>
+            <%- include('../layouts/footer') %>
+                <script src="/js/payment-modal.js"></script>
+
+                <script>
+                    // Registration modal handler
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const openBtn = document.getElementById('openRegistrationBtn');
+                        if (openBtn) {
+                            openBtn.addEventListener('click', function () {
+                                paymentModal.open({
+                                    title: 'Pay Registration Fee',
+                                    amount: 4,
+                                    category: 'registration',
+                                    userId: '<%= user.id %>',
+                                    userPhone: '<%= user.phone_number %>',
+                                    csrfToken: '<%= csrfToken %>'
+                                });
+                            });
+                        }
+                    });
+                </script>
+</body>
+
+</html>

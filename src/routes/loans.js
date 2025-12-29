@@ -41,6 +41,9 @@ router.get("/:loanId", loanController.viewLoanDetails);
 // Loan repayment schedule
 router.get("/:loanId/schedule", loanController.viewRepaymentSchedule);
 
+// Loan repayment page
+router.get("/:loanId/repay", loanController.showRepaymentPage);
+
 // View guarantors for this loan
 router.get("/:loanId/guarantors", loanController.viewLoanGuarantors);
 

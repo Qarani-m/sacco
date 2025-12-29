@@ -41,6 +41,10 @@ router.post(
 // Submit one-time profile form
 router.post("/profile/submit-form", memberController.submitProfileForm);
 
+// POST /members/profile/guarantor-settings
+// Update guarantor opt-in settings
+router.post("/profile/guarantor-settings", memberController.updateGuarantorSettings);
+
 // GET /members/notifications
 // View all notifications (loan updates, guarantor requests, admin messages)
 router.get("/notifications", memberController.listNotifications);
@@ -55,5 +59,13 @@ router.post(
 // GET /members/savings
 // View personal savings account balance and history
 router.get("/savings", memberController.viewSavings);
+
+// GET /members/guarantor-requests
+// View pending guarantor requests
+router.get("/guarantor-requests", memberController.viewGuarantorRequests);
+
+// POST /members/guarantor-requests/:requestId/respond
+// Respond to a guarantor request (accept/decline)
+router.post("/guarantor-requests/:requestId/respond", memberController.respondToGuarantorRequest);
 
 module.exports = router;

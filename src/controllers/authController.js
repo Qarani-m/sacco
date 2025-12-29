@@ -20,9 +20,9 @@ exports.login = async (req, res) => {
 
     const { email, password } = req.body;
 
-    const user = await User.findByEmail(email);
+    const userBasic = await User.findByEmail(email);
 
-    if (!user) {
+    if (!userBasic) {
       console.error(`email: ${email}, Password: ${password}`);
       if (req.headers['content-type'] === 'application/json') {
         return res.status(401).json({ success: false, message: "Invalid credentials" });
@@ -31,7 +31,7 @@ exports.login = async (req, res) => {
       return res.redirect("/auth/login");
     }
 
-    if (!user.is_active) {
+    if (!userBasic.is_active) {
       if (req.headers['content-type'] === 'application/json') {
         return res.status(403).json({ success: false, message: "Account is deactivated" });
       }
@@ -39,7 +39,7 @@ exports.login = async (req, res) => {
       return res.redirect("/auth/login");
     }
 
-    const isValid = await User.verifyPassword(password, user.password_hash);
+    const isValid = await User.verifyPassword(password, userBasic.password_hash);
     if (!isValid) {
       if (req.headers['content-type'] === 'application/json') {
         return res.status(401).json({ success: false, message: "Invalid credentials" });
@@ -48,11 +48,14 @@ exports.login = async (req, res) => {
       return res.redirect("/auth/login");
     }
 
+    // Fetch user with role details
+    const user = await User.findByIdWithRole(userBasic.id);
+
     const token = jwt.sign(
       {
         id: user.id,
         email: user.email,
-        role: user.role,
+        role: user.role_name || user.role,
         full_name: user.full_name,
         registration_paid: user.registration_paid,
       },
@@ -68,9 +71,37 @@ exports.login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    const redirectUrl =
-      user.role === "admin" ? "/admin/dashboard" : "/members/dashboard";
-    // const redirectUrl = user.role === 'admin' ? '/admin/dashboard' : '/members/dashboard';
+    // Determine dashboard based on role_name
+    const roleName = user.role_name || user.role;
+    let redirectUrl = "/members/dashboard";
+
+    if (roleName === "Admin" || roleName === "admin") {
+      redirectUrl = "/admin/dashboard";
+    } else if (roleName === "finance" || roleName === "Finance") {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.json({ success: true, message: "Login successful!", redirectUrl: "/staff/finance/dashboard" });
+      }
+      req.flash("success_msg", "Login successful!");
+      return res.redirect("/staff/finance/dashboard");
+    } else if (roleName === "risk" || roleName === "Risk") {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.json({ success: true, message: "Login successful!", redirectUrl: "/staff/risk/dashboard" });
+      }
+      req.flash("success_msg", "Login successful!");
+      return res.redirect("/staff/risk/dashboard");
+    } else if (roleName === "customer_service" || roleName === "Customer Service") {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.json({ success: true, message: "Login successful!", redirectUrl: "/staff/customer-service/dashboard" });
+      }
+      req.flash("success_msg", "Login successful!");
+      return res.redirect("/staff/customer-service/dashboard");
+    } else if (roleName === "disbursement_officer" || roleName === "Disbursement Officer") {
+      if (req.headers['content-type'] === 'application/json') {
+        return res.json({ success: true, message: "Login successful!", redirectUrl: "/staff/disbursement/dashboard" });
+      }
+      req.flash("success_msg", "Login successful!");
+      return res.redirect("/staff/disbursement/dashboard");
+    }
 
     if (req.headers['content-type'] === 'application/json') {
       return res.json({ success: true, message: "Login successful!", redirectUrl });
@@ -102,7 +133,7 @@ exports.register = async (req, res) => {
       return res.redirect("/admin/register");
     }
 
-    const { email, password, full_name, phone_number, role } = req.body;
+    const { email, password, full_name, phone_number, role, role_id } = req.body;
 
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
@@ -113,13 +144,21 @@ exports.register = async (req, res) => {
       return res.redirect("/admin/register");
     }
 
-    const user = await User.create({
+    const newUser = await User.create({
       email,
       password,
       full_name,
       phone_number,
       role: role || "member",
     });
+
+    // Assign role if role_id is provided
+    if (role_id) {
+      await User.assignRole(newUser.id, role_id);
+    }
+
+    // Fetch user with role details after assignment
+    const user = await User.findByIdWithRole(newUser.id);
 
     // Generate verification token
     const { token: verificationToken } = await User.generateVerificationToken(
@@ -150,7 +189,7 @@ exports.register = async (req, res) => {
       {
         id: user.id,
         email: user.email,
-        role: user.role,
+        role: user.role_name || user.role,
         full_name: user.full_name,
         registration_paid: user.registration_paid,
       },

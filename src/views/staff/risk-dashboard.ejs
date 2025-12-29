@@ -1,0 +1,54 @@
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-2 text-gray-800">Risk Management Dashboard</h1>
+        <p class="mb-4">Assess and approve loan applications.</p>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Pending Loan Approvals</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Applicant</th>
+                        <th>Amount</th>
+                        <th>Term</th>
+                        <th>Date Applied</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% pendingLoans.forEach(loan=> { %>
+                        <tr>
+                            <td>
+                                <%= loan.full_name %>
+                            </td>
+                            <td>KSh <%= loan.requested_amount %>
+                            </td>
+                            <td>
+                                <%= loan.repayment_months %> months
+                            </td>
+                            <td>
+                                <%= new Date(loan.created_at).toLocaleDateString() %>
+                            </td>
+                            <td>
+                                <a href="/loans/<%= loan.id %>" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-file-contract"></i> Review
+                                </a>
+                            </td>
+                        </tr>
+                        <% }); %>
+                            <% if (pendingLoans.length===0) { %>
+                                <tr>
+                                    <td colspan="5" class="text-center">No loans pending approval</td>
+                                </tr>
+                                <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

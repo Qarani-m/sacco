@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - SACCO</title>
+    <link rel="stylesheet" href="/css/design-system.css">
+</head>
+<body>
+    <%- include('../layouts/member-header') %>
+
+    <div class="container-xl">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">Repay Loan</h1>
+            <p class="page-subtitle">Loan #<%= loan.id.substring(0, 8) %></p>
+        </div>
+
+        <!-- Loan Summary -->
+        <div class="card mb-6" style="background: #F0FDF4; border: 2px solid #000;">
+            <h3 class="small-title" style="margin-bottom: 1.5rem;">💳 Loan Summary</h3>
+            <div class="grid grid-cols-3 gap-6">
+                <div style="padding: 1.5rem; background: #FFF; border: 2px solid #000; text-align: center;">
+                    <p class="text-meta" style="margin-bottom: 0.5rem;">Approved Amount</p>
+                    <p style="font-size: 1.75rem; font-weight: 700; color: #000; margin: 0;">
+                        KSh <%= loan.approved_amount.toLocaleString() %>
+                    </p>
+                </div>
+                <div style="padding: 1.5rem; background: #FFF; border: 2px solid #000; text-align: center;">
+                    <p class="text-meta" style="margin-bottom: 0.5rem;">Balance Remaining</p>
+                    <p style="font-size: 1.75rem; font-weight: 700; color: #DC2626; margin: 0;">
+                        KSh <%= loan.balance_remaining.toLocaleString() %>
+                    </p>
+                </div>
+                <div style="padding: 1.5rem; background: #FFF; border: 2px solid #000; text-align: center;">
+                    <p class="text-meta" style="margin-bottom: 0.5rem;">Monthly Payment</p>
+                    <p style="font-size: 1.75rem; font-weight: 700; color: #000; margin: 0;">
+                        KSh <%= schedule.monthly_payment.toLocaleString() %>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <!-- Payment Form -->
+            <div class="card">
+                <h3 class="small-title" style="margin-bottom: 1.5rem;">💰 Make Payment</h3>
+
+                <form id="repaymentForm" style="display: grid; gap: 1.5rem;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                    <div>
+                        <label class="form-label">Payment Amount (KSh)</label>
+                        <input
+                            type="number"
+                            id="paymentAmount"
+                            name="amount"
+                            class="form-input"
+                            placeholder="Enter amount"
+                            min="1"
+                            max="<%= loan.balance_remaining %>"
+                            required
+                            style="border: 2px solid #000; font-size: 1.125rem; font-weight: 600;"
+                        >
+                        <p class="text-meta" style="margin-top: 0.5rem;">
+                            Minimum: KSh <%= schedule.monthly_payment.toLocaleString() %> |
+                            Maximum: KSh <%= loan.balance_remaining.toLocaleString() %>
+                        </p>
+                    </div>
+
+                    <!-- Quick Amount Buttons -->
+                    <div>
+                        <p class="form-label">Quick Select</p>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+                            <button
+                                type="button"
+                                class="btn-secondary"
+                                onclick="setAmount(<%= schedule.monthly_payment %>)"
+                                style="border: 2px solid #000;"
+                            >
+                                Monthly Payment
+                            </button>
+                            <button
+                                type="button"
+                                class="btn-secondary"
+                                onclick="setAmount(<%= Math.round(loan.balance_remaining / 2) %>)"
+                                style="border: 2px solid #000;"
+                            >
+                                Half Balance
+                            </button>
+                            <button
+                                type="button"
+                                class="btn-secondary"
+                                onclick="setAmount(<%= loan.balance_remaining %>)"
+                                style="border: 2px solid #000;"
+                            >
+                                Full Balance
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="padding: 1.5rem; background: #FAFAFA; border: 2px solid #000;">
+                        <h4 style="font-weight: 600; margin-bottom: 1rem;">Payment Method</h4>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 48px; height: 48px; background: #10B981; border: 2px solid #000; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                <span style="font-size: 1.5rem;">📱</span>
+                            </div>
+                            <div>
+                                <p style="font-weight: 600; margin: 0;">M-Pesa</p>
+                                <p class="text-meta" style="margin: 0;">You'll receive a payment prompt on your phone</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                        style="background: #000; color: #FFF; border: 2px solid #000; padding: 1rem; font-size: 1.125rem; font-weight: 600;"
+                    >
+                        Continue to M-Pesa Payment
+                    </button>
+                </form>
+            </div>
+
+            <!-- Repayment Schedule -->
+            <div class="card">
+                <h3 class="small-title" style="margin-bottom: 1.5rem;">📋 Repayment Schedule</h3>
+
+                <div style="padding: 1.5rem; background: #FAFAFA; border: 2px solid #000; margin-bottom: 1.5rem;">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-meta">Total to Repay</p>
+                            <p style="font-weight: 700; font-size: 1.25rem; margin: 0;">
+                                KSh <%= schedule.total_to_repay.toLocaleString() %>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-meta">Total Interest</p>
+                            <p style="font-weight: 700; font-size: 1.25rem; margin: 0; color: #DC2626;">
+                                KSh <%= schedule.total_interest.toLocaleString() %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: #000; color: #FFF;">
+                            <tr>
+                                <th style="padding: 0.75rem; text-align: left; border: 2px solid #000;">Month</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 2px solid #000;">Payment</th>
+                                <th style="padding: 0.75rem; text-align: right; border: 2px solid #000;">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% schedule.schedule.forEach((month, index) => { %>
+                            <tr style="<%= index % 2 === 0 ? 'background: #FAFAFA;' : 'background: #FFF;' %>">
+                                <td style="padding: 0.75rem; border: 2px solid #E5E5E5;">Month <%= month.month %></td>
+                                <td style="padding: 0.75rem; text-align: right; border: 2px solid #E5E5E5; font-weight: 600;">
+                                    <%= month.payment.toLocaleString() %>
+                                </td>
+                                <td style="padding: 0.75rem; text-align: right; border: 2px solid #E5E5E5;">
+                                    <%= month.balance.toLocaleString() %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment History -->
+        <% if (repayments && repayments.length > 0) { %>
+        <div class="card mt-6">
+            <h3 class="small-title" style="margin-bottom: 1.5rem;">📜 Payment History</h3>
+
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #000; color: #FFF;">
+                    <tr>
+                        <th style="padding: 1rem; text-align: left; border: 2px solid #000;">Date</th>
+                        <th style="padding: 1rem; text-align: right; border: 2px solid #000;">Amount Paid</th>
+                        <th style="padding: 1rem; text-align: right; border: 2px solid #000;">Principal</th>
+                        <th style="padding: 1rem; text-align: right; border: 2px solid #000;">Interest</th>
+                        <th style="padding: 1rem; text-align: left; border: 2px solid #000;">Transaction Ref</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% repayments.forEach((payment, index) => { %>
+                    <tr style="<%= index % 2 === 0 ? 'background: #FAFAFA;' : 'background: #FFF;' %>">
+                        <td style="padding: 1rem; border: 2px solid #E5E5E5;">
+                            <%= new Date(payment.payment_date).toLocaleDateString() %>
+                        </td>
+                        <td style="padding: 1rem; text-align: right; border: 2px solid #E5E5E5; font-weight: 600;">
+                            KSh <%= payment.amount_paid.toLocaleString() %>
+                        </td>
+                        <td style="padding: 1rem; text-align: right; border: 2px solid #E5E5E5;">
+                            KSh <%= payment.principal_amount.toLocaleString() %>
+                        </td>
+                        <td style="padding: 1rem; text-align: right; border: 2px solid #E5E5E5;">
+                            KSh <%= payment.interest_amount.toLocaleString() %>
+                        </td>
+                        <td style="padding: 1rem; border: 2px solid #E5E5E5; font-family: monospace; font-size: 0.875rem;">
+                            <%= payment.transaction_ref %>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+        <% } %>
+
+        <!-- Back Button -->
+        <div style="margin-top: 2rem; padding-bottom: 2rem;">
+            <a href="/loans/<%= loan.id %>" class="btn-secondary" style="border: 2px solid #000;">
+                ← Back to Loan Details
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function setAmount(amount) {
+            document.getElementById('paymentAmount').value = amount;
+        }
+
+        document.getElementById('repaymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            const balance = <%= loan.balance_remaining %>;
+
+            if (amount <= 0) {
+                alert('Please enter a valid payment amount');
+                return;
+            }
+
+            if (amount > balance) {
+                alert('Payment amount cannot exceed the balance remaining');
+                return;
+            }
+
+            try {
+                const response = await fetch('/loans/<%= loan.id %>/repay', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'CSRF-Token': '<%= csrfToken %>'
+                    },
+                    body: JSON.stringify({ amount })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Payment failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Failed to process payment. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

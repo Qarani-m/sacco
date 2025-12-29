@@ -7,8 +7,15 @@
     "dev": "tailwindcss -i ./public/css/tailwind.css -o ./public/css/output.css --watch",
     "build": "tailwindcss -i ./public/css/tailwind.css -o ./public/css/output.css --minify",
     "start": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "seed-sqlite": "node scripts/seed_sqlite.js"
+    "test": "jest --coverage",
+    "test:unit": "jest tests/unit --coverage",
+    "test:integration": "jest tests/integration --coverage",
+    "test:watch": "jest --watch",
+    "test:verbose": "jest --verbose --coverage",
+    "test:setup": "node scripts/setup-test-db.js",
+    "seed-sqlite": "node scripts/seed_sqlite.js",
+    "seed-workflows": "node src/models/migrations/run_workflow_migration.js",
+    "migrate:guarantor": "node src/models/migrations/run_guarantor_migration.js"
   },
   "keywords": [],
   "author": "",
@@ -41,8 +48,11 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "autoprefixer": "^10.4.22",
+    "jest": "^30.2.0",
     "postcss": "^8.5.6",
+    "supertest": "^7.1.4",
     "tailwindcss": "^3.4.18"
   }
 }

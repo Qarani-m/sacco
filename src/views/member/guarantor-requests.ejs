@@ -1,285 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guarantor Requests - SACCO</title>
+    <title><%= title %> - SACCO</title>
     <link rel="stylesheet" href="/css/design-system.css">
 </head>
-
 <body>
     <%- include('../layouts/member-header') %>
 
-        <div class="container-xl">
-
-            <!-- Page Header -->
-            <div class="page-header">
-                <div class="accent-line"></div>
-                <h1 class="page-title">Guarantor Requests</h1>
-                <p class="page-subtitle">Review and respond to loan guarantee requests</p>
-            </div>
-
-            <!-- Info Alert -->
-            <% if (hasActiveLoan) { %>
-                <div class="alert alert-warning" style="margin-bottom: 2rem;">
-                    <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">⚠️ Cannot Guarantee Others
-                    </h3>
-                    <p style="margin: 0;">You have an active loan. You cannot act as a guarantor until your loan is
-                        fully repaid.</p>
-                </div>
-                <% } else { %>
-                    <div class="alert alert-info" style="margin-bottom: 2rem;">
-                        <p style="margin: 0;">
-                            <strong>How it works:</strong> When you accept a guarantee request, the specified number of
-                            your shares will be pledged to cover the borrower's loan. Your shares will be released once
-                            they repay the loan.
-                        </p>
-                    </div>
-                    <% } %>
-
-                        <!-- Stats Overview -->
-                        <div class="grid grid-cols-3 gap-6 mb-12">
-                            <div class="stat-card">
-                                <p class="stat-label">Pending Requests</p>
-                                <p class="stat-value">
-                                    <%= pendingRequests.length %>
-                                </p>
-                            </div>
-                            <div class="stat-card">
-                                <p class="stat-label">Active Guarantees</p>
-                                <p class="stat-value">
-                                    <%= activeGuarantees.length %>
-                                </p>
-                                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
-                                    <%= totalPledgedShares %> shares pledged
-                                </p>
-                            </div>
-                            <div class="stat-card">
-                                <p class="stat-label">Available Shares</p>
-                                <p class="stat-value">
-                                    <%= availableShares %>
-                                </p>
-                                <p class="text-secondary" style="font-size: 0.875rem; margin-top: 0.5rem;">
-                                    Can be pledged
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Pending Requests -->
-                        <div class="mb-12">
-                            <h2 class="section-title mb-6">Pending Requests</h2>
-
-                            <% if (pendingRequests.length===0) { %>
-                                <div class="card" style="text-align: center; padding: 4rem 2rem;">
-                                    <div style="font-size: 3rem; margin-bottom: 1rem;">🤝</div>
-                                    <h3 class="small-title" style="margin-bottom: 0.5rem;">No Pending Requests</h3>
-                                    <p class="text-secondary">You don't have any guarantor requests at the moment.</p>
-                                </div>
-                                <% } else { %>
-                                    <% pendingRequests.forEach(request=> { %>
-                                        <div class="card-hover" style="margin-bottom: 1.5rem; padding: 2rem;">
-                                            <div
-                                                style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
-                                                <div>
-                                                    <h3 class="small-title" style="margin-bottom: 0.5rem;">
-                                                        Request from <%= request.borrower_name %>
-                                                    </h3>
-                                                    <p class="text-meta">Requested <%= new
-                                                            Date(request.created_at).toLocaleDateString() %>
-                                                    </p>
-                                                </div>
-                                                <span
-                                                    style="padding: 0.5rem 1rem; background: #F5F5F5; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-                                                    Pending
-                                                </span>
-                                            </div>
-
-                                            <div class="grid grid-cols-4 gap-6 mb-6"
-                                                style="padding: 1.5rem; background: #FAFAFA; border: 1px solid #E5E5E5;">
-                                                <div>
-                                                    <p class="text-meta">Loan Amount</p>
-                                                    <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
-                                                        KSh <%= request.requested_amount.toLocaleString() %>
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-meta">Shares Needed</p>
-                                                    <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
-                                                        <%= request.shares_pledged %> shares
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-meta">Amount Covered</p>
-                                                    <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
-                                                        KSh <%= request.amount_covered.toLocaleString() %>
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-meta">Repayment Period</p>
-                                                    <p style="font-weight: 600; color: #000000; font-size: 1.125rem;">
-                                                        <%= request.repayment_months %> months
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div
-                                                style="padding: 1rem; background: #FAFAFA; border-left: 3px solid #000000; margin-bottom: 1.5rem;">
-                                                <p class="text-secondary" style="margin: 0; font-size: 0.875rem;">
-                                                    <strong>Note:</strong> By accepting this request, <%=
-                                                        request.shares_pledged %> of your shares (worth KSh <%=
-                                                            (request.shares_pledged * 1000).toLocaleString() %>) will be
-                                                            pledged until the loan is fully repaid.
-                                                </p>
-                                            </div>
-
-                                            <% if (!hasActiveLoan) { %>
-                                                <div style="display: flex; gap: 1rem;">
-                                                    <button onclick="acceptRequest('<%= request.id %>')"
-                                                        class="btn-primary">
-                                                        Accept Request
-                                                    </button>
-                                                    <button onclick="declineRequest('<%= request.id %>')"
-                                                        class="btn-secondary">
-                                                        Decline
-                                                    </button>
-                                                </div>
-                                                <% } else { %>
-                                                    <div class="alert alert-warning">
-                                                        <p style="margin: 0; font-size: 0.875rem;">You cannot accept
-                                                            this request while you have an active loan.</p>
-                                                    </div>
-                                                    <% } %>
-                                        </div>
-                                        <% }) %>
-                                            <% } %>
-                        </div>
-
-                        <!-- Active Guarantees -->
-                        <div class="mb-12">
-                            <h2 class="section-title mb-6">Active Guarantees</h2>
-
-                            <% if (activeGuarantees.length===0) { %>
-                                <div class="card" style="text-align: center; padding: 3rem 2rem;">
-                                    <p class="text-secondary">You haven't guaranteed any loans yet.</p>
-                                </div>
-                                <% } else { %>
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Borrower</th>
-                                                <th>Loan Amount</th>
-                                                <th>Shares Pledged</th>
-                                                <th>Amount Covered</th>
-                                                <th>Loan Status</th>
-                                                <th>Balance</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <% activeGuarantees.forEach(guarantee=> { %>
-                                                <tr>
-                                                    <td>
-                                                        <%= guarantee.borrower_name %>
-                                                    </td>
-                                                    <td>KSh <%= guarantee.requested_amount.toLocaleString() %>
-                                                    </td>
-                                                    <td>
-                                                        <%= guarantee.shares_pledged %> shares
-                                                    </td>
-                                                    <td>KSh <%= guarantee.amount_covered.toLocaleString() %>
-                                                    </td>
-                                                    <td>
-                                                        <span
-                                                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-                                                            <%= guarantee.loan_status %>
-                                                        </span>
-                                                    </td>
-                                                    <td>KSh <%= (guarantee.balance_remaining || 0).toLocaleString() %>
-                                                    </td>
-                                                </tr>
-                                                <% }) %>
-                                        </tbody>
-                                    </table>
-                                    <% } %>
-                        </div>
-
+    <div class="container-xl">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="accent-line"></div>
+            <h1 class="page-title">Guarantor Requests</h1>
+            <p class="page-subtitle">Manage loan guarantor requests from other members</p>
         </div>
 
+        <!-- Pending Requests -->
+        <% if (pendingRequests && pendingRequests.length > 0) { %>
+        <div class="card mb-6" style="background: #FEF2F2; border: 2px solid #000;">
+            <h3 class="small-title" style="margin-bottom: 1.5rem;">⏳ Pending Requests (<%= pendingRequests.length %>)</h3>
 
+            <div style="display: grid; gap: 1.5rem;">
+                <% pendingRequests.forEach(request => { %>
+                <div style="padding: 1.5rem; background: #FFF; border: 2px solid #000;">
+                    <div class="grid grid-cols-2 gap-6">
+                        <!-- Request Details -->
+                        <div>
+                            <h4 style="font-weight: 700; font-size: 1.125rem; margin-bottom: 1rem;">
+                                <%= request.borrower_name %>
+                            </h4>
+                            <div style="display: grid; gap: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="text-meta">Loan Amount:</span>
+                                    <span style="font-weight: 600;">KSh <%= request.requested_amount.toLocaleString() %></span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="text-meta">Repayment Period:</span>
+                                    <span style="font-weight: 600;"><%= request.repayment_months %> months</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="text-meta">Shares Requested:</span>
+                                    <span style="font-weight: 700; color: #DC2626;"><%= request.shares_pledged %> shares</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="text-meta">Amount Covered:</span>
+                                    <span style="font-weight: 700; color: #DC2626;">KSh <%= request.amount_covered.toLocaleString() %></span>
+                                </div>
+                            </div>
+                        </div>
 
-        <script>
-            const csrfToken = '<%= csrfToken %>';
+                        <!-- Response Form -->
+                        <div>
+                            <form class="guarantor-response-form" data-request-id="<%= request.id %>" style="display: grid; gap: 1rem;">
+                                <div>
+                                    <label class="form-label">Adjust Shares (Optional)</label>
+                                    <input
+                                        type="number"
+                                        name="shares_pledged"
+                                        class="form-input"
+                                        min="1"
+                                        max="<%= request.shares_pledged %>"
+                                        value="<%= request.shares_pledged %>"
+                                        style="border: 2px solid #000; font-weight: 600;"
+                                    >
+                                    <p class="text-meta" style="margin-top: 0.5rem;">
+                                        You can reduce the number of shares before accepting
+                                    </p>
+                                </div>
 
-            async function acceptRequest(requestId) {
-                const shares = prompt('How many shares do you want to pledge? (Enter a number)');
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                    <button
+                                        type="button"
+                                        class="btn-accept"
+                                        onclick="respondToRequest('<%= request.id %>', 'accept')"
+                                        style="background: #000; color: #FFF; border: 2px solid #000; padding: 0.75rem; font-weight: 600;"
+                                    >
+                                        ✓ Accept
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn-decline"
+                                        onclick="respondToRequest('<%= request.id %>', 'decline')"
+                                        style="background: #FFF; color: #DC2626; border: 2px solid #DC2626; padding: 0.75rem; font-weight: 600;"
+                                    >
+                                        ✗ Decline
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } else { %>
+        <div class="card mb-6" style="background: #F0FDF4; border: 2px solid #000;">
+            <div style="text-align: center; padding: 2rem;">
+                <p style="font-size: 3rem; margin-bottom: 1rem;">✓</p>
+                <h3 style="font-weight: 600; margin-bottom: 0.5rem;">No Pending Requests</h3>
+                <p class="text-meta" style="margin: 0;">You don't have any pending guarantor requests at the moment</p>
+            </div>
+        </div>
+        <% } %>
 
-                if (!shares || isNaN(shares) || parseInt(shares) < 1) {
-                    alert('Please enter a valid number of shares');
-                    return;
-                }
+        <!-- Request History -->
+        <div class="card">
+            <h3 class="small-title" style="margin-bottom: 1.5rem;">📜 Request History</h3>
 
-                if (!confirm(`Are you sure you want to pledge ${shares} shares for this loan?`)) {
-                    return;
-                }
+            <% if (allRequests && allRequests.length > 0) { %>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #000; color: #FFF;">
+                    <tr>
+                        <th style="padding: 1rem; text-align: left; border: 2px solid #000;">Borrower</th>
+                        <th style="padding: 1rem; text-align: right; border: 2px solid #000;">Loan Amount</th>
+                        <th style="padding: 1rem; text-align: right; border: 2px solid #000;">Shares</th>
+                        <th style="padding: 1rem; text-align: center; border: 2px solid #000;">Status</th>
+                        <th style="padding: 1rem; text-align: center; border: 2px solid #000;">Loan Status</th>
+                        <th style="padding: 1rem; text-align: right; border: 2px solid #000;">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% allRequests.forEach((request, index) => { %>
+                    <tr style="<%= index % 2 === 0 ? 'background: #FAFAFA;' : 'background: #FFF;' %>">
+                        <td style="padding: 1rem; border: 2px solid #E5E5E5; font-weight: 600;">
+                            <%= request.borrower_name %>
+                        </td>
+                        <td style="padding: 1rem; text-align: right; border: 2px solid #E5E5E5;">
+                            KSh <%= request.requested_amount ? request.requested_amount.toLocaleString() : 'N/A' %>
+                        </td>
+                        <td style="padding: 1rem; text-align: right; border: 2px solid #E5E5E5; font-weight: 600;">
+                            <%= request.shares_pledged %>
+                        </td>
+                        <td style="padding: 1rem; text-align: center; border: 2px solid #E5E5E5;">
+                            <% if (request.status === 'accepted') { %>
+                                <span style="padding: 0.5rem 1rem; background: #10B981; color: #FFF; border-radius: 4px; font-weight: 600;">Accepted</span>
+                            <% } else if (request.status === 'declined') { %>
+                                <span style="padding: 0.5rem 1rem; background: #EF4444; color: #FFF; border-radius: 4px; font-weight: 600;">Declined</span>
+                            <% } else if (request.status === 'released') { %>
+                                <span style="padding: 0.5rem 1rem; background: #6B7280; color: #FFF; border-radius: 4px; font-weight: 600;">Released</span>
+                            <% } else { %>
+                                <span style="padding: 0.5rem 1rem; background: #F59E0B; color: #FFF; border-radius: 4px; font-weight: 600;">Pending</span>
+                            <% } %>
+                        </td>
+                        <td style="padding: 1rem; text-align: center; border: 2px solid #E5E5E5;">
+                            <% if (request.loan_status === 'active') { %>
+                                <span style="color: #10B981; font-weight: 600;">Active</span>
+                            <% } else if (request.loan_status === 'paid') { %>
+                                <span style="color: #6B7280; font-weight: 600;">Paid</span>
+                            <% } else if (request.loan_status === 'pending') { %>
+                                <span style="color: #F59E0B; font-weight: 600;">Pending</span>
+                            <% } else { %>
+                                <span style="color: #6B7280; font-weight: 600;"><%= request.loan_status || 'N/A' %></span>
+                            <% } %>
+                        </td>
+                        <td style="padding: 1rem; text-align: right; border: 2px solid #E5E5E5;">
+                            <%= new Date(request.created_at).toLocaleDateString() %>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+            <% } else { %>
+            <div style="text-align: center; padding: 2rem; background: #FAFAFA; border: 2px solid #E5E5E5;">
+                <p class="text-meta" style="margin: 0;">No request history</p>
+            </div>
+            <% } %>
+        </div>
+    </div>
 
-                try {
-                    const response = await fetch(`/guarantors/requests/${requestId}/respond`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-Token': csrfToken
-                        },
-                        body: JSON.stringify({
-                            decision: 'accepted',
-                            shares_to_pledge: parseInt(shares)
-                        })
-                    });
+    <script>
+        async function respondToRequest(requestId, action) {
+            const form = document.querySelector(`form[data-request-id="${requestId}"]`);
+            const sharesPledged = form.querySelector('input[name="shares_pledged"]').value;
 
-                    const data = await response.json();
-
-                    if (data.success) {
-                        alert('Guarantor request accepted successfully!');
-                        window.location.reload();
-                    } else {
-                        alert('Error: ' + (data.error || 'Failed to accept request'));
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Failed to accept request. Please try again.');
-                }
+            if (!confirm(`Are you sure you want to ${action} this guarantor request?`)) {
+                return;
             }
 
-            async function declineRequest(requestId) {
-                if (!confirm('Are you sure you want to decline this guarantor request?')) {
-                    return;
+            try {
+                const response = await fetch(`/members/guarantor-requests/${requestId}/respond`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'CSRF-Token': '<%= csrfToken %>'
+                    },
+                    body: JSON.stringify({
+                        action,
+                        shares_pledged: parseInt(sharesPledged)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Failed to respond to request');
                 }
-
-                try {
-                    const response = await fetch(`/guarantors/requests/${requestId}/respond`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-Token': csrfToken
-                        },
-                        body: JSON.stringify({
-                            decision: 'declined'
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        alert('Guarantor request declined.');
-                        window.location.reload();
-                    } else {
-                        alert('Error: ' + (data.error || 'Failed to decline request'));
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Failed to decline request. Please try again.');
-                }
+            } catch (error) {
+                console.error('Response error:', error);
+                alert('Failed to respond to request. Please try again.');
             }
-        </script>
+        }
+    </script>
 </body>
-
 </html>

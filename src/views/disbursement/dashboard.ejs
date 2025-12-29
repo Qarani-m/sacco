@@ -1,0 +1,72 @@
+<div class="page-header" style="border-bottom: 2px solid #000; padding-bottom: 1rem; margin-bottom: 2rem;">
+    <h1 class="page-title" style="font-size: 2rem; font-weight: 700; color: #000;">Disbursement Dashboard</h1>
+    <p style="color: #6B7280; margin-top: 0.5rem;">Loan disbursement operations</p>
+</div>
+
+<!-- Quick Stats -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card" style="border: 2px solid #000; background: #fff;">
+        <div style="padding: 1.5rem;">
+            <div style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Pending Disbursements</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #000;">0</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.5rem;">Approved loans</div>
+        </div>
+    </div>
+
+    <div class="card" style="border: 2px solid #000; background: #fff;">
+        <div style="padding: 1.5rem;">
+            <div style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Disbursed Today</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #000;">KES 0</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.5rem;">Amount</div>
+        </div>
+    </div>
+
+    <div class="card" style="border: 2px solid #000; background: #fff;">
+        <div style="padding: 1.5rem;">
+            <div style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">This Month</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #000;">KES 0</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.5rem;">Total disbursed</div>
+        </div>
+    </div>
+
+    <div class="card" style="border: 2px solid #000; background: #fff;">
+        <div style="padding: 1.5rem;">
+            <div style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Processing</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #000;">0</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.5rem;">In progress</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="margin-bottom: 2rem;">
+    <h2 style="font-size: 1.25rem; font-weight: 600; color: #000; margin-bottom: 1rem; border-bottom: 1px solid #E5E7EB; padding-bottom: 0.5rem;">Quick Actions</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <a href="/admin/loans" style="display: block; padding: 1.5rem; border: 2px solid #000; background: #fff; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#000'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#000';">
+            <div style="font-weight: 600; color: inherit;">Process Loans</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">Ready for disbursement</div>
+        </a>
+        <a href="#" style="display: block; padding: 1.5rem; border: 2px solid #000; background: #fff; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#000'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#000';">
+            <div style="font-weight: 600; color: inherit;">Payment Status</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">Track disbursements</div>
+        </a>
+        <a href="#" style="display: block; padding: 1.5rem; border: 2px solid #000; background: #fff; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#000'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#000';">
+            <div style="font-weight: 600; color: inherit;">Bank Reconciliation</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">Match transactions</div>
+        </a>
+        <a href="/admin/reports" style="display: block; padding: 1.5rem; border: 2px solid #000; background: #fff; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#000'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#000';">
+            <div style="font-weight: 600; color: inherit;">Reports</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">Disbursement reports</div>
+        </a>
+    </div>
+</div>
+
+<!-- Pending Disbursements -->
+<div class="card" style="border: 2px solid #000;">
+    <div style="padding: 1.5rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 600; color: #000; margin-bottom: 1rem;">Pending Disbursements</h2>
+        <div style="text-align: center; padding: 3rem; color: #6B7280;">
+            No pending disbursements
+        </div>
+    </div>
+</div>

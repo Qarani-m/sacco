@@ -416,6 +416,99 @@ class User {
     const result = await db.query(query, [userId]);
     return result.rows[0];
   }
+
+  /**
+   * Update guarantor opt-in status
+   */
+  static async updateGuarantorStatus(userId, canBeGuarantor, maxShares = 0) {
+    const query = `
+      UPDATE users
+      SET can_be_guarantor = $1, max_shares_to_guarantee = $2, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $3
+      RETURNING id, email, full_name, can_be_guarantor, max_shares_to_guarantee
+    `;
+    const result = await db.query(query, [canBeGuarantor, maxShares, userId]);
+    return result.rows[0];
+  }
+
+  /**
+   * Get all available guarantors (users who opted in)
+   */
+  static async getAvailableGuarantors(excludeUserId = null) {
+    let query = `
+      SELECT id, full_name, email, phone_number, max_shares_to_guarantee
+      FROM users
+      WHERE can_be_guarantor = true AND is_active = true
+    `;
+    const params = [];
+
+    if (excludeUserId) {
+      query += ' AND id != $1';
+      params.push(excludeUserId);
+    }
+
+    query += ' ORDER BY full_name';
+
+    const result = await db.query(query, params);
+    return result.rows;
+  }
+
+  /**
+   * Get guarantor status for a user
+   */
+  static async getGuarantorStatus(userId) {
+    const query = `
+      SELECT can_be_guarantor, max_shares_to_guarantee
+      FROM users
+      WHERE id = $1
+    `;
+    const result = await db.query(query, [userId]);
+    return result.rows[0];
+  }
+
+  /**
+   * Check if user can guarantee (has opted in and has available shares)
+   */
+  static async canGuarantee(userId, sharesRequested) {
+    const status = await this.getGuarantorStatus(userId);
+
+    if (!status || !status.can_be_guarantor) {
+      return { canGuarantee: false, reason: 'User has not opted in as guarantor' };
+    }
+
+    if (sharesRequested > status.max_shares_to_guarantee) {
+      return {
+        canGuarantee: false,
+        reason: `User can only guarantee up to ${status.max_shares_to_guarantee} shares`,
+        maxShares: status.max_shares_to_guarantee
+      };
+    }
+
+    // Check current guarantor commitments
+    const LoanGuarantor = require('./LoanGuarantor');
+    const activeGuarantees = await db.query(`
+      SELECT COALESCE(SUM(lg.shares_pledged), 0) as committed_shares
+      FROM loan_guarantors lg
+      INNER JOIN loans l ON lg.loan_id = l.id
+      WHERE lg.guarantor_id = $1
+      AND lg.status IN ('pending', 'accepted')
+      AND l.status IN ('pending', 'active')
+    `, [userId]);
+
+    const committedShares = parseInt(activeGuarantees.rows[0].committed_shares || 0);
+    const availableShares = status.max_shares_to_guarantee - committedShares;
+
+    if (sharesRequested > availableShares) {
+      return {
+        canGuarantee: false,
+        reason: `Only ${availableShares} shares available (${committedShares} already committed)`,
+        availableShares,
+        committedShares
+      };
+    }
+
+    return { canGuarantee: true, availableShares, committedShares };
+  }
 }
 
 module.exports = User;

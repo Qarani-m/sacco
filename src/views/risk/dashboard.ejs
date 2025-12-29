@@ -1,0 +1,72 @@
+<div class="page-header" style="border-bottom: 2px solid #000; padding-bottom: 1rem; margin-bottom: 2rem;">
+    <h1 class="page-title" style="font-size: 2rem; font-weight: 700; color: #000;">Risk Management Dashboard</h1>
+    <p style="color: #6B7280; margin-top: 0.5rem;">Risk assessment and loan approval</p>
+</div>
+
+<!-- Quick Stats -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card" style="border: 2px solid #000; background: #fff;">
+        <div style="padding: 1.5rem;">
+            <div style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Pending Approvals</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #000;">0</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.5rem;">Loan applications</div>
+        </div>
+    </div>
+
+    <div class="card" style="border: 2px solid #000; background: #fff;">
+        <div style="padding: 1.5rem;">
+            <div style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">High Risk Loans</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #DC2626;">0</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.5rem;">Require attention</div>
+        </div>
+    </div>
+
+    <div class="card" style="border: 2px solid #000; background: #fff;">
+        <div style="padding: 1.5rem;">
+            <div style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Portfolio Health</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #000;">0%</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.5rem;">Default rate</div>
+        </div>
+    </div>
+
+    <div class="card" style="border: 2px solid #000; background: #fff;">
+        <div style="padding: 1.5rem;">
+            <div style="font-size: 0.875rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Reviewed Today</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #000;">0</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.5rem;">Applications</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="margin-bottom: 2rem;">
+    <h2 style="font-size: 1.25rem; font-weight: 600; color: #000; margin-bottom: 1rem; border-bottom: 1px solid #E5E7EB; padding-bottom: 0.5rem;">Quick Actions</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <a href="/admin/loans" style="display: block; padding: 1.5rem; border: 2px solid #000; background: #fff; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#000'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#000';">
+            <div style="font-weight: 600; color: inherit;">Review Loans</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">Pending applications</div>
+        </a>
+        <a href="#" style="display: block; padding: 1.5rem; border: 2px solid #000; background: #fff; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#000'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#000';">
+            <div style="font-weight: 600; color: inherit;">Risk Analysis</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">View risk metrics</div>
+        </a>
+        <a href="/admin/members" style="display: block; padding: 1.5rem; border: 2px solid #000; background: #fff; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#000'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#000';">
+            <div style="font-weight: 600; color: inherit;">Member Credit</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">Check member history</div>
+        </a>
+        <a href="/admin/reports" style="display: block; padding: 1.5rem; border: 2px solid #000; background: #fff; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='#000'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#000';">
+            <div style="font-weight: 600; color: inherit;">Risk Reports</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">Generate reports</div>
+        </a>
+    </div>
+</div>
+
+<!-- Pending Reviews -->
+<div class="card" style="border: 2px solid #000;">
+    <div style="padding: 1.5rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 600; color: #000; margin-bottom: 1rem;">Pending Loan Reviews</h2>
+        <div style="text-align: center; padding: 3rem; color: #6B7280;">
+            No pending loan reviews
+        </div>
+    </div>
+</div>

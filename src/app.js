@@ -15,6 +15,10 @@ const whitelistMiddleware = require("./middleware/whitelistMiddleware");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const memberRoutes = require("./routes/members");
+const financeRoutes = require("./routes/finance");
+const riskRoutes = require("./routes/risk");
+const customerServiceRoutes = require("./routes/customer-service");
+const disbursementRoutes = require("./routes/disbursement");
 const shareRoutes = require("./routes/shares");
 const loanRoutes = require("./routes/loans");
 const guarantorRoutes = require("./routes/guarantors");
@@ -151,6 +155,10 @@ app.use("/api", apiRoutes);
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/members", memberRoutes);
+app.use("/staff/finance", financeRoutes);
+app.use("/staff/risk", riskRoutes);
+app.use("/staff/customer-service", customerServiceRoutes);
+app.use("/staff/disbursement", disbursementRoutes);
 app.use("/shares", shareRoutes);
 app.use("/loans", loanRoutes);
 app.use("/guarantors", guarantorRoutes);
@@ -162,13 +170,35 @@ app.use("/roles", roleRoutes);
 app.use("/payment-allocation", paymentAllocationRoutes);
 
 // Home route
-app.get("/", (req, res) => {
-  if (req.session.user) {
-    if (req.session.user.role === "admin") {
-      return res.redirect("/admin/dashboard");
+app.get("/", async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (token) {
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findByIdWithRole(payload.id);
+
+      if (user) {
+        const roleName = user.role_name || user.role;
+
+        if (roleName === "Admin") {
+          return res.redirect("/admin/dashboard");
+        } else if (roleName === "Finance" || roleName === "finance") {
+          return res.redirect("/staff/finance/dashboard");
+        } else if (roleName === "Risk" || roleName === "risk") {
+          return res.redirect("/staff/risk/dashboard");
+        } else if (roleName === "Customer Service" || roleName === "customer_service") {
+          return res.redirect("/staff/customer-service/dashboard");
+        } else if (roleName === "Disbursement Officer" || roleName === "disbursement_officer") {
+          return res.redirect("/staff/disbursement/dashboard");
+        } else {
+          return res.redirect("/members/dashboard");
+        }
+      }
     }
-    return res.redirect("/members/dashboard");
+  } catch (err) {
+    // Token invalid or expired
   }
+
   res.redirect("/auth/login");
 });
 

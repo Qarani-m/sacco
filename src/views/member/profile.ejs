@@ -253,11 +253,132 @@
                         <% } %>
             </div>
 
+            <!-- Guarantor Opt-In Section -->
+            <div class="card mb-12">
+                <h2 class="section-title mb-6">Guarantor Settings</h2>
+
+                <div class="alert alert-info mb-6">
+                    <p style="margin: 0;">
+                        <strong>Become a Guarantor:</strong> Opt-in to be available as a guarantor for other members.
+                        You can specify how many shares you're willing to pledge.
+                    </p>
+                </div>
+
+                <form id="guarantorSettingsForm" style="display: grid; gap: 1.5rem;">
+                    <div style="padding: 1.5rem; background: #FAFAFA; border: 2px solid #E5E5E5;">
+                        <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+                            <input
+                                type="checkbox"
+                                id="canBeGuarantor"
+                                name="can_be_guarantor"
+                                <%= user.can_be_guarantor ? 'checked' : '' %>
+                                style="width: 24px; height: 24px; cursor: pointer;"
+                            >
+                            <div>
+                                <p style="font-weight: 600; font-size: 1.125rem; margin: 0;">Available as Guarantor</p>
+                                <p class="text-meta" style="margin: 0;">
+                                    Allow other members to select you as a guarantor for their loans
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="guarantorDetailsSection" style="<%= user.can_be_guarantor ? '' : 'display: none;' %>">
+                        <div class="form-group">
+                            <label for="maxShares" style="font-weight: 600;">Maximum Shares to Guarantee</label>
+                            <input
+                                type="number"
+                                id="maxShares"
+                                name="max_shares_to_guarantee"
+                                min="0"
+                                max="100"
+                                value="<%= user.max_shares_to_guarantee || 0 %>"
+                                class="form-input"
+                                style="border: 2px solid #000; font-size: 1.125rem; font-weight: 600;"
+                            >
+                            <p class="text-meta" style="margin-top: 0.5rem;">
+                                Each share = KSh 1,000. Example: 5 shares = KSh 5,000 guarantee capacity
+                            </p>
+                        </div>
+
+                        <div style="padding: 1.5rem; background: #FEF2F2; border: 2px solid #E5E5E5;">
+                            <h4 style="font-weight: 600; margin-bottom: 0.5rem;">How Guarantor System Works</h4>
+                            <ul class="text-meta" style="margin: 0; padding-left: 1.5rem;">
+                                <li>When a member needs a guarantor, you'll receive a request notification</li>
+                                <li>You can approve or decline the request</li>
+                                <li>You can edit the number of shares you're willing to pledge</li>
+                                <li>Your shares are pledged only when you approve the request</li>
+                                <li>Shares are released when the loan is fully repaid</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                        style="background: #000; color: #FFF; border: 2px solid #000; padding: 1rem; font-size: 1.125rem; font-weight: 600;"
+                    >
+                        Save Guarantor Settings
+                    </button>
+                </form>
+            </div>
+
         </div>
 
 
 
         <script src="/js/profile.js"></script>
+        <script>
+            // Guarantor settings toggle
+            document.getElementById('canBeGuarantor').addEventListener('change', function() {
+                const detailsSection = document.getElementById('guarantorDetailsSection');
+                if (this.checked) {
+                    detailsSection.style.display = 'block';
+                } else {
+                    detailsSection.style.display = 'none';
+                    document.getElementById('maxShares').value = 0;
+                }
+            });
+
+            // Guarantor settings form submission
+            document.getElementById('guarantorSettingsForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const canBeGuarantor = document.getElementById('canBeGuarantor').checked;
+                const maxShares = parseInt(document.getElementById('maxShares').value) || 0;
+
+                if (canBeGuarantor && maxShares <= 0) {
+                    alert('Please specify how many shares you are willing to guarantee (minimum 1)');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/profile/guarantor-settings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            can_be_guarantor: canBeGuarantor,
+                            max_shares_to_guarantee: maxShares
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        alert('Guarantor settings updated successfully!');
+                        window.location.reload();
+                    } else {
+                        alert(data.error || 'Failed to update guarantor settings');
+                    }
+                } catch (error) {
+                    console.error('Guarantor settings error:', error);
+                    alert('Failed to update guarantor settings. Please try again.');
+                }
+            });
+        </script>
 </body>
 
 </html>

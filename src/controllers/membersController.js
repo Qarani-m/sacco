@@ -493,3 +493,164 @@ exports.showLoanRequestPage = async (req, res) => {
     res.status(500).send("Failed to load loan request page");
   }
 };
+
+// Update guarantor opt-in settings
+exports.updateGuarantorSettings = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { can_be_guarantor, max_shares_to_guarantee } = req.body;
+
+    // Validate max shares
+    const maxShares = parseInt(max_shares_to_guarantee) || 0;
+    if (can_be_guarantor && maxShares <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Maximum shares must be at least 1 when opting in as guarantor'
+      });
+    }
+
+    // Update user guarantor status
+    await User.updateGuarantorStatus(userId, can_be_guarantor, maxShares);
+
+    res.json({
+      success: true,
+      message: 'Guarantor settings updated successfully',
+      can_be_guarantor,
+      max_shares_to_guarantee: maxShares
+    });
+  } catch (error) {
+    console.error("Update guarantor settings error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to update guarantor settings"
+    });
+  }
+};
+
+// View guarantor requests
+exports.viewGuarantorRequests = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const LoanGuarantor = require("../models/LoanGuarantor");
+
+    // Get all guarantor requests (pending and responded)
+    const pendingRequests = await LoanGuarantor.getPendingByGuarantor(userId);
+    const allRequests = await LoanGuarantor.getByGuarantor(userId);
+
+    res.render("member/guarantor-requests", {
+      title: "Guarantor Requests",
+      user: req.user,
+      pendingRequests,
+      allRequests,
+      unreadNotifications: 0,
+      unreadMessages: 0,
+      csrfToken: req.csrfToken(),
+    });
+  } catch (error) {
+    console.error("View guarantor requests error:", error);
+    res.status(500).render("errors/500", {
+      title: "Server Error",
+      error,
+    });
+  }
+};
+
+// Respond to guarantor request
+exports.respondToGuarantorRequest = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { action, shares_pledged } = req.body;
+    const userId = req.user.id;
+
+    const LoanGuarantor = require("../models/LoanGuarantor");
+    const request = await LoanGuarantor.findById(requestId);
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        error: "Request not found"
+      });
+    }
+
+    // Verify the request is for this user
+    if (request.guarantor_id !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: "Unauthorized"
+      });
+    }
+
+    if (action === 'accept') {
+      // Validate shares
+      const sharesToPledge = parseInt(shares_pledged) || request.shares_pledged;
+
+      // Check if user can guarantee this amount
+      const canGuarantee = await User.canGuarantee(userId, sharesToPledge);
+
+      if (!canGuarantee.canGuarantee) {
+        return res.status(400).json({
+          success: false,
+          error: canGuarantee.reason,
+          availableShares: canGuarantee.availableShares
+        });
+      }
+
+      // Update request with accepted shares
+      await LoanGuarantor.accept(requestId);
+
+      // Update shares if different from requested
+      if (sharesToPledge !== request.shares_pledged) {
+        const db = require("../models/db");
+        await db.query(
+          `UPDATE loan_guarantors
+           SET shares_pledged = $1, amount_covered = $2
+           WHERE id = $3`,
+          [sharesToPledge, sharesToPledge * 1000, requestId]
+        );
+      }
+
+      // Create notification for borrower
+      await Notification.create({
+        user_id: request.borrower_id,
+        type: "guarantor_response",
+        title: "Guarantor Request Accepted",
+        message: `${req.user.full_name} has accepted to guarantee ${sharesToPledge} shares for your loan`,
+        related_entity_type: "loan",
+        related_entity_id: request.loan_id,
+      });
+
+      res.json({
+        success: true,
+        message: "Guarantor request accepted"
+      });
+    } else if (action === 'decline') {
+      await LoanGuarantor.decline(requestId);
+
+      // Create notification for borrower
+      await Notification.create({
+        user_id: request.borrower_id,
+        type: "guarantor_response",
+        title: "Guarantor Request Declined",
+        message: `${req.user.full_name} has declined your guarantor request`,
+        related_entity_type: "loan",
+        related_entity_id: request.loan_id,
+      });
+
+      res.json({
+        success: true,
+        message: "Guarantor request declined"
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: "Invalid action"
+      });
+    }
+  } catch (error) {
+    console.error("Respond to guarantor request error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to respond to request"
+    });
+  }
+};

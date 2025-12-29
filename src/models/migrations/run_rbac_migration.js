@@ -1,118 +1,62 @@
-/**
- * RBAC Migration Runner
- * 
- * Run this script to apply RBAC schema to your database
- * Usage: node src/models/migrations/run_rbac_migration.js
- */
-
 const db = require('../db');
 const fs = require('fs');
 const path = require('path');
 
-async function runMigration() {
-    try {
-        console.log('🚀 Starting RBAC Migration...\n');
-
-        // Determine which database we're using
-        const currentDb = db.getCurrentDb();
-        console.log(`📊 Database: ${currentDb}\n`);
-
-        // Select appropriate schema file
-        const schemaFile = currentDb === 'sqlite'
-            ? 'rbac_schema_sqlite.sql'
-            : 'rbac_schema.sql';
-
-        const schemaPath = path.join(__dirname, schemaFile);
-
-        // Check if file exists
-        if (!fs.existsSync(schemaPath)) {
-            throw new Error(`Schema file not found: ${schemaPath}`);
-        }
-
-        // Read schema file
-        console.log(`📄 Reading schema from: ${schemaFile}`);
-        const schema = fs.readFileSync(schemaPath, 'utf8');
-
-        // Split into individual statements (SQLite doesn't support multiple statements in one query)
-        const statements = schema
-            .split(';')
-            .map(s => s.trim())
-            .filter(s => s.length > 0 && !s.startsWith('--'));
-
-        console.log(`📝 Found ${statements.length} SQL statements\n`);
-
-        // Execute each statement
-        let successCount = 0;
-        let skipCount = 0;
-
-        for (let i = 0; i < statements.length; i++) {
-            const statement = statements[i];
-
-            try {
-                // Skip comments
-                if (statement.startsWith('--') || statement.startsWith('/*')) {
-                    continue;
-                }
-
-                // Log progress
-                const preview = statement.substring(0, 60).replace(/\n/g, ' ');
-                process.stdout.write(`[${i + 1}/${statements.length}] ${preview}... `);
-
-                await db.query(statement);
-                console.log('✅');
-                successCount++;
-            } catch (error) {
-                // Some errors are expected (e.g., table already exists)
-                if (error.message.includes('already exists') ||
-                    error.message.includes('duplicate') ||
-                    error.message.includes('UNIQUE constraint')) {
-                    console.log('⏭️  (already exists)');
-                    skipCount++;
-                } else {
-                    console.log('❌');
-                    console.error(`Error: ${error.message}`);
-                }
+async function waitForDb() {
+    let retries = 10;
+    while (retries > 0) {
+        try {
+            await db.query('SELECT 1');
+            return true;
+        } catch (error) {
+            if (error.message === 'Database not initialized yet') {
+                console.log('⏳ Waiting for database initialization...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                retries--;
+            } else {
+                throw error;
             }
         }
+    }
+    throw new Error('Database initialization timed out');
+}
 
-        console.log('\n' + '='.repeat(50));
-        console.log('✅ Migration Complete!');
-        console.log(`   Executed: ${successCount} statements`);
-        console.log(`   Skipped: ${skipCount} statements`);
-        console.log('='.repeat(50) + '\n');
+async function runRbacMigration() {
+    try {
+        console.log('🔄 Running RBAC migration to update user check constraint...');
+        await waitForDb();
 
-        // Verify migration
-        console.log('🔍 Verifying migration...\n');
+        const sqlPath = path.join(__dirname, 'update_user_role_check.sql');
+        const sql = fs.readFileSync(sqlPath, 'utf8');
 
-        // Check roles table
-        const rolesResult = await db.query('SELECT COUNT(*) as count FROM roles');
-        const rolesCount = parseInt(rolesResult.rows[0].count);
-        console.log(`✓ Roles table: ${rolesCount} roles`);
+        // Split by semicolon to run statements sequentially if needed, 
+        // but db.query might handle multiple statements depending on driver.
+        // sqlite3 driver `exec` handles multiple, but `run`/`all` usually one.
+        // db.js uses `query` which maps to `db.all` or `db.run`.
+        // `sqlite.js` implementation of `query` tries to detect SELECT vs Insert etc.
+        // It might NOT handle multiple statements well if they are complex.
+        // SAFE BET: Split and execute one by one.
 
-        // Check permissions table
-        const permsResult = await db.query('SELECT COUNT(*) as count FROM permissions');
-        const permsCount = parseInt(permsResult.rows[0].count);
-        console.log(`✓ Permissions table: ${permsCount} permissions`);
+        const statements = sql
+            .split(';')
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
 
-        // Check role_permissions table
-        const rpResult = await db.query('SELECT COUNT(*) as count FROM role_permissions');
-        const rpCount = parseInt(rpResult.rows[0].count);
-        console.log(`✓ Role-Permission mappings: ${rpCount} assignments`);
+        for (const statement of statements) {
+            console.log(`Executing: ${statement.substring(0, 50)}...`);
+            await db.query(statement);
+        }
 
-        // Check users with roles
-        const usersResult = await db.query('SELECT COUNT(*) as count FROM users WHERE role_id IS NOT NULL');
-        const usersCount = parseInt(usersResult.rows[0].count);
-        console.log(`✓ Users with roles: ${usersCount} users\n`);
-
-        console.log('🎉 RBAC system is ready to use!\n');
-
+        console.log('✅ RBAC user constraint migration completed successfully!');
         process.exit(0);
     } catch (error) {
-        console.error('\n❌ Migration failed:', error.message);
-        console.error(error.stack);
+        console.error('❌ Migration failed:', error);
         process.exit(1);
     }
 }
 
-// Run migration
-runMigration();
+if (require.main === module) {
+    runRbacMigration();
+}
+
+module.exports = runRbacMigration;

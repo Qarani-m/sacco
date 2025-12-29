@@ -1,0 +1,52 @@
+{
+  "users": {
+    "admin": {
+      "email": "admin@test.com",
+      "password": "Test@1234",
+      "full_name": "Test Admin",
+      "phone_number": "0700000001",
+      "role": "admin"
+    },
+    "finance": {
+      "email": "finance@test.com",
+      "password": "Test@1234",
+      "full_name": "Test Finance",
+      "phone_number": "0700000002",
+      "role": "member"
+    },
+    "risk": {
+      "email": "risk@test.com",
+      "password": "Test@1234",
+      "full_name": "Test Risk",
+      "phone_number": "0700000003",
+      "role": "member"
+    },
+    "member": {
+      "email": "member@test.com",
+      "password": "Test@1234",
+      "full_name": "Test Member",
+      "phone_number": "0700000004",
+      "role": "member"
+    }
+  },
+  "loans": {
+    "small": {
+      "amount": 30000,
+      "purpose": "Small business loan",
+      "duration_months": 6,
+      "interest_rate": 8
+    },
+    "medium": {
+      "amount": 75000,
+      "purpose": "Medium business expansion",
+      "duration_months": 12,
+      "interest_rate": 10
+    },
+    "large": {
+      "amount": 250000,
+      "purpose": "Large business investment",
+      "duration_months": 24,
+      "interest_rate": 12
+    }
+  }
+}

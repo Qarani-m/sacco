@@ -1,17 +1,19 @@
+const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
 
 class LoanGuarantor {
     // Create guarantor request
     static async create(guarantorData) {
         const { loan_id, guarantor_id, shares_pledged, amount_covered } = guarantorData;
-        
+        const id = uuidv4();
+
         const query = `
-            INSERT INTO loan_guarantors (loan_id, guarantor_id, shares_pledged, amount_covered)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO loan_guarantors (id, loan_id, guarantor_id, shares_pledged, amount_covered)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *
         `;
-        
-        const result = await db.query(query, [loan_id, guarantor_id, shares_pledged, amount_covered]);
+
+        const result = await db.query(query, [id, loan_id, guarantor_id, shares_pledged, amount_covered]);
         return result.rows[0];
     }
 

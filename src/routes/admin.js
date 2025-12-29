@@ -26,16 +26,22 @@ router.use((req, res, next) => {
 router.get("/register", async (req, res) => {
   try {
     const db = require("../models/db");
+    const Role = require("../models/Role");
+
     const pendingCountResult = await db.query(
       "SELECT COUNT(*) FROM admin_actions WHERE status = 'pending'"
     );
     const pendingCount = parseInt(pendingCountResult.rows[0].count);
+
+    // Fetch all available roles
+    const roles = await Role.getAll();
 
     res.render("admin/register", {
       title: "Register Member",
       layout: "layouts/admin",
       pendingCount,
       user: req.user,
+      roles,
     });
   } catch (error) {
     console.error("Register page error:", error);

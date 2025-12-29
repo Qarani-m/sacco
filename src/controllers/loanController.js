@@ -341,6 +341,62 @@ exports.viewRepaymentSchedule = async (req, res) => {
   }
 };
 
+exports.showRepaymentPage = async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const loan = await Loan.findById(loanId);
+
+    if (!loan) {
+      return res.status(404).render("errors/404", {
+        title: "Loan Not Found",
+        message: "The requested loan could not be found",
+      });
+    }
+
+    // Check authorization
+    if (loan.borrower_id !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).render("errors/403", {
+        title: "Access Denied",
+        message: "You don't have permission to make payments on this loan",
+      });
+    }
+
+    if (loan.status !== "active") {
+      return res.status(400).render("errors/400", {
+        title: "Invalid Loan Status",
+        message: "This loan is not active and cannot accept payments",
+      });
+    }
+
+    // Calculate repayment schedule
+    const schedule = Loan.calculateRepaymentSchedule(
+      loan.approved_amount,
+      loan.interest_rate,
+      loan.repayment_months
+    );
+
+    // Get repayment history
+    const repayments = await require("../models/LoanRepayment").getByLoan(loanId);
+
+    res.render("loans/repay", {
+      title: "Repay Loan",
+      user: req.user,
+      loan,
+      schedule,
+      repayments,
+      unreadNotifications: 0,
+      unreadMessages: 0,
+      csrfToken: req.csrfToken(),
+    });
+  } catch (error) {
+    console.error("Show repayment page error:", error);
+    res.status(500).render("errors/500", {
+      title: "Server Error",
+      error,
+    });
+  }
+};
+
 exports.repayLoan = async (req, res) => {
   try {
     const { loanId } = req.params;

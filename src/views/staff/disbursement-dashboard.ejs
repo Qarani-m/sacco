@@ -1,0 +1,72 @@
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-2 text-gray-800">Disbursement Dashboard</h1>
+        <p class="mb-4">Manage approved loans ready for disbursement.</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Pending Disbursements Card -->
+    <div class="col-xl-6 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Pending Disbursement</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            <%= pendingDisbursement.length %> Loans
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Loans Ready for Disbursement</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Borrower</th>
+                        <th>Amount</th>
+                        <th>Date Approved</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% pendingDisbursement.forEach(loan=> { %>
+                        <tr>
+                            <td>
+                                <%= loan.full_name %>
+                            </td>
+                            <td>KSh <%= loan.approved_amount || loan.requested_amount %>
+                            </td>
+                            <td>
+                                <%= new Date(loan.approved_at).toLocaleDateString() %>
+                            </td>
+                            <td>
+                                <a href="/loans/<%= loan.id %>/disburse" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check"></i> Disburse
+                                </a>
+                            </td>
+                        </tr>
+                        <% }); %>
+                            <% if (pendingDisbursement.length===0) { %>
+                                <tr>
+                                    <td colspan="4" class="text-center">No loans pending disbursement</td>
+                                </tr>
+                                <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

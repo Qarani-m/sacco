@@ -8,7 +8,11 @@
       "Bash(node models/migrations/run_email_verification_migration.js:*)",
       "Bash(pkill:*)",
       "Bash(sqlite3:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(node:*)",
+      "Bash(timeout 10 node:*)",
+      "Bash(timeout 30 node:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

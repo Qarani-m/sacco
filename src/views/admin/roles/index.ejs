@@ -1,0 +1,42 @@
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1 class="page-title">Role Management</h1>
+    </div>
+</div>
+
+<div class="card">
+    <% if (roles && roles.length > 0) { %>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 1px solid #E5E7EB;">
+                    <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Role Name</th>
+                    <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Description</th>
+                    <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Created</th>
+                    <th style="padding: 0.75rem 1rem; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% roles.forEach(role => { %>
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 1rem;">
+                            <div style="font-weight: 500; color: #111827;"><%= role.name %></div>
+                        </td>
+                        <td style="padding: 1rem; color: #374151;">
+                            <%= role.description || 'No description' %>
+                        </td>
+                        <td style="padding: 1rem; color: #6B7280; font-size: 0.875rem;">
+                            <%= new Date(role.created_at).toLocaleDateString() %>
+                        </td>
+                        <td style="padding: 1rem; text-align: right;">
+                            <a href="/roles/<%= role.id %>" style="color: #2563EB; text-decoration: none; font-size: 0.875rem; font-weight: 500;">View Permissions</a>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <div style="text-align: center; padding: 3rem;">
+            <p style="color: #6B7280; font-size: 1rem;">No roles found in the system.</p>
+        </div>
+    <% } %>
+</div>

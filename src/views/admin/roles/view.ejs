@@ -1,0 +1,137 @@
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1 class="page-title">Role: <%= role.name %></h1>
+        <a href="/roles" class="btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: #6B7280; color: white; padding: 0.5rem 1rem; border-radius: 4px;">
+            <span>← Back to Roles</span>
+        </a>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 2rem;">
+    <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #111827;">Role Information</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+            <label style="display: block; font-size: 0.875rem; color: #6B7280; margin-bottom: 0.25rem;">Role Name</label>
+            <p style="font-weight: 500; color: #111827;"><%= role.name %></p>
+        </div>
+        <div>
+            <label style="display: block; font-size: 0.875rem; color: #6B7280; margin-bottom: 0.25rem;">Created At</label>
+            <p style="color: #374151;"><%= new Date(role.created_at).toLocaleDateString() %></p>
+        </div>
+        <div style="grid-column: 1 / -1;">
+            <label style="display: block; font-size: 0.875rem; color: #6B7280; margin-bottom: 0.25rem;">Description</label>
+            <p style="color: #374151;"><%= role.description || 'No description available' %></p>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <!-- Current Permissions -->
+    <div class="card">
+        <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #111827;">
+            Current Permissions (<%= permissions.length %>)
+        </h2>
+        <% if (permissions && permissions.length > 0) { %>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <% permissions.forEach(permission => { %>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #F9FAFB; border-radius: 4px;">
+                        <div>
+                            <div style="font-weight: 500; color: #111827;"><%= permission.name %></div>
+                            <div style="font-size: 0.875rem; color: #6B7280;"><%= permission.module %></div>
+                        </div>
+                        <form method="POST" action="/roles/<%= role.id %>/permissions/remove" style="margin: 0;">
+                            <input type="hidden" name="permissionId" value="<%= permission.id %>">
+                            <button type="submit" style="background: #EF4444; color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.875rem;">
+                                Remove
+                            </button>
+                        </form>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <p style="color: #6B7280; text-align: center; padding: 2rem;">No permissions assigned to this role.</p>
+        <% } %>
+    </div>
+
+    <!-- Add Permissions -->
+    <div class="card">
+        <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #111827;">
+            Add Permissions
+        </h2>
+        <% if (allPermissions && Object.keys(allPermissions).length > 0) { %>
+            <%
+            const assignedIds = permissions.map(p => p.id);
+            const availablePermissions = {};
+            Object.keys(allPermissions).forEach(module => {
+                const available = allPermissions[module].filter(p => !assignedIds.includes(p.id));
+                if (available.length > 0) {
+                    availablePermissions[module] = available;
+                }
+            });
+            %>
+            <% if (Object.keys(availablePermissions).length > 0) { %>
+                <form method="POST" action="/roles/<%= role.id %>/permissions/assign" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.875rem; color: #6B7280; margin-bottom: 0.5rem;">Select Permission</label>
+                        <select name="permissionId" required style="width: 100%; padding: 0.5rem; border: 1px solid #D1D5DB; border-radius: 4px;">
+                            <option value="">-- Select a permission --</option>
+                            <% Object.keys(availablePermissions).forEach(module => { %>
+                                <optgroup label="<%= module %>">
+                                    <% availablePermissions[module].forEach(permission => { %>
+                                        <option value="<%= permission.id %>"><%= permission.name %></option>
+                                    <% }); %>
+                                </optgroup>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <button type="submit" style="background: #10B981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                        Add Permission
+                    </button>
+                </form>
+            <% } else { %>
+                <p style="color: #6B7280; text-align: center; padding: 2rem;">All available permissions have been assigned to this role.</p>
+            <% } %>
+        <% } else { %>
+            <p style="color: #6B7280; text-align: center; padding: 2rem;">No permissions available in the system.</p>
+        <% } %>
+    </div>
+</div>
+
+<!-- Users with this role -->
+<div class="card" style="margin-top: 2rem;">
+    <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #111827;">
+        Users with this Role (<%= users.length %>)
+    </h2>
+    <% if (users && users.length > 0) { %>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 1px solid #E5E7EB;">
+                    <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Name</th>
+                    <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Email</th>
+                    <th style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">Status</th>
+                    <th style="padding: 0.75rem 1rem; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(user => { %>
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 1rem; font-weight: 500; color: #111827;"><%= user.full_name %></td>
+                        <td style="padding: 1rem; color: #374151;"><%= user.email %></td>
+                        <td style="padding: 1rem;">
+                            <% if (user.is_active) { %>
+                                <span style="background: #D1FAE5; color: #059669; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">Active</span>
+                            <% } else { %>
+                                <span style="background: #FEE2E2; color: #DC2626; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">Inactive</span>
+                            <% } %>
+                        </td>
+                        <td style="padding: 1rem; text-align: right;">
+                            <a href="/admin/members/<%= user.id %>" style="color: #2563EB; text-decoration: none; font-size: 0.875rem; font-weight: 500;">View</a>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p style="color: #6B7280; text-align: center; padding: 2rem;">No users have been assigned this role.</p>
+    <% } %>
+</div>

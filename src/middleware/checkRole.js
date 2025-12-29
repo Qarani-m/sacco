@@ -12,37 +12,35 @@ function checkRole(allowedRoles) {
         try {
             // Ensure user is authenticated
             if (!req.user || !req.user.id) {
-                return res.status(401).json({
-                    success: false,
-                    error: 'Authentication required'
+                return res.status(401).render('errors/403', {
+                    title: 'Unauthorized',
+                    message: 'Authentication required. Please log in to access this resource.'
                 });
             }
 
             // Get user's role
             const roleId = req.user.role_id;
             if (!roleId) {
-                return res.status(403).json({
-                    success: false,
-                    error: 'No role assigned to user'
+                return res.status(403).render('errors/403', {
+                    title: 'Access Denied',
+                    message: 'No role assigned to your account. Please contact the administrator.'
                 });
             }
 
             // Get role details
             const userRole = await Role.findById(roleId);
             if (!userRole) {
-                return res.status(403).json({
-                    success: false,
-                    error: 'Invalid role'
+                return res.status(403).render('errors/403', {
+                    title: 'Access Denied',
+                    message: 'Invalid role assigned to your account. Please contact the administrator.'
                 });
             }
 
             // Check if user's role is in allowed roles
             if (!roles.includes(userRole.name)) {
-                return res.status(403).json({
-                    success: false,
-                    error: `Access denied: ${roles.join(' or ')} role required`,
-                    required_roles: roles,
-                    user_role: userRole.name
+                return res.status(403).render('errors/403', {
+                    title: 'Access Denied',
+                    message: `Access denied. This page requires ${roles.join(' or ')} role. Your current role is ${userRole.name}.`
                 });
             }
 
@@ -50,9 +48,9 @@ function checkRole(allowedRoles) {
             next();
         } catch (error) {
             console.error('Role check error:', error);
-            res.status(500).json({
-                success: false,
-                error: 'Error checking role'
+            res.status(500).render('errors/500', {
+                title: 'Server Error',
+                message: 'An error occurred while checking your permissions.'
             });
         }
     };

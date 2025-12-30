@@ -48,6 +48,7 @@ app.use(
         frameSrc: ["'self'"],
       },
     },
+    hsts: false, // Disable HSTS to prevent local SSL issues
   })
 );
 

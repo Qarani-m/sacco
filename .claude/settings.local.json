@@ -12,7 +12,8 @@
       "Bash(node:*)",
       "Bash(timeout 10 node:*)",
       "Bash(timeout 30 node:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

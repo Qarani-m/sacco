@@ -146,7 +146,6 @@ exports.mpesaCallback = async (req, res) => {
         related_entity_type: "transaction",
         related_entity_id: transaction.id,
       });
-
       console.log(
         `Payment allocated successfully for transaction ${transaction.id}`
       );
